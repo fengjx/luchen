@@ -1,0 +1,7 @@
+server:
+  http:
+    server-name: "greeter"
+    listen: ":8080"
+  grpc:
+    server-name: "rpc.greeter"
+    listen: ":8090"

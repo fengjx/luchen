@@ -1,0 +1,4 @@
+
+### say-hello
+POST http://localhost:8080/open/api/greeter/say-hello?name=fengjx
+

@@ -1,0 +1,35 @@
+package http
+
+import (
+	"github.com/go-chi/chi/v5"
+	httptransport "github.com/go-kit/kit/transport/http"
+
+	"github.com/fengjx/luchen"
+	"github.com/fengjx/luchen/_example/greetsvr/endpoint"
+	"github.com/fengjx/luchen/_example/greetsvr/pb"
+)
+
+type greeterHandler struct {
+}
+
+func newGreeterHandler() *greeterHandler {
+	return &greeterHandler{}
+}
+
+func (h *greeterHandler) Bind(router luchen.HTTPRouter) {
+	router.Route(openAPI+"/greeter", func(r chi.Router) {
+		r.Handle("/say-hello", h.sayHello())
+	})
+}
+
+func (h *greeterHandler) sayHello() *httptransport.Server {
+	options := []httptransport.ServerOption{
+		httptransport.ServerErrorEncoder(errorEncoder),
+	}
+	return httptransport.NewServer(
+		endpoint.GetInst().GreeterEndpoints.MakeSayHelloEndpoint(),
+		luchen.DecodeKvRequest[pb.HelloReq],
+		encodeResponse,
+		options...,
+	)
+}
