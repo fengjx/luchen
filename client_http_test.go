@@ -17,8 +17,8 @@ func TestHTTPClient_Call(t *testing.T) {
 		newHelloHttpServer(serviceName, ":0"),
 	)
 	registrar.Register()
-	selector := luchen.NewEtcdV3Selector(serviceName)
-	client := luchen.GetHTTPClient(serviceName, selector)
+	defer registrar.Deregister()
+	client := luchen.GetHTTPClient(serviceName)
 	body, _ := json.ToBytes(&pb.HelloReq{
 		Name: "fengjx",
 	})
@@ -35,5 +35,4 @@ func TestHTTPClient_Call(t *testing.T) {
 		t.Fatal("http call not success")
 	}
 	t.Log(response.String())
-	registrar.Deregister()
 }

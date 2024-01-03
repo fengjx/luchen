@@ -41,23 +41,24 @@ type HTTPRequest struct {
 }
 
 // GetHTTPClient 返回服务对应的 client
-func GetHTTPClient(serviceName string, selector Selector) *HTTPClient {
+func GetHTTPClient(serviceName string) *HTTPClient {
 	client := httpc.New(&httpc.Config{
 		DefaultHeaders: map[string]string{
 			"User-Agent": "luchen-http-client",
 		},
-		Timeout: time.Second * 3,
+		Timeout: defaultRequestTimeout,
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			DialContext: (&net.Dialer{
-				Timeout: time.Second * 3,
+				Timeout: defaultConnectionTimeout,
 			}).DialContext,
-			MaxIdleConnsPerHost:   100,
-			MaxIdleConns:          10,
+			MaxIdleConnsPerHost:   defaultMaxPoolSize,
+			MaxIdleConns:          defaultPoolSize,
 			IdleConnTimeout:       time.Second * 3,
-			ExpectContinueTimeout: time.Second,
+			ExpectContinueTimeout: defaultConnectionTimeout,
 		},
 	})
+	selector := NewEtcdV3Selector(serviceName)
 	httpClient := &HTTPClient{
 		serviceName: serviceName,
 		client:      client,
@@ -72,20 +73,33 @@ func (c *HTTPClient) Call(ctx context.Context, req *HTTPRequest) (response *HTTP
 		return nil, ctx.Err()
 	default:
 	}
-	for i := 0; i < 3; i++ {
-		response, err = c.call(req)
-		if err != nil {
-			return nil, err
-		}
-		if lo.Contains(retryHTTPCode, response.StatusCode()) {
-			RootLogger().Warn("retry http call",
-				zap.String("service_name", c.serviceName),
-				zap.Any("req", req),
-			)
-			// retry
-			continue
+
+	ch := make(chan error, 1)
+
+	go func() {
+		for i := 0; i < 3; i++ {
+			response, err = c.call(req)
+			if err != nil {
+				return
+			}
+			if lo.Contains(retryHTTPCode, response.StatusCode()) {
+				RootLogger().Warn("retry http call",
+					zap.String("service_name", c.serviceName),
+					zap.Any("req", req),
+				)
+				// retry
+				continue
+			}
+			return
 		}
 		return
+	}()
+
+	select {
+	case cerr := <-ch:
+		err = cerr
+	case <-ctx.Done():
+		err = ctx.Err()
 	}
 	return
 }

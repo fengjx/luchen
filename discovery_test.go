@@ -15,7 +15,7 @@ func TestEtcdV3Selector(t *testing.T) {
 		newHelloHttpServer(serviceName, ":0"),
 	)
 	registrar.Register()
-
+	defer registrar.Deregister()
 	selector := luchen.NewEtcdV3Selector(serviceName)
 	serviceInfo, err := selector.Next()
 	if err != nil {

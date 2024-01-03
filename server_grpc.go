@@ -116,10 +116,12 @@ func NewGRPCHandler(
 			if len(md.Get(TraceIDCtxKey)) > 0 {
 				traceID = md.Get(TraceIDHeader)[0]
 			}
+			md.Set(TraceIDHeader, traceID)
 			ctx = WithTraceID(ctx, traceID)
 			logger := Logger(ctx)
 			logger = logger.With(zap.String("traceId", traceID))
 			ctx = WithLogger(ctx, logger)
+			ctx = metadata.NewOutgoingContext(ctx, md)
 			return ctx
 		}),
 		grpctransport.ServerErrorHandler(NewLogGRPCErrorHandler()),

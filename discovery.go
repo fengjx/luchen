@@ -109,7 +109,7 @@ type EtcdV3Selector struct {
 	client             etcdv3.Client
 	instancer          sd.Instancer
 	instances          []string
-	balancer           SelectorBalancer
+	balancer           Balancer[ServiceInfo]
 	ch                 chan sd.Event // 接收服务节点变更事件
 	invalidateDeadline time.Time     // 定时刷新
 	invalidateTimeout  time.Duration // 缓存失效时间间隔
@@ -127,7 +127,7 @@ func NewEtcdV3Selector(serviceName string) *EtcdV3Selector {
 		serviceName:       serviceName,
 		client:            client,
 		instancer:         instancer,
-		balancer:          NewRoundRobinBalancer(),
+		balancer:          NewRoundRobinBalancer[ServiceInfo](),
 		ch:                make(chan sd.Event),
 		invalidateTimeout: time.Minute,
 	}
@@ -206,32 +206,32 @@ func (s *EtcdV3Selector) Close() {
 	close(s.ch)
 }
 
-// SelectorBalancer 选择器负载策略
-type SelectorBalancer interface {
+// Balancer 选择器负载策略
+type Balancer[T any] interface {
 	// Refresh 刷新服务节点
-	Refresh(services []*ServiceInfo)
+	Refresh(services []*T)
 	// Pick 选择服务节点
-	Pick() (*ServiceInfo, error)
+	Pick() (*T, error)
 }
 
-type RoundRobinBalancer struct {
+type RoundRobinBalancer[T any] struct {
 	mtx      sync.RWMutex
-	services []*ServiceInfo
+	services []*T
 	index    uint64
 }
 
-func NewRoundRobinBalancer() *RoundRobinBalancer {
-	return &RoundRobinBalancer{}
+func NewRoundRobinBalancer[T any]() *RoundRobinBalancer[T] {
+	return &RoundRobinBalancer[T]{}
 }
 
-func (b *RoundRobinBalancer) Refresh(services []*ServiceInfo) {
+func (b *RoundRobinBalancer[T]) Refresh(services []*T) {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
 	b.services = services
 	b.index = 0
 }
 
-func (b *RoundRobinBalancer) Pick() (*ServiceInfo, error) {
+func (b *RoundRobinBalancer[T]) Pick() (*T, error) {
 	b.mtx.RLock()
 	if len(b.services) == 0 {
 		b.mtx.RUnlock()
