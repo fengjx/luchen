@@ -73,33 +73,19 @@ func (c *HTTPClient) Call(ctx context.Context, req *HTTPRequest) (response *HTTP
 		return nil, ctx.Err()
 	default:
 	}
-
-	ch := make(chan error, 1)
-
-	go func() {
-		for i := 0; i < 3; i++ {
-			response, err = c.call(req)
-			if err != nil {
-				return
-			}
-			if lo.Contains(retryHTTPCode, response.StatusCode()) {
-				RootLogger().Warn("retry http call",
-					zap.String("service_name", c.serviceName),
-					zap.Any("req", req),
-				)
-				// retry
-				continue
-			}
+	for i := 0; i < defaultRetries; i++ {
+		response, err = c.call(req)
+		if err != nil {
 			return
 		}
-		return
-	}()
-
-	select {
-	case cerr := <-ch:
-		err = cerr
-	case <-ctx.Done():
-		err = ctx.Err()
+		if lo.Contains(retryHTTPCode, response.StatusCode()) {
+			RootLogger().Warn("retry http call",
+				zap.String("service_name", c.serviceName),
+				zap.Any("req", req),
+			)
+			// retry
+			continue
+		}
 	}
 	return
 }
