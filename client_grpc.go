@@ -14,7 +14,6 @@ type GRPCClient struct {
 }
 
 // GetGRPCClient 创建grpc客户端
-// CLIENT 是pb生成的client接口
 func GetGRPCClient(serviceName string, opts ...grpc.DialOption) *GRPCClient {
 	selector := NewEtcdV3Selector(serviceName)
 	p := newPool(defaultPoolSize, defaultPoolTTL, defaultMaxPoolSize, defaultMaxPoolSize)
