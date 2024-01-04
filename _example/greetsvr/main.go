@@ -13,6 +13,12 @@ import (
 	"github.com/fengjx/luchen/_example/greetsvr/transport"
 )
 
+func init() {
+	if luchen.IsLocal() {
+		luchen.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
+	}
+}
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	logger := luchen.Logger(ctx)

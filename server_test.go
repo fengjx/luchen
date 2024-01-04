@@ -9,6 +9,12 @@ import (
 	"github.com/fengjx/luchen"
 )
 
+func init() {
+	if luchen.IsLocal() {
+		luchen.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
+	}
+}
+
 func startTestServer() {
 	httpSvr := newHelloHttpServer("hello", ":0")
 	grpcSvr := newHelloGRPCServer("rpc.hello", ":0")

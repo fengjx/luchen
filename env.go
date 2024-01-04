@@ -8,7 +8,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var _appPath string
+var (
+	_appPath string
+
+	defaultEtcdAddress = []string{"localhost:2379"}
+)
 
 func init() {
 	appPath, err := os.Getwd()
@@ -74,5 +78,10 @@ func GetDefaultEtcdAddress() (address []string) {
 	if len(etcdAddr) > 0 {
 		return utils.SplitTrim(etcdAddr, ",")
 	}
-	return []string{"localhost:2379"}
+	return defaultEtcdAddress
+}
+
+// SetDefaultEtcdAddress 覆盖全局 etcd 地址
+func SetDefaultEtcdAddress(address []string) {
+	defaultEtcdAddress = address
 }
