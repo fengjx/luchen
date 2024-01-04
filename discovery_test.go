@@ -16,7 +16,7 @@ func TestEtcdV3Selector(t *testing.T) {
 	)
 	registrar.Register()
 	defer registrar.Deregister()
-	selector := luchen.NewEtcdV3Selector(serviceName)
+	selector := luchen.GetEtcdV3Selector(serviceName)
 	serviceInfo, err := selector.Next()
 	if err != nil {
 		t.Fatal(err)

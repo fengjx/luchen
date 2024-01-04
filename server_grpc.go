@@ -69,11 +69,13 @@ func (s *GRPCServer) Start() error {
 	s.Lock()
 	ln, err := net.Listen("tcp", s.address)
 	if err != nil {
+		s.Unlock()
 		return err
 	}
 	address := ln.Addr().String()
 	host, port, err := addr.ExtractHostPort(address)
 	if err != nil {
+		s.Unlock()
 		return err
 	}
 	s.address = fmt.Sprintf("%s:%s", host, port)

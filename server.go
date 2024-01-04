@@ -80,7 +80,11 @@ func Start(svrs ...Server) {
 		svr := server
 		go func() {
 			if err := svr.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				RootLogger().Panic("server start err", zap.Error(err))
+				RootLogger().Panic(
+					"server start err",
+					zap.String("server_name", svr.GetServiceInfo().Name),
+					zap.Error(err),
+				)
 			}
 		}()
 	}

@@ -7,6 +7,11 @@ import (
 	"google.golang.org/grpc"
 )
 
+var (
+	grpcClientCache     = make(map[string]*GRPCClient)
+	grpcClientCacheLock = newSegmentLock(10)
+)
+
 type GRPCClient struct {
 	selector    Selector
 	pool        *pool
@@ -15,13 +20,20 @@ type GRPCClient struct {
 
 // GetGRPCClient 创建grpc客户端
 func GetGRPCClient(serviceName string, opts ...grpc.DialOption) *GRPCClient {
-	selector := NewEtcdV3Selector(serviceName)
+	if cli, ok := grpcClientCache[serviceName]; ok {
+		return cli
+	}
+	lock := grpcClientCacheLock.getLock(serviceName)
+	lock.Lock()
+	defer lock.Unlock()
+	selector := GetEtcdV3Selector(serviceName)
 	p := newPool(defaultPoolSize, defaultPoolTTL, defaultMaxPoolSize, defaultMaxPoolSize)
 	client := &GRPCClient{
 		selector:    selector,
 		pool:        p,
 		dialOptions: opts,
 	}
+	grpcClientCache[serviceName] = client
 	return client
 }
 

@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/fengjx/go-halo/httpc"
@@ -21,6 +22,9 @@ var (
 		http.StatusBadGateway,
 		http.StatusServiceUnavailable,
 	}
+
+	httpClientCache     = make(map[string]*HTTPClient)
+	httpClientCacheLock = newSegmentLock(10)
 )
 
 type HTTPClient struct {
@@ -42,6 +46,12 @@ type HTTPRequest struct {
 
 // GetHTTPClient 返回服务对应的 client
 func GetHTTPClient(serviceName string) *HTTPClient {
+	if cli, ok := httpClientCache[serviceName]; ok {
+		return cli
+	}
+	lock := httpClientCacheLock.getLock(serviceName)
+	lock.Lock()
+	defer lock.Unlock()
 	client := httpc.New(&httpc.Config{
 		DefaultHeaders: map[string]string{
 			"User-Agent": "luchen-http-client",
@@ -58,39 +68,51 @@ func GetHTTPClient(serviceName string) *HTTPClient {
 			ExpectContinueTimeout: defaultConnectionTimeout,
 		},
 	})
-	selector := NewEtcdV3Selector(serviceName)
+	selector := GetEtcdV3Selector(serviceName)
 	httpClient := &HTTPClient{
 		serviceName: serviceName,
 		client:      client,
 		selector:    selector,
 	}
+	httpClientCache[serviceName] = httpClient
 	return httpClient
 }
 
-func (c *HTTPClient) Call(ctx context.Context, req *HTTPRequest) (response *HTTPResponse, err error) {
+func (c *HTTPClient) Call(ctx context.Context, req *HTTPRequest) (*HTTPResponse, error) {
+	var response *HTTPResponse
+	var err error
+	ch := make(chan error, 1)
+
+	go func() {
+		for i := 0; i < defaultRetries; i++ {
+			response, err = c.call(ctx, req)
+			if err != nil {
+				ch <- nil
+				break
+			}
+			if lo.Contains(retryHTTPCode, response.StatusCode()) {
+				RootLogger().Warn("retry http call",
+					zap.String("service_name", c.serviceName),
+					zap.Any("req", req),
+				)
+				// retry
+				continue
+			}
+		}
+		ch <- nil
+	}()
+
 	select {
+	case e := <-ch:
+		err = e
 	case <-ctx.Done():
-		return nil, ctx.Err()
-	default:
+		err = ctx.Err()
 	}
-	for i := 0; i < defaultRetries; i++ {
-		response, err = c.call(req)
-		if err != nil {
-			return
-		}
-		if lo.Contains(retryHTTPCode, response.StatusCode()) {
-			RootLogger().Warn("retry http call",
-				zap.String("service_name", c.serviceName),
-				zap.Any("req", req),
-			)
-			// retry
-			continue
-		}
-	}
-	return
+
+	return response, err
 }
 
-func (c *HTTPClient) call(req *HTTPRequest) (*HTTPResponse, error) {
+func (c *HTTPClient) call(ctx context.Context, req *HTTPRequest) (*HTTPResponse, error) {
 	node, err := c.selector.Next()
 	if err != nil {
 		return nil, err
@@ -99,15 +121,14 @@ func (c *HTTPClient) call(req *HTTPRequest) (*HTTPResponse, error) {
 	var httpReq *http.Request
 	if req.Body != nil {
 		bodyBuf := bytes.NewBuffer(req.Body)
-		httpReq, err = http.NewRequest(req.Method, rawurl, bodyBuf)
+		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, bodyBuf)
+	} else if len(req.Form) > 0 {
+		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, strings.NewReader(req.Form.Encode()))
 	} else {
-		httpReq, err = http.NewRequest(req.Method, rawurl, nil)
+		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, nil)
 	}
 	if err != nil {
 		return nil, err
-	}
-	if len(req.Form) > 0 {
-		httpReq.Form = req.Form
 	}
 	if len(req.Params) > 0 {
 		httpReq.URL.RawQuery = req.Params.Encode()

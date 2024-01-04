@@ -24,6 +24,9 @@ const (
 
 var (
 	ErrNoServer = errors.New("no server available")
+
+	etcdV3SelectorCache     = make(map[string]*EtcdV3Selector)
+	etcdV3SelectorCacheLock = newSegmentLock(10)
 )
 
 type EtcdV3Registrar struct {
@@ -115,8 +118,14 @@ type EtcdV3Selector struct {
 	invalidateTimeout  time.Duration // 缓存失效时间间隔
 }
 
-// NewEtcdV3Selector 创建 EtcdV3Selector
-func NewEtcdV3Selector(serviceName string) *EtcdV3Selector {
+// GetEtcdV3Selector 创建 EtcdV3Selector
+func GetEtcdV3Selector(serviceName string) *EtcdV3Selector {
+	if selector, ok := etcdV3SelectorCache[serviceName]; ok {
+		return selector
+	}
+	lock := etcdV3SelectorCacheLock.getLock(serviceName)
+	lock.Lock()
+	defer lock.Unlock()
 	client := NewDefaultEtcdV3Client()
 	prefix := path.Join(servicePrefix, serviceName)
 	instancer, err := etcdv3.NewInstancer(client, prefix, NewKitLogger("selector-instancer", logger.InfoLevel))
@@ -133,6 +142,7 @@ func NewEtcdV3Selector(serviceName string) *EtcdV3Selector {
 	}
 	go s.receive()
 	instancer.Register(s.ch)
+	etcdV3SelectorCache[serviceName] = s
 	return s
 }
 
