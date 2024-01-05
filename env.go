@@ -22,15 +22,21 @@ func init() {
 	_appPath = appPath
 }
 
+// ENV 环境
 type ENV string
 
 const (
+	// Local 本地环境
 	Local ENV = "local"
-	Dev   ENV = "dev"
-	Test  ENV = "test"
-	Prod  ENV = "prod"
+	// Dev 开发环境
+	Dev ENV = "dev"
+	// Test 测试环境
+	Test ENV = "test"
+	// Prod 生产环境
+	Prod ENV = "prod"
 )
 
+// GetEnv 返回当前环境
 func GetEnv() ENV {
 	env := os.Getenv("APP_ENV")
 	switch ENV(env) {
@@ -45,18 +51,22 @@ func GetEnv() ENV {
 	}
 }
 
+// IsProd 返回是否是生产环境
 func IsProd() bool {
 	return GetEnv() == Prod
 }
 
+// IsTest 返回是否是测试环境
 func IsTest() bool {
 	return GetEnv() == Test
 }
 
+// IsDev 返回是否是开发环境
 func IsDev() bool {
 	return GetEnv() == Dev
 }
 
+// IsLocal 返回是否是本地环境
 func IsLocal() bool {
 	return GetEnv() == Local
 }

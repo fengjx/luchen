@@ -23,13 +23,18 @@ var (
 	rewriteRegexpCache = lru.New(50)
 )
 
+// GatewayOptions 网关选项定义
 type GatewayOptions struct {
+	plugins []GatewayPlugin
 }
 
+// GatewayOption 网关选项赋值
 type GatewayOption func(*GatewayOptions)
 
-func With() GatewayOption {
+// WithGatewayPlugin 注册网关扩展插件
+func WithGatewayPlugin(plugins ...GatewayPlugin) GatewayOption {
 	return func(o *GatewayOptions) {
+		o.plugins = append(o.plugins, plugins...)
 	}
 }
 
@@ -116,6 +121,7 @@ func NewGateway(cfg GatewayConfig, opts ...GatewayOption) *Gateway {
 	return g
 }
 
+// Start 启动服务
 func (g *Gateway) Start() error {
 	g.Lock()
 	address := ":8080"
@@ -147,6 +153,7 @@ func (g *Gateway) Start() error {
 	return g.server.Serve(ln)
 }
 
+// Stop 停止服务
 func (g *Gateway) Stop() error {
 	g.RLock()
 	if !g.started {
@@ -225,6 +232,7 @@ func (g *Gateway) errorHandler(w http.ResponseWriter, r *http.Request, err error
 	RootLogger().Error("handler err", zap.Error(err))
 }
 
+// RegPattern 注册匹配模式
 func (g *Gateway) RegPattern(patterns ...Pattern) {
 	for _, p := range patterns {
 		g.patternMap[p.Name()] = p
@@ -259,6 +267,7 @@ func (g *Gateway) selectServiceInfo(r *httpRoute) (*ServiceInfo, error) {
 	return serviceInfo, nil
 }
 
+// Pattern 路由匹配模式
 type Pattern interface {
 	// Name 匹配模式名称
 	Name() string
@@ -270,6 +279,7 @@ type Pattern interface {
 type HostPattern struct {
 }
 
+// Name 模式名称
 func (h *HostPattern) Name() string {
 	return "host"
 }
@@ -283,6 +293,7 @@ func (h *HostPattern) Match(req *http.Request, route *httpRoute) bool {
 type PrefixPattern struct {
 }
 
+// Name 模式名称
 func (h *PrefixPattern) Name() string {
 	return "prefix"
 }
@@ -340,5 +351,6 @@ func getRewriteRegexp(rewriteRegex string) *regexp.Regexp {
 	return reg
 }
 
+// GatewayPlugin 网关插件接口
 type GatewayPlugin interface {
 }

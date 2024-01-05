@@ -5,15 +5,18 @@ import (
 )
 
 var (
-	SystemErr = &Errno{Code: 500, HttpCode: 500, Msg: "系统错误"}
+	// ErrSystem 系统错误
+	ErrSystem = &Errno{Code: 500, HTTPCode: 500, Msg: "系统错误"}
 )
 
+// Errno 错误编码定义
 type Errno struct {
-	Code     int
-	HttpCode int
-	Msg      string
+	Code     int    // 自定义错误码
+	HTTPCode int    // http 错误码
+	Msg      string // 错误信息
 }
 
+// Error 实现 error 接口
 func (e *Errno) Error() string {
-	return fmt.Sprintf("code:%d, httpcode:%d, msg:%s", e.Code, e.HttpCode, e.Msg)
+	return fmt.Sprintf("code:%d, httpcode:%d, msg:%s", e.Code, e.HTTPCode, e.Msg)
 }

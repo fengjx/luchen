@@ -14,9 +14,13 @@ import (
 	"go.uber.org/zap"
 )
 
+type ctxKey string
+
 var (
-	LoggerCtxKey  = "ctx.logger"
-	TraceIDCtxKey = "ctx.traceID"
+	// LoggerCtxKey logger context key
+	LoggerCtxKey ctxKey = "ctx.logger"
+	// TraceIDCtxKey traceID context key
+	TraceIDCtxKey ctxKey = "ctx.traceID"
 
 	_log    logger.Logger
 	_logDir = filepath.Join("./", "logs")
@@ -56,6 +60,7 @@ func createFileLog(level logger.Level, logDir string) logger.Logger {
 	return appLog
 }
 
+// GetLogDir 返回日志路径
 func GetLogDir() string {
 	logDir := os.Getenv("LUCHEN_LOG_DIR")
 	if len(logDir) > 0 {
@@ -66,6 +71,7 @@ func GetLogDir() string {
 
 type kitLogger func(msg string, keysAndValues ...interface{})
 
+// Log 日志打印实现
 func (l kitLogger) Log(kv ...interface{}) error {
 	fields := make(map[string]any)
 	for i := 0; i < len(kv); i = i + 2 {
@@ -108,10 +114,12 @@ func NewKitLogger(name string, level logger.Level) kitlog.Logger {
 	return klog
 }
 
+// RootLogger 返回默认 logger
 func RootLogger() logger.Logger {
 	return _log
 }
 
+// Logger 从 context 获得 logger
 func Logger(ctx context.Context) logger.Logger {
 	if lclog, ok := ctx.Value(LoggerCtxKey).(logger.Logger); ok {
 		return lclog
@@ -122,10 +130,12 @@ func Logger(ctx context.Context) logger.Logger {
 	return lclog
 }
 
+// WithLogger context 注入 logger
 func WithLogger(ctx context.Context, logger logger.Logger) context.Context {
 	return context.WithValue(ctx, LoggerCtxKey, logger)
 }
 
+// TraceID 从 context 获得 TraceID
 func TraceID(ctx context.Context) string {
 	value := ctx.Value(TraceIDCtxKey)
 	if value == nil {
@@ -134,6 +144,7 @@ func TraceID(ctx context.Context) string {
 	return value.(string)
 }
 
+// WithTraceID context 注入 traceID
 func WithTraceID(ctx context.Context, traceID string) context.Context {
 	return context.WithValue(ctx, TraceIDCtxKey, traceID)
 }

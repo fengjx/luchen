@@ -23,17 +23,21 @@ const (
 )
 
 var (
+	// ErrNoServer 没有可用的服务节点
 	ErrNoServer = errors.New("no server available")
 
 	etcdV3SelectorCache     = make(map[string]*EtcdV3Selector)
 	etcdV3SelectorCacheLock = newSegmentLock(10)
 )
 
+// EtcdV3Registrar 基于 etcd 实现的服务注册器
 type EtcdV3Registrar struct {
 	delegate map[string]*etcdv3.Registrar
 	servers  []Server
 }
 
+// NewEtcdV3Registrar 创建一个服务注册器
+// servers 需要注册的服务
 func NewEtcdV3Registrar(servers ...Server) *EtcdV3Registrar {
 	return &EtcdV3Registrar{
 		servers:  servers,
@@ -41,6 +45,7 @@ func NewEtcdV3Registrar(servers ...Server) *EtcdV3Registrar {
 	}
 }
 
+// Register 启动并注册服务到 etcd
 func (r *EtcdV3Registrar) Register() {
 	for _, server := range r.servers {
 		svr := server
@@ -54,7 +59,7 @@ func (r *EtcdV3Registrar) Register() {
 }
 
 func (r *EtcdV3Registrar) register(serviceInfo *ServiceInfo) {
-	key := path.Join(servicePrefix, serviceInfo.Name, serviceInfo.Id)
+	key := path.Join(servicePrefix, serviceInfo.Name, serviceInfo.ID)
 	params := url.Values{}
 	info, _ := json.ToJson(serviceInfo)
 	params.Set("info", info)
@@ -63,11 +68,12 @@ func (r *EtcdV3Registrar) register(serviceInfo *ServiceInfo) {
 		Key:   key,
 		Value: value,
 	}, NewKitLogger(fmt.Sprintf("%s-%s", "register", serviceInfo.Name), logger.InfoLevel))
-	r.delegate[serviceInfo.Id] = registar
+	r.delegate[serviceInfo.ID] = registar
 	registar.Register()
-	RootLogger().Infof("server[%s, %s] register", serviceInfo.Name, serviceInfo.Id)
+	RootLogger().Infof("server[%s, %s] register", serviceInfo.Name, serviceInfo.ID)
 }
 
+// Deregister 摘除服务注册信息并停止服务
 func (r *EtcdV3Registrar) Deregister() {
 	DoStopHook()
 	for _, server := range r.servers {
@@ -81,14 +87,17 @@ func (r *EtcdV3Registrar) Deregister() {
 
 func (r *EtcdV3Registrar) deregister(serviceInfo *ServiceInfo) {
 	// 摘除服务节点
-	r.delegate[serviceInfo.Id].Deregister()
-	RootLogger().Infof("server[%s, %s] deregister", serviceInfo.Name, serviceInfo.Id)
+	r.delegate[serviceInfo.ID].Deregister()
+	RootLogger().Infof("server[%s, %s] deregister", serviceInfo.Name, serviceInfo.ID)
 }
 
+// NewDefaultEtcdV3Client 创建默认 etcdv3.Client
+// etcd 地址通过 GetDefaultEtcdAddress 方法获得
 func NewDefaultEtcdV3Client() etcdv3.Client {
 	return MustNewEtcdV3Client(GetDefaultEtcdAddress())
 }
 
+// MustNewEtcdV3Client 创建 etcdv3.Client
 func MustNewEtcdV3Client(address []string) etcdv3.Client {
 	options := etcdv3.ClientOptions{
 		DialTimeout:   time.Second,
@@ -106,6 +115,7 @@ type Selector interface {
 	Next() (*ServiceInfo, error)
 }
 
+// EtcdV3Selector 基于etcd3的节点查询器
 type EtcdV3Selector struct {
 	mtx                sync.RWMutex
 	serviceName        string
@@ -194,6 +204,7 @@ func (s *EtcdV3Selector) updateCache(instances []string) {
 	s.balancer.Refresh(services)
 }
 
+// Next 返回一个服务节点信息
 func (s *EtcdV3Selector) Next() (*ServiceInfo, error) {
 	s.mtx.RLock()
 	if time.Now().Before(s.invalidateDeadline) {
@@ -211,6 +222,7 @@ func (s *EtcdV3Selector) Next() (*ServiceInfo, error) {
 	return s.balancer.Pick()
 }
 
+// Close 关闭查询器
 func (s *EtcdV3Selector) Close() {
 	s.instancer.Deregister(s.ch)
 	close(s.ch)
@@ -224,16 +236,19 @@ type Balancer[T any] interface {
 	Pick() (*T, error)
 }
 
+// RoundRobinBalancer 基于 RoundRobin 算法的 Balancer 实现
 type RoundRobinBalancer[T any] struct {
 	mtx      sync.RWMutex
 	services []*T
 	index    uint64
 }
 
+// NewRoundRobinBalancer 创建 NewRoundRobinBalancer 实例
 func NewRoundRobinBalancer[T any]() *RoundRobinBalancer[T] {
 	return &RoundRobinBalancer[T]{}
 }
 
+// Refresh 刷新节点列表
 func (b *RoundRobinBalancer[T]) Refresh(services []*T) {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
@@ -241,6 +256,7 @@ func (b *RoundRobinBalancer[T]) Refresh(services []*T) {
 	b.index = 0
 }
 
+// Pick 选择一个服务节点
 func (b *RoundRobinBalancer[T]) Pick() (*T, error) {
 	b.mtx.RLock()
 	if len(b.services) == 0 {

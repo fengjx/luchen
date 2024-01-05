@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// MustLoadConfig 加载配置，异常时 panic
 func MustLoadConfig[T any](files ...string) T {
 	viperConfig := viper.New()
 	for _, file := range files {

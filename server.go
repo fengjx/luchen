@@ -10,12 +10,15 @@ import (
 	"go.uber.org/zap"
 )
 
+// Protocol 服务协议
 type Protocol string
 
 const (
 	defaultAddress = ":0"
 
+	// ProtocolHTTP http 协议
 	ProtocolHTTP Protocol = "http"
+	// ProtocolGRPC grpc 协议
 	ProtocolGRPC Protocol = "grpc"
 
 	beforeStopHookEvent = "before-stop-hook"
@@ -25,16 +28,16 @@ var (
 	servers []Server
 )
 
+// ServiceInfo 服务节点信息
 type ServiceInfo struct {
-	Id       string         `json:"id"`
+	ID       string         `json:"id"`
 	Name     string         `json:"name"`
 	Protocol Protocol       `json:"protocol"`
 	Addr     string         `json:"addr"`
 	Metadata map[string]any `json:"metadata,omitempty"`
 }
 
-type ServerHookHandler func(info ServiceInfo)
-
+// Server server 接口定义
 type Server interface {
 	Start() error
 	Stop() error
@@ -58,7 +61,7 @@ func (s *baseServer) GetServiceInfo() *ServiceInfo {
 		s.RUnlock()
 		return &ServiceInfo{
 			Protocol: s.protocol,
-			Id:       s.id,
+			ID:       s.id,
 			Name:     s.serviceName,
 			Addr:     s.address,
 			Metadata: s.metadata,

@@ -17,30 +17,36 @@ import (
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 )
 
+// GRPCServerOptions grpc server 选项
 type GRPCServerOptions struct {
 	addr     string
 	metadata map[string]any
 }
 
+// GRPCServerOption grpc server 选项赋值
 type GRPCServerOption func(*GRPCServerOptions)
 
+// WithGRPCAddr grpc server 监听地址
 func WithGRPCAddr(addr string) GRPCServerOption {
 	return func(o *GRPCServerOptions) {
 		o.addr = addr
 	}
 }
 
+// WithGRPCMetadata grpc server 注册信息 metadata
 func WithGRPCMetadata(md map[string]any) GRPCServerOption {
 	return func(o *GRPCServerOptions) {
 		o.metadata = md
 	}
 }
 
+// GRPCServer grpc server 实现
 type GRPCServer struct {
 	*baseServer
 	server *grpc.Server
 }
 
+// NewGRPCServer 创建 grpc server
 func NewGRPCServer(serviceName string, opts ...GRPCServerOption) *GRPCServer {
 	options := &GRPCServerOptions{}
 	for _, opt := range opts {
@@ -65,6 +71,7 @@ func NewGRPCServer(serviceName string, opts ...GRPCServerOption) *GRPCServer {
 	}
 }
 
+// Start 停止服务
 func (s *GRPCServer) Start() error {
 	s.Lock()
 	ln, err := net.Listen("tcp", s.address)
@@ -86,6 +93,7 @@ func (s *GRPCServer) Start() error {
 	return s.server.Serve(ln)
 }
 
+// Stop 停止服务
 func (s *GRPCServer) Stop() error {
 	s.RLock()
 	if !s.started {
@@ -100,6 +108,7 @@ func (s *GRPCServer) Stop() error {
 // RegisterHandler 注册 grpc handler
 type RegisterHandler func(grpcServer *grpc.Server)
 
+// RegisterServer 注册 grpc 接口实现
 func (s *GRPCServer) RegisterServer(rh RegisterHandler) *GRPCServer {
 	rh(s.server)
 	return s
@@ -115,7 +124,7 @@ func NewGRPCHandler(
 	opts := []grpctransport.ServerOption{
 		grpctransport.ServerBefore(func(ctx context.Context, md metadata.MD) context.Context {
 			traceID := uuid.NewString()
-			if len(md.Get(TraceIDCtxKey)) > 0 {
+			if len(md.Get(string(TraceIDCtxKey))) > 0 {
 				traceID = md.Get(TraceIDHeader)[0]
 			}
 			md.Set(TraceIDHeader, traceID)
@@ -137,23 +146,28 @@ func NewGRPCHandler(
 	)
 }
 
+// LogGRPCErrorHandler grpc 接口错误处理器
 type LogGRPCErrorHandler struct {
 }
 
+// NewLogGRPCErrorHandler 创建 LogGRPCErrorHandler
 func NewLogGRPCErrorHandler() *LogGRPCErrorHandler {
 	return &LogGRPCErrorHandler{}
 }
 
+// Handle 统一错误处理
 func (h *LogGRPCErrorHandler) Handle(ctx context.Context, err error) {
 	logger := Logger(ctx)
 	logger.Error("handle grpc err", zap.Error(err))
 }
 
+// DecodePB protobuf 解码
 func DecodePB[T any](_ context.Context, req interface{}) (interface{}, error) {
 	pbReq := req.(*T)
 	return pbReq, nil
 }
 
+// EncodePB protobuf 编码
 func EncodePB[T any](_ context.Context, resp interface{}) (interface{}, error) {
 	pbResp := resp.(*T)
 	return pbResp, nil

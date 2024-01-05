@@ -1,5 +1,6 @@
 package luchen
 
+// GatewayConfig 网关配置
 type GatewayConfig struct {
 	ServerName      string  `json:"server-name"`      // 服务名
 	Listen          string  `json:"listen"`           // 监听地址

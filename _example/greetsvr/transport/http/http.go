@@ -39,11 +39,11 @@ func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
 	logger := luchen.Logger(ctx)
 	logger.Error("handler error", zap.Error(err))
 	httpCode := 500
-	msg := luchen.SystemErr.Msg
+	msg := luchen.ErrSystem.Msg
 	var errn *luchen.Errno
 	ok := errors.As(err, &errn)
-	if ok && errn.HttpCode > 0 {
-		httpCode = errn.HttpCode
+	if ok && errn.HTTPCode > 0 {
+		httpCode = errn.HTTPCode
 		msg = errn.Msg
 	}
 	w.WriteHeader(httpCode)
