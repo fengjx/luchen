@@ -1,11 +1,8 @@
 package grpc
 
 import (
-	"context"
 	"sync"
 
-	"github.com/fengjx/go-halo/halo"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	"github.com/fengjx/luchen"
@@ -30,22 +27,4 @@ func GetServer() *luchen.GRPCServer {
 		})
 	})
 	return server
-}
-
-func Start(_ context.Context) {
-	go func() {
-		logger := luchen.RootLogger().With(zap.Int64("goid", halo.GetGoID()))
-		if err := GetServer().Start(); err != nil {
-			logger.Panic("start grpc server err", zap.Error(err))
-		}
-	}()
-}
-
-func Stop(ctx context.Context) {
-	logger := luchen.Logger(ctx)
-	if err := GetServer().Stop(); err != nil {
-		logger.Error("grpc server stop err", zap.Error(err))
-	} else {
-		logger.Info("grpc server was shutdown gracefully")
-	}
 }

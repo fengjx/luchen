@@ -1,6 +1,7 @@
 package luchen
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"sync"
@@ -78,6 +79,15 @@ func (s *baseServer) GetServiceInfo() *ServiceInfo {
 
 // Start 启动服务
 func Start(svrs ...Server) {
+	start(nil, svrs...)
+}
+
+// StartWithContext 启动服务
+func StartWithContext(ctx context.Context, svrs ...Server) {
+	start(ctx, svrs...)
+}
+
+func start(ctx context.Context, svrs ...Server) {
 	servers = svrs
 	for _, server := range servers {
 		svr := server
@@ -91,15 +101,27 @@ func Start(svrs ...Server) {
 			}
 		}()
 	}
+	if ctx == nil {
+		return
+	}
+	select {
+	case <-ctx.Done():
+		Stop()
+	}
 }
 
 // Stop 停止服务
 func Stop() {
 	DoStopHook()
 	for _, server := range servers {
+		// 停止服务
 		if err := server.Stop(); err != nil {
 			RootLogger().Error("server stop err", zap.Error(err))
 		}
+		RootLogger().Info(
+			"server stop gracefully",
+			zap.String("name", server.GetServiceInfo().Name),
+		)
 	}
 }
 

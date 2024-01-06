@@ -51,7 +51,11 @@ func (r *EtcdV3Registrar) Register() {
 		svr := server
 		go func() {
 			if err := svr.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				RootLogger().Panic("server start err", zap.Error(err))
+				RootLogger().Panic(
+					"server start err",
+					zap.String("name", svr.GetServiceInfo().Name),
+					zap.Error(err),
+				)
 			}
 		}()
 		r.register(svr.GetServiceInfo())
@@ -80,8 +84,15 @@ func (r *EtcdV3Registrar) Deregister() {
 		r.deregister(server.GetServiceInfo())
 		// 停止服务
 		if err := server.Stop(); err != nil {
-			RootLogger().Error("server stop err", zap.Error(err))
+			RootLogger().Error(
+				"server stop err",
+				zap.String("name", server.GetServiceInfo().Name),
+				zap.Error(err))
 		}
+		RootLogger().Info(
+			"server stop gracefully",
+			zap.String("name", server.GetServiceInfo().Name),
+		)
 	}
 }
 
