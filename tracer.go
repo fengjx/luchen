@@ -16,7 +16,7 @@ const (
 
 var (
 	// TraceIDCtxKey traceID context key
-	TraceIDCtxKey = struct{}{}
+	TraceIDCtxKey ctxType = "ctx.traceID"
 )
 
 // TraceHTTPRequest 返回 traceID
@@ -64,6 +64,15 @@ func TraceID(ctx context.Context) string {
 		return ""
 	}
 	return value.(string)
+}
+
+// TraceIDOrNew 从 context 获得 TraceID，取不到则创建
+func TraceIDOrNew(ctx context.Context) string {
+	traceID := TraceID(ctx)
+	if traceID == "" {
+		return uuid.NewString()
+	}
+	return traceID
 }
 
 // WithTraceID context 注入 traceID

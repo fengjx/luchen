@@ -8,6 +8,12 @@ import (
 	"github.com/fengjx/luchen"
 )
 
+func init() {
+	if luchen.IsLocal() {
+		luchen.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
+	}
+}
+
 func main() {
 	config := luchen.MustLoadConfig[luchen.GatewayConfig]("_example/gateway/gateway.yaml")
 	gateway := luchen.NewGateway(

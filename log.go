@@ -16,7 +16,7 @@ import (
 
 var (
 	// LoggerCtxKey logger context key
-	LoggerCtxKey = struct{}{}
+	LoggerCtxKey ctxType = "ctx.logger"
 
 	_log    logger.Logger
 	_logDir = filepath.Join("./", "logs")

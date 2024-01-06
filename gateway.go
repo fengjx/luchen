@@ -22,8 +22,8 @@ var (
 	//nolint:gomnd
 	rewriteRegexpCache = lru.New(50)
 	// GatewayConfigContextKey 从 context 中获取网关配置
-	GatewayConfigContextKey = struct{}{}
-	gatewayErrContextKey    = struct{}{}
+	GatewayConfigContextKey ctxType = "ctx.gateway.config"
+	gatewayErrContextKey    ctxType = "ctx.gateway.err"
 
 	defaultGatewayTransport = &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
@@ -189,7 +189,10 @@ func (g *Gateway) Stop() error {
 
 // ServeHTTP 重新定义 request context
 func (g *Gateway) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	ctx := NewContext(req.Context())
+	ctx := req.Context()
+	log := Logger(ctx)
+	ctx = WithLogger(ctx, log)
+	ctx = NewContext(ctx)
 	req = req.WithContext(ctx)
 	g.ReverseProxy.ServeHTTP(rw, req)
 }
@@ -205,7 +208,7 @@ func (g *Gateway) director(req *http.Request) {
 		}
 		req = r
 	}
-
+	log := Logger(ctx).With(zap.String("trace_id", TraceIDOrNew(ctx)))
 	var ro *httpRoute
 	// 静态路由匹配
 	for _, route := range g.routes {
@@ -214,16 +217,15 @@ func (g *Gateway) director(req *http.Request) {
 			break
 		}
 	}
-
 	if ro == nil {
-		RootLogger().Warn("no route match", zap.String("path", req.URL.Path))
+		log.Warn("no route match", zap.String("path", req.URL.Path))
 		return
 	}
 	upstream := ro.upstream
 	if upstream == "" {
 		serviceInfo, err := g.selectServiceInfo(ro)
 		if err != nil {
-			RootLogger().Error("select service err",
+			log.Error("select service err",
 				zap.String("service_name", ro.serviceName),
 				zap.Error(err),
 			)
@@ -244,7 +246,7 @@ func (g *Gateway) director(req *http.Request) {
 	if reg != nil {
 		req.URL.Path = reg.ReplaceAllString(req.URL.Path, "$1")
 	}
-	RootLogger().Info("upstream info",
+	log.Info("upstream info",
 		zap.String("service_name", ro.serviceName),
 		zap.String("upstream", upstream),
 		zap.String("path", req.URL.Path),
