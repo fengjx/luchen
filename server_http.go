@@ -144,7 +144,7 @@ type HTTPMiddleware func(http.Handler) http.Handler
 // TraceHTTPMiddleware 链路跟踪
 func TraceHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		traceID := TraceHttpRequest(r)
+		r, traceID := TraceHTTPRequest(r)
 		logger := Logger(r.Context())
 		logger = logger.With(zap.String("traceId", traceID))
 		ctx := WithLogger(r.Context(), logger)

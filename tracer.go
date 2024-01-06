@@ -13,9 +13,9 @@ const (
 	TraceIDHeader = "X-Trace-ID"
 )
 
-// TraceHttpRequest 返回 traceID
+// TraceHTTPRequest 返回 traceID
 // http 请求携带 traceID 处理
-func TraceHttpRequest(r *http.Request) string {
+func TraceHTTPRequest(r *http.Request) (*http.Request, string) {
 	traceID := r.Header.Get(TraceIDHeader)
 	if traceID == "" {
 		traceID = TraceID(r.Context())
@@ -25,8 +25,7 @@ func TraceHttpRequest(r *http.Request) string {
 	}
 	r.Header.Set(TraceIDHeader, traceID)
 	ctx := WithTraceID(r.Context(), traceID)
-	r.WithContext(ctx)
-	return traceID
+	return r.WithContext(ctx), traceID
 }
 
 // TraceGRPC 返回 traceID

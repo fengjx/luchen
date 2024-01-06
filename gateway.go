@@ -21,6 +21,9 @@ import (
 var (
 	//nolint:gomnd
 	rewriteRegexpCache = lru.New(50)
+	// GatewayConfigContextKey 从 context 中获取网关配置
+	GatewayConfigContextKey = struct{}{}
+	gatewayErrContextKey    = struct{}{}
 
 	defaultGatewayTransport = &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
@@ -92,6 +95,7 @@ func NewGateway(cfg GatewayConfig, opts ...GatewayOption) *Gateway {
 	// 静态路由初始化
 	for _, route := range cfg.Routes {
 		if route.Protocol != "http" {
+			RootLogger().Panic("route protocol not support now", zap.String("protocol", route.Protocol))
 			continue
 		}
 		routes = append(routes, &httpRoute{
@@ -125,6 +129,7 @@ func NewGateway(cfg GatewayConfig, opts ...GatewayOption) *Gateway {
 		config:       cfg,
 		routes:       routes,
 		patternMap:   make(map[string]Pattern),
+		plugins:      options.plugins,
 	}
 	g.RegPattern(
 		&HostPattern{},
@@ -182,26 +187,44 @@ func (g *Gateway) Stop() error {
 	return g.server.Shutdown(ctx)
 }
 
+// ServeHTTP 重新定义 request context
+func (g *Gateway) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	ctx := NewContext(req.Context())
+	req = req.WithContext(ctx)
+	g.ReverseProxy.ServeHTTP(rw, req)
+}
+
 func (g *Gateway) director(req *http.Request) {
-	var r *httpRoute
+	ctx := req.Context().(*Context)
+	ctx.Set(GatewayConfigContextKey, g.config)
+	for _, plugin := range g.plugins {
+		r, err := plugin.BeforeRoute(ctx, req)
+		if err != nil {
+			ctx.Set(gatewayErrContextKey, err)
+			return
+		}
+		req = r
+	}
+
+	var ro *httpRoute
 	// 静态路由匹配
 	for _, route := range g.routes {
-		r = g.match(req, route)
-		if r != nil {
+		ro = g.match(req, route)
+		if ro != nil {
 			break
 		}
 	}
 
-	if r == nil {
+	if ro == nil {
 		RootLogger().Warn("no route match", zap.String("path", req.URL.Path))
 		return
 	}
-	upstream := r.upstream
+	upstream := ro.upstream
 	if upstream == "" {
-		serviceInfo, err := g.selectServiceInfo(r)
+		serviceInfo, err := g.selectServiceInfo(ro)
 		if err != nil {
 			RootLogger().Error("select service err",
-				zap.String("service_name", r.serviceName),
+				zap.String("service_name", ro.serviceName),
 				zap.Error(err),
 			)
 		}
@@ -214,33 +237,53 @@ func (g *Gateway) director(req *http.Request) {
 		req.URL = nil
 		return
 	}
-	req.URL.Scheme = r.protocol
+	req.URL.Scheme = ro.protocol
 	req.URL.Host = upstream
-	reg := getRewriteRegexp(r.rewriteRegex)
+	reg := g.getRewriteRegexp(ro.rewriteRegex)
 	// url 重写
 	if reg != nil {
 		req.URL.Path = reg.ReplaceAllString(req.URL.Path, "$1")
 	}
 	RootLogger().Info("upstream info",
-		zap.String("service_name", r.serviceName),
+		zap.String("service_name", ro.serviceName),
 		zap.String("upstream", upstream),
 		zap.String("path", req.URL.Path),
 	)
 	innerIP := addr.InnerIP()
 	req.Header.Set("X-Real-Ip", getClientIP(req))
 	req.Header.Set("X-Proxy-Server", "luchen-gateway")
-	req.Header.Set("X-Upstream-Service", r.serviceName)
+	req.Header.Set("X-Upstream-Service", ro.serviceName)
 	req.Header.Set("X-Upstream-Node", upstream)
 	req.Header.Set("X-Proxy-Ip", innerIP)
+
+	for _, plugin := range g.plugins {
+		r, err := plugin.AfterRoute(ctx, req)
+		if err != nil {
+			ctx.Set(gatewayErrContextKey, err)
+			return
+		}
+		req = r
+	}
 }
 
-func (g *Gateway) modifyResponse(resp *http.Response) error {
-	resp.Header.Set("Server", "luchen-gateway")
+func (g *Gateway) modifyResponse(res *http.Response) error {
+	res.Header.Set("Server", "luchen-gateway")
+	ctx := NewContext(res.Request.Context())
+	for _, plugin := range g.plugins {
+		err := plugin.ModifyResponse(ctx, res)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-func (g *Gateway) errorHandler(w http.ResponseWriter, r *http.Request, err error) {
+func (g *Gateway) errorHandler(w http.ResponseWriter, req *http.Request, err error) {
 	RootLogger().Error("handler err", zap.Error(err))
+	ctx := NewContext(req.Context())
+	for _, plugin := range g.plugins {
+		plugin.ErrorHandler(ctx, w, req, err)
+	}
 }
 
 // RegPattern 注册匹配模式
@@ -278,6 +321,26 @@ func (g *Gateway) selectServiceInfo(r *httpRoute) (*ServiceInfo, error) {
 	return serviceInfo, nil
 }
 
+func (g *Gateway) getRewriteRegexp(rewriteRegex string) *regexp.Regexp {
+	if rewriteRegex == "" {
+		return nil
+	}
+	var reg *regexp.Regexp
+	regCache, ok := rewriteRegexpCache.Get(rewriteRegex)
+	if ok {
+		reg = regCache.(*regexp.Regexp)
+	} else {
+		var err error
+		reg, err = regexp.Compile(rewriteRegex)
+		if err != nil {
+			RootLogger().Error("regexp compile error", zap.String("regexp", rewriteRegex), zap.Error(err))
+		} else {
+			rewriteRegexpCache.Add(rewriteRegex, reg)
+		}
+	}
+	return reg
+}
+
 // Pattern 路由匹配模式
 type Pattern interface {
 	// Name 匹配模式名称
@@ -312,100 +375,4 @@ func (h *PrefixPattern) Name() string {
 // Match 前缀匹配判断
 func (h *PrefixPattern) Match(req *http.Request, route *httpRoute) bool {
 	return strings.HasPrefix(req.URL.Path, route.prefix)
-}
-
-func getClientIP(req *http.Request) string {
-	forwardIPs := getHeader(req, "X-Forwarded-For")
-	if forwardIPs == "" {
-		return ""
-	}
-	ips := strings.Split(forwardIPs, ",")
-	for _, ip := range ips {
-		ip = strings.TrimSpace(ip)
-		if ip == "unknown" || ip == "unknow" {
-			continue
-		}
-		parseIP := net.ParseIP(ip)
-		if parseIP.IsLoopback() || parseIP.IsPrivate() {
-			continue
-		}
-		return ip
-	}
-	return ""
-}
-
-func getHeader(req *http.Request, key string) string {
-	vals := req.Header[key]
-	if len(vals) == 0 {
-		return ""
-	}
-	return vals[0]
-}
-
-func getRewriteRegexp(rewriteRegex string) *regexp.Regexp {
-	if rewriteRegex == "" {
-		return nil
-	}
-	var reg *regexp.Regexp
-	regCache, ok := rewriteRegexpCache.Get(rewriteRegex)
-	if ok {
-		reg = regCache.(*regexp.Regexp)
-	} else {
-		var err error
-		reg, err = regexp.Compile(rewriteRegex)
-		if err != nil {
-			RootLogger().Error("regexp compile error", zap.String("regexp", rewriteRegex), zap.Error(err))
-		} else {
-			rewriteRegexpCache.Add(rewriteRegex, reg)
-		}
-	}
-	return reg
-}
-
-// GatewayPlugin 网关插件接口
-type GatewayPlugin interface {
-	// Director 请求阶段处理
-	Director(*http.Request)
-	// ModifyResponse 响应阶段处理
-	ModifyResponse(*http.Response) error
-	// ErrorHandler 统一异常处理
-	ErrorHandler(http.ResponseWriter, *http.Request, error)
-}
-
-var unimplementedGatewayPlugin = &UnimplementedGatewayPlugin{}
-
-// UnimplementedGatewayPlugin 其他自定义插件如果不想实现所有接口，可以跟UnimplementedGatewayPlugin组合，只实现指定的方法即可
-type UnimplementedGatewayPlugin struct {
-}
-
-// Director nothing to do
-func (p *UnimplementedGatewayPlugin) Director(*http.Request) {
-	return
-}
-
-// ModifyResponse nothing to do
-func (p *UnimplementedGatewayPlugin) ModifyResponse(*http.Response) error {
-	return nil
-}
-
-// ErrorHandler nothing to do
-func (p *UnimplementedGatewayPlugin) ErrorHandler(http.ResponseWriter, *http.Request, error) {
-	return
-}
-
-// TraceGatewayPlugin 链路跟踪插件
-type TraceGatewayPlugin struct {
-	*UnimplementedGatewayPlugin
-}
-
-func (p *TraceGatewayPlugin) Director(req *http.Request) {
-	TraceHttpRequest(req)
-	return
-}
-
-func (p *TraceGatewayPlugin) ModifyResponse(res *http.Response) error {
-	ctx := res.Request.Context()
-	traceID := TraceID(ctx)
-	res.Header.Set(TraceIDHeader, traceID)
-	return nil
 }

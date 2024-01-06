@@ -137,5 +137,6 @@ func (c *HTTPClient) call(ctx context.Context, req *HTTPRequest) (*HTTPResponse,
 	if len(req.Params) > 0 {
 		httpReq.URL.RawQuery = req.Params.Encode()
 	}
+	httpReq, _ = TraceHTTPRequest(httpReq)
 	return c.client.Request(httpReq)
 }
