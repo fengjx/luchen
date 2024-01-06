@@ -5,3 +5,4 @@ routes:
     pattern: prefix
     prefix: /open/api/greeter
     service-name: greeter
+    rewrite-regex: "^/open/api/greeter(.*)"

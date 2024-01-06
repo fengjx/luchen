@@ -17,7 +17,7 @@ func newGreeterHandler() *greeterHandler {
 }
 
 func (h *greeterHandler) Bind(router luchen.HTTPRouter) {
-	router.Route(openAPI+"/greeter", func(r chi.Router) {
+	router.Route("/hello", func(r chi.Router) {
 		r.Handle("/say-hello", h.sayHello())
 	})
 }

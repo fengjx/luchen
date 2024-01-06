@@ -10,7 +10,12 @@ import (
 
 func main() {
 	config := luchen.MustLoadConfig[luchen.GatewayConfig]("_example/gateway/gateway.yaml")
-	gateway := luchen.NewGateway(config)
+	gateway := luchen.NewGateway(
+		config,
+		luchen.WithGatewayPlugin(
+			&luchen.TraceGatewayPlugin{},
+		),
+	)
 	luchen.Start(gateway)
 
 	quit := make(chan os.Signal)

@@ -21,11 +21,23 @@ import (
 var (
 	//nolint:gomnd
 	rewriteRegexpCache = lru.New(50)
+
+	defaultGatewayTransport = &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout: defaultConnectionTimeout,
+		}).DialContext,
+		MaxIdleConnsPerHost:   defaultMaxPoolSize,
+		MaxIdleConns:          defaultPoolSize,
+		IdleConnTimeout:       time.Second * 30,
+		ExpectContinueTimeout: defaultConnectionTimeout,
+	}
 )
 
 // GatewayOptions 网关选项定义
 type GatewayOptions struct {
-	plugins []GatewayPlugin
+	plugins   []GatewayPlugin
+	transport http.RoundTripper
 }
 
 // GatewayOption 网关选项赋值
@@ -38,6 +50,13 @@ func WithGatewayPlugin(plugins ...GatewayPlugin) GatewayOption {
 	}
 }
 
+// WithGatewayTransport 网关 http transport
+func WithGatewayTransport(transport http.RoundTripper) GatewayOption {
+	return func(o *GatewayOptions) {
+		o.transport = transport
+	}
+}
+
 // Gateway 网关服务
 type Gateway struct {
 	*baseServer
@@ -46,6 +65,7 @@ type Gateway struct {
 	server     *http.Server
 	routes     []*httpRoute
 	patternMap map[string]Pattern
+	plugins    []GatewayPlugin
 }
 
 type httpRoute struct {
@@ -61,8 +81,12 @@ type httpRoute struct {
 
 // NewGateway 创建 gateway 服务
 func NewGateway(cfg GatewayConfig, opts ...GatewayOption) *Gateway {
-	options := &GatewayOptions{}
-	_ = options
+	options := &GatewayOptions{
+		transport: defaultGatewayTransport,
+	}
+	for _, opt := range opts {
+		opt(options)
+	}
 
 	var routes []*httpRoute
 	// 静态路由初始化
@@ -87,16 +111,7 @@ func NewGateway(cfg GatewayConfig, opts ...GatewayOption) *Gateway {
 	})
 
 	proxy := &httputil.ReverseProxy{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			DialContext: (&net.Dialer{
-				Timeout: defaultConnectionTimeout,
-			}).DialContext,
-			MaxIdleConnsPerHost:   defaultMaxPoolSize,
-			MaxIdleConns:          defaultPoolSize,
-			IdleConnTimeout:       time.Second * 30,
-			ExpectContinueTimeout: defaultConnectionTimeout,
-		},
+		Transport: options.transport,
 	}
 	g := &Gateway{
 		baseServer: &baseServer{
@@ -165,10 +180,6 @@ func (g *Gateway) Stop() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	return g.server.Shutdown(ctx)
-}
-
-func (g *Gateway) rewrite(req *httputil.ProxyRequest) {
-
 }
 
 func (g *Gateway) director(req *http.Request) {
@@ -353,4 +364,48 @@ func getRewriteRegexp(rewriteRegex string) *regexp.Regexp {
 
 // GatewayPlugin 网关插件接口
 type GatewayPlugin interface {
+	// Director 请求阶段处理
+	Director(*http.Request)
+	// ModifyResponse 响应阶段处理
+	ModifyResponse(*http.Response) error
+	// ErrorHandler 统一异常处理
+	ErrorHandler(http.ResponseWriter, *http.Request, error)
+}
+
+var unimplementedGatewayPlugin = &UnimplementedGatewayPlugin{}
+
+// UnimplementedGatewayPlugin 其他自定义插件如果不想实现所有接口，可以跟UnimplementedGatewayPlugin组合，只实现指定的方法即可
+type UnimplementedGatewayPlugin struct {
+}
+
+// Director nothing to do
+func (p *UnimplementedGatewayPlugin) Director(*http.Request) {
+	return
+}
+
+// ModifyResponse nothing to do
+func (p *UnimplementedGatewayPlugin) ModifyResponse(*http.Response) error {
+	return nil
+}
+
+// ErrorHandler nothing to do
+func (p *UnimplementedGatewayPlugin) ErrorHandler(http.ResponseWriter, *http.Request, error) {
+	return
+}
+
+// TraceGatewayPlugin 链路跟踪插件
+type TraceGatewayPlugin struct {
+	*UnimplementedGatewayPlugin
+}
+
+func (p *TraceGatewayPlugin) Director(req *http.Request) {
+	TraceHttpRequest(req)
+	return
+}
+
+func (p *TraceGatewayPlugin) ModifyResponse(res *http.Response) error {
+	ctx := res.Request.Context()
+	traceID := TraceID(ctx)
+	res.Header.Set(TraceIDHeader, traceID)
+	return nil
 }

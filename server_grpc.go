@@ -123,12 +123,7 @@ func NewGRPCHandler(
 ) *grpctransport.Server {
 	opts := []grpctransport.ServerOption{
 		grpctransport.ServerBefore(func(ctx context.Context, md metadata.MD) context.Context {
-			traceID := uuid.NewString()
-			if len(md.Get(string(TraceIDCtxKey))) > 0 {
-				traceID = md.Get(TraceIDHeader)[0]
-			}
-			md.Set(TraceIDHeader, traceID)
-			ctx = WithTraceID(ctx, traceID)
+			ctx, traceID := TraceGRPC(ctx, md)
 			logger := Logger(ctx)
 			logger = logger.With(zap.String("traceId", traceID))
 			ctx = WithLogger(ctx, logger)

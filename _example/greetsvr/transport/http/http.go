@@ -11,11 +11,6 @@ import (
 	"github.com/fengjx/luchen"
 )
 
-const (
-	openAPI  = "/open/api"
-	adminAPI = "/admin/api"
-)
-
 type result struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
@@ -30,7 +25,7 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 	}
 	logger := luchen.Logger(ctx)
 	logger.Info("http response", zap.Any("data", res))
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Content-Type", "application/json")
 	return json.NewEncoder(w).Encode(res)
 }
 
