@@ -29,6 +29,7 @@ func GetGRPCClient(serviceName string, opts ...grpc.DialOption) *GRPCClient {
 	defer lock.Unlock()
 	selector := GetEtcdV3Selector(serviceName)
 	p := newPool(defaultPoolSize, defaultPoolTTL, defaultMaxPoolSize, defaultMaxPoolSize)
+	opts = append(opts, grpc.WithUnaryInterceptor(TraceGRPCClient))
 	client := &GRPCClient{
 		selector:    selector,
 		pool:        p,

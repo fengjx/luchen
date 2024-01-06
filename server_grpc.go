@@ -128,7 +128,7 @@ func NewGRPCHandler(
 			logger = logger.With(zap.String("traceId", traceID))
 			ctx = WithLogger(ctx, logger)
 			ctx = metadata.NewOutgoingContext(ctx, md)
-			return ctx
+			return NewContext(ctx)
 		}),
 		grpctransport.ServerErrorHandler(NewLogGRPCErrorHandler()),
 	}

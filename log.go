@@ -14,13 +14,9 @@ import (
 	"go.uber.org/zap"
 )
 
-type ctxKey string
-
 var (
 	// LoggerCtxKey logger context key
-	LoggerCtxKey ctxKey = "ctx.logger"
-	// TraceIDCtxKey traceID context key
-	TraceIDCtxKey ctxKey = "ctx.traceID"
+	LoggerCtxKey = struct{}{}
 
 	_log    logger.Logger
 	_logDir = filepath.Join("./", "logs")
@@ -133,18 +129,4 @@ func Logger(ctx context.Context) logger.Logger {
 // WithLogger context 注入 logger
 func WithLogger(ctx context.Context, logger logger.Logger) context.Context {
 	return context.WithValue(ctx, LoggerCtxKey, logger)
-}
-
-// TraceID 从 context 获得 TraceID
-func TraceID(ctx context.Context) string {
-	value := ctx.Value(TraceIDCtxKey)
-	if value == nil {
-		return ""
-	}
-	return value.(string)
-}
-
-// WithTraceID context 注入 traceID
-func WithTraceID(ctx context.Context, traceID string) context.Context {
-	return context.WithValue(ctx, TraceIDCtxKey, traceID)
 }
