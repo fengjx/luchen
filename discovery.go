@@ -112,7 +112,7 @@ func NewDefaultEtcdV3Client() etcdv3.Client {
 func MustNewEtcdV3Client(address []string) etcdv3.Client {
 	options := etcdv3.ClientOptions{
 		DialTimeout:   time.Second,
-		DialKeepAlive: time.Second,
+		DialKeepAlive: time.Second * 30,
 	}
 	client, err := etcdv3.NewClient(context.Background(), address, options)
 	if err != nil {
