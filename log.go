@@ -29,7 +29,7 @@ func init() {
 	}
 	logDir := os.Getenv("LUCHEN_LOG_DIR")
 	if len(logDir) > 0 {
-		_log = createFileLog(level, GetLogDir())
+		_log = createFileLog(level, logDir)
 		_log.SetLevel(level)
 		return
 	}
