@@ -3,7 +3,7 @@ module github.com/fengjx/luchen
 go 1.20
 
 require (
-	github.com/fengjx/go-halo v0.0.1-rc13
+	github.com/fengjx/go-halo v0.0.1-rc14
 	github.com/go-chi/chi/v5 v5.0.11
 	github.com/go-kit/kit v0.13.0
 	github.com/go-kit/log v0.2.0

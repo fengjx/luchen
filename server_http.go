@@ -12,9 +12,15 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/google/uuid"
+	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
 
 	httptransport "github.com/go-kit/kit/transport/http"
+)
+
+var (
+	HTTPRequestHeaderContextKey ctxType = "ctx.http.request.header"
+	HTTPRequestURLContextKey    ctxType = "ctx.http.request.url"
 )
 
 // HTTPServerOptions http server 选项
@@ -165,6 +171,7 @@ func NewHTTPHandler(
 	enc httptransport.EncodeResponseFunc,
 	options ...httptransport.ServerOption,
 ) *httptransport.Server {
+	options = append(options, httptransport.ServerBefore(contextServerBefore))
 	return httptransport.NewServer(
 		e,
 		dec,
@@ -173,8 +180,14 @@ func NewHTTPHandler(
 	)
 }
 
-// DecodeKvRequest 解析 http request query 和 form 参数
-func DecodeKvRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
+func contextServerBefore(ctx context.Context, req *http.Request) context.Context {
+	ctx = context.WithValue(ctx, HTTPRequestHeaderContextKey, req.Header)
+	ctx = context.WithValue(ctx, HTTPRequestURLContextKey, req.URL)
+	return ctx
+}
+
+// DecodeParamHTTPRequest 解析 http request query 和 form 参数
+func DecodeParamHTTPRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
 	logger := Logger(ctx)
 	req := new(T)
 	err := ShouldBind(r, req)
@@ -205,4 +218,17 @@ func DecodeJSONRequest[T any](ctx context.Context, r *http.Request) (interface{}
 		return nil, errn
 	}
 	return req, nil
+}
+
+// CreateHttpJSONEncoder http 返回json数据
+// wrapper 对数据重新包装
+func CreateHttpJSONEncoder(wrapper DataWrapper) httptransport.EncodeResponseFunc {
+	return func(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+		traceID := TraceID(ctx)
+		if traceID != "" {
+			w.Header().Set(TraceIDHeader, traceID)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		return jsoniter.NewEncoder(w).Encode(wrapper(response))
+	}
 }

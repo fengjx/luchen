@@ -134,3 +134,6 @@ func AddBeforeStopHook(handler func()) {
 func DoStopHook() {
 	hook.DoCustomHooks(beforeStopHookEvent)
 }
+
+// DataWrapper 对数据重新组装
+type DataWrapper func(data any) any

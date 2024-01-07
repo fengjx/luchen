@@ -17,6 +17,14 @@ type result struct {
 	Data any    `json:"data"`
 }
 
+func httpResponseWrapper(data interface{}) interface{} {
+	res := &result{
+		Msg:  "ok",
+		Data: data,
+	}
+	return res
+}
+
 // 统一返回值处理
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 	res := &result{

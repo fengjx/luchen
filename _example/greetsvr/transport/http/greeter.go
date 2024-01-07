@@ -28,8 +28,8 @@ func (h *greeterHandler) sayHello() *httptransport.Server {
 	}
 	return httptransport.NewServer(
 		endpoint.GetInst().GreeterEndpoints.MakeSayHelloEndpoint(),
-		luchen.DecodeKvRequest[pb.HelloReq],
-		encodeResponse,
+		luchen.DecodeParamHTTPRequest[pb.HelloReq],
+		luchen.CreateHttpJSONEncoder(httpResponseWrapper),
 		options...,
 	)
 }
