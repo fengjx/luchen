@@ -8,9 +8,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fengjx/go-halo v0.0.1-rc14 h1:V62UWyylISIXwW+WlSgk7zPPKReQegBI68xRFM6ljek=
 github.com/fengjx/go-halo v0.0.1-rc14/go.mod h1:2+XqPtPM+OshHRoDfVH681Sh9zFJ95lOd5QRNMRaISs=
-github.com/fengjx/luchen v1.0.0-rc2 h1:6dyM3ax0DwlYl05TLXjDyixbV1db7K3su0orFdrwMfQ=
-github.com/fengjx/luchen v1.0.0-rc2/go.mod h1:2RutJi/Y7L06c70UVjGqM+7MEU5y6db/FlATxatKryE=
-github.com/fengjx/luchen v1.0.0-rc3/go.mod h1:2RutJi/Y7L06c70UVjGqM+7MEU5y6db/FlATxatKryE=
+github.com/fengjx/luchen v1.0.0-rc4 h1:W9sum0+Rbw0dbsk59kgUjhYC8KgnmvtMv6CAHCORU5c=
+github.com/fengjx/luchen v1.0.0-rc4/go.mod h1:v+9pstv+fknD4YhtSD5xFRsU3MiBcZXDHhfuPNhjDZE=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=
