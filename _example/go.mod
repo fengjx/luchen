@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/fengjx/go-halo v0.0.1-rc14
-	github.com/fengjx/luchen v1.0.0-rc3
+	github.com/fengjx/luchen v1.0.0-rc4
 	github.com/go-chi/chi/v5 v5.0.11
 	github.com/go-kit/kit v0.13.0
 	go.uber.org/zap v1.26.0
