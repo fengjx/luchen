@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/fengjx/luchen/_example/greetsvr/pb"
+	"github.com/fengjx/luchen/example/greetsvr/pb"
 )
 
 func main() {

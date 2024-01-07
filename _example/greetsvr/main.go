@@ -7,10 +7,11 @@ import (
 	"syscall"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/_example/greetsvr/endpoint"
-	"github.com/fengjx/luchen/_example/greetsvr/logic"
-	"github.com/fengjx/luchen/_example/greetsvr/service"
-	"github.com/fengjx/luchen/_example/greetsvr/transport"
+
+	"github.com/fengjx/luchen/example/greetsvr/endpoint"
+	"github.com/fengjx/luchen/example/greetsvr/logic"
+	"github.com/fengjx/luchen/example/greetsvr/service"
+	"github.com/fengjx/luchen/example/greetsvr/transport"
 )
 
 func init() {

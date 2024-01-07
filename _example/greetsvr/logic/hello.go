@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 
-	"github.com/fengjx/luchen/_example/greetsvr/service/hello"
+	"github.com/fengjx/luchen/example/greetsvr/service/hello"
 )
 
 type helloLogic struct {

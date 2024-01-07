@@ -5,8 +5,8 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/_example/greetsvr/endpoint"
-	"github.com/fengjx/luchen/_example/greetsvr/pb"
+	"github.com/fengjx/luchen/example/greetsvr/endpoint"
+	"github.com/fengjx/luchen/example/greetsvr/pb"
 )
 
 type greeterHandler struct {

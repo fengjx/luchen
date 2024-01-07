@@ -8,7 +8,8 @@ import (
 	"github.com/fengjx/go-halo/json"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/_example/greetsvr/pb"
+
+	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 )
 
 func TestHTTPClient_Call(t *testing.T) {
@@ -19,7 +20,7 @@ func TestHTTPClient_Call(t *testing.T) {
 	registrar.Register()
 	defer registrar.Deregister()
 	client := luchen.GetHTTPClient(serviceName)
-	body, _ := json.ToBytes(&pb.HelloReq{
+	body, _ := json.ToBytes(&pb.HelloRequest{
 		Name: "fengjx",
 	})
 	req := &luchen.HTTPRequest{

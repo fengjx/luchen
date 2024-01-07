@@ -6,8 +6,8 @@ import (
 	"github.com/go-kit/kit/sd"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/_example/greetsvr/transport/grpc"
-	"github.com/fengjx/luchen/_example/greetsvr/transport/http"
+	"github.com/fengjx/luchen/example/greetsvr/transport/grpc"
+	"github.com/fengjx/luchen/example/greetsvr/transport/http"
 )
 
 var (

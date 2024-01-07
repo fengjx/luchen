@@ -6,8 +6,8 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/_example/greetsvr/connom/config"
-	"github.com/fengjx/luchen/_example/greetsvr/pb"
+	"github.com/fengjx/luchen/example/greetsvr/connom/config"
+	"github.com/fengjx/luchen/example/greetsvr/pb"
 )
 
 var (

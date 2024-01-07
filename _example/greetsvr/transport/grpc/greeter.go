@@ -6,8 +6,8 @@ import (
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/_example/greetsvr/endpoint"
-	"github.com/fengjx/luchen/_example/greetsvr/pb"
+	"github.com/fengjx/luchen/example/greetsvr/endpoint"
+	"github.com/fengjx/luchen/example/greetsvr/pb"
 )
 
 type GreeterServer struct {

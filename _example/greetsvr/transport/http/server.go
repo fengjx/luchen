@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/_example/greetsvr/connom/config"
+	"github.com/fengjx/luchen/example/greetsvr/connom/config"
 )
 
 var (
