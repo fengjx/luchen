@@ -280,4 +280,5 @@ func (b *RoundRobinBalancer[T]) Pick() (*T, error) {
 	return b.services[idx], nil
 }
 
+// SelectorBuilder Selector 构造函数
 type SelectorBuilder func(serviceName string) Selector

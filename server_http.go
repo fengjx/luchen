@@ -19,8 +19,10 @@ import (
 )
 
 var (
+	// HTTPRequestHeaderContextKey context http header
 	HTTPRequestHeaderContextKey ctxType = "ctx.http.request.header"
-	HTTPRequestURLContextKey    ctxType = "ctx.http.request.url"
+	// HTTPRequestURLContextKey context http url
+	HTTPRequestURLContextKey ctxType = "ctx.http.request.url"
 )
 
 // HTTPServerOptions http server 选项
@@ -220,9 +222,9 @@ func DecodeJSONRequest[T any](ctx context.Context, r *http.Request) (interface{}
 	return req, nil
 }
 
-// CreateHttpJSONEncoder http 返回json数据
+// CreateHTTPJSONEncoder http 返回json数据
 // wrapper 对数据重新包装
-func CreateHttpJSONEncoder(wrapper DataWrapper) httptransport.EncodeResponseFunc {
+func CreateHTTPJSONEncoder(wrapper DataWrapper) httptransport.EncodeResponseFunc {
 	return func(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 		traceID := TraceID(ctx)
 		if traceID != "" {
