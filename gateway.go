@@ -24,12 +24,23 @@ var (
 )
 
 type GatewayOptions struct {
+	selectorBuilder SelectorBuilder
+	plugins         []GatewayPlugin
 }
 
 type GatewayOption func(*GatewayOptions)
 
-func With() GatewayOption {
+// WithGatewaySelectorBuilder 自定义通过 serviceName 构造 Selector 的方式
+func WithGatewaySelectorBuilder(b SelectorBuilder) GatewayOption {
 	return func(o *GatewayOptions) {
+		o.selectorBuilder = b
+	}
+}
+
+// WithGatewayPlugins 自定义网关处理插件
+func WithGatewayPlugins(plugins ...GatewayPlugin) GatewayOption {
+	return func(o *GatewayOptions) {
+		o.plugins = append(o.plugins, plugins...)
 	}
 }
 
@@ -37,10 +48,12 @@ func With() GatewayOption {
 type Gateway struct {
 	*baseServer
 	*httputil.ReverseProxy
-	config     GatewayConfig
-	server     *http.Server
-	routes     []*httpRoute
-	patternMap map[string]Pattern
+	config          GatewayConfig
+	server          *http.Server
+	routes          []*httpRoute
+	patternMap      map[string]Pattern
+	selectorBuilder SelectorBuilder
+	plugins         []GatewayPlugin
 }
 
 type httpRoute struct {
@@ -56,13 +69,21 @@ type httpRoute struct {
 
 // NewGateway 创建 gateway 服务
 func NewGateway(cfg GatewayConfig, opts ...GatewayOption) *Gateway {
-	options := &GatewayOptions{}
-	_ = options
+	options := &GatewayOptions{
+		selectorBuilder: getEtcdV3Selector,
+	}
+	for _, opt := range opts {
+		opt(options)
+	}
 
 	var routes []*httpRoute
 	// 静态路由初始化
 	for _, route := range cfg.Routes {
 		if route.Protocol != "http" {
+			RootLogger().Warn(
+				"route protocol not support now",
+				zap.String("protocol", route.Protocol),
+			)
 			continue
 		}
 		routes = append(routes, &httpRoute{
@@ -251,7 +272,7 @@ func (g *Gateway) selectServiceInfo(r *httpRoute) (*ServiceInfo, error) {
 	if r.serviceName == "" {
 		return nil, nil
 	}
-	selector := GetEtcdV3Selector(r.serviceName)
+	selector := g.selectorBuilder(r.serviceName)
 	serviceInfo, err := selector.Next()
 	if err != nil {
 		return nil, err
@@ -341,4 +362,8 @@ func getRewriteRegexp(rewriteRegex string) *regexp.Regexp {
 }
 
 type GatewayPlugin interface {
+}
+
+func getEtcdV3Selector(serviceName string) Selector {
+	return GetEtcdV3Selector(serviceName)
 }

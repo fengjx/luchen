@@ -252,3 +252,5 @@ func (b *RoundRobinBalancer[T]) Pick() (*T, error) {
 	idx := old % uint64(len(b.services))
 	return b.services[idx], nil
 }
+
+type SelectorBuilder func(serviceName string) Selector
