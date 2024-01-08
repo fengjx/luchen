@@ -1,0 +1,50 @@
+run:
+  timeout: 5m
+  skip-files:
+    - generated.*
+    - gen.*
+  tests: false
+
+issues:
+  new: true
+  exclude-rules:
+    - path: (.+)_test\.go
+      linters:
+        - unused
+        - govet
+        - funlen
+        - goconst
+
+linters:
+  enable:
+    - asciicheck
+    - bodyclose
+    - gci
+    - gocritic
+    - gofmt
+    - gofumpt
+    - goimports
+    - goprintffuncname
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nilerr
+    - rowserrcheck
+    - staticcheck
+    - unused
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - whitespace
+    - errcheck
+    - errname
+    - sqlclosecheck
+#  disable:
+
+linters-settings:
+  gci:
+    local-prefixes: github.com/fengjx/daox
+  goimports:
+    local-prefixes: github.com/fengjx/daox

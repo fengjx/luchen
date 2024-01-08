@@ -26,8 +26,15 @@ func init() {
 // ShouldBind 从参数url参数和form表单解析参数
 func ShouldBind(r *http.Request, obj any) error {
 	values := r.URL.Query()
-	for key, val := range r.Form {
-		values[key] = val
+	contentType := r.Header.Get("Content-Type")
+	if contentType == "application/x-www-form-urlencoded" {
+		err := r.ParseForm()
+		if err != nil {
+			return err
+		}
+		for key, val := range r.Form {
+			values[key] = val
+		}
 	}
 	err := decoder.Decode(obj, values)
 	if err != nil {

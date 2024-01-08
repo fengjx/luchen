@@ -6,8 +6,8 @@ import (
 	"github.com/go-kit/kit/endpoint"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/_example/greetsvr/logic"
-	"github.com/fengjx/luchen/_example/greetsvr/pb"
+	"github.com/fengjx/luchen/example/greetsvr/logic"
+	"github.com/fengjx/luchen/example/greetsvr/pb"
 )
 
 type greeterEndpoints struct {

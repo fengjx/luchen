@@ -27,14 +27,17 @@ var (
 	httpClientCacheLock = newSegmentLock(10)
 )
 
+// HTTPClient 支持服务发现的 http client
 type HTTPClient struct {
 	serviceName string
 	client      *httpc.Client
 	selector    Selector
 }
 
+// HTTPResponse http 请求返回信息
 type HTTPResponse = httpc.Response
 
+// HTTPRequest http 请求参数
 type HTTPRequest struct {
 	Path   string
 	Method string
@@ -78,6 +81,7 @@ func GetHTTPClient(serviceName string) *HTTPClient {
 	return httpClient
 }
 
+// Call 发起 http 请求
 func (c *HTTPClient) Call(ctx context.Context, req *HTTPRequest) (*HTTPResponse, error) {
 	var response *HTTPResponse
 	var err error
@@ -133,5 +137,6 @@ func (c *HTTPClient) call(ctx context.Context, req *HTTPRequest) (*HTTPResponse,
 	if len(req.Params) > 0 {
 		httpReq.URL.RawQuery = req.Params.Encode()
 	}
+	httpReq, _ = TraceHTTPRequest(httpReq)
 	return c.client.Request(httpReq)
 }

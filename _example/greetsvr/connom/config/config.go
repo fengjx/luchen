@@ -39,7 +39,7 @@ func init() {
 		configFile = os.Args[1]
 	}
 	if configFile == "" {
-		confFile, err := fs.Lookup("_example/greetsvr/conf/app.yaml", 3)
+		confFile, err := fs.Lookup("conf/app.yaml", 3)
 		if err != nil {
 			luchen.RootLogger().Panic("config file not found")
 		}
