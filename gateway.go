@@ -41,7 +41,7 @@ var (
 type GatewayOptions struct {
 	selectorBuilder SelectorBuilder
 	plugins         []GatewayPlugin
-	transport http.RoundTripper
+	transport       http.RoundTripper
 }
 
 // GatewayOption 网关选项赋值
@@ -72,12 +72,12 @@ func WithGatewayTransport(transport http.RoundTripper) GatewayOption {
 type Gateway struct {
 	*baseServer
 	*httputil.ReverseProxy
-	config     GatewayConfig
-	server     *http.Server
-	routes     []*httpRoute
-	patternMap map[string]Pattern
+	config          GatewayConfig
+	server          *http.Server
+	routes          []*httpRoute
+	patternMap      map[string]Pattern
 	selectorBuilder SelectorBuilder
-	plugins    []GatewayPlugin
+	plugins         []GatewayPlugin
 }
 
 type httpRoute struct {
@@ -95,7 +95,7 @@ type httpRoute struct {
 func NewGateway(cfg GatewayConfig, opts ...GatewayOption) *Gateway {
 	options := &GatewayOptions{
 		selectorBuilder: getEtcdV3Selector,
-		transport: defaultGatewayTransport,
+		transport:       defaultGatewayTransport,
 	}
 	for _, opt := range opts {
 		opt(options)
