@@ -14,7 +14,7 @@ $ cd _example
 $ go run helloworld/main.go
 ```
 
-source: <_example/helloworld/main.go>
+source: [_example/helloworld/main.go](_example/helloworld/main.go)
 
 请求服务接口
 ```bash
