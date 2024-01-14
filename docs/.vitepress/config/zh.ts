@@ -2,7 +2,7 @@ import { defineConfig, type DefaultTheme } from 'vitepress'
 
 export const zh = defineConfig({
   lang: 'zh-Hans',
-  description: '由 Vite 和 Vue 驱动的静态站点生成器',
+  description: '基于 go-kit 封装的微服务框架',
 
   themeConfig: {
     nav: nav(),
@@ -18,8 +18,8 @@ export const zh = defineConfig({
     },
 
     footer: {
-      message: '基于 MIT 许可发布',
-      copyright: `版权所有 © 2019-${new Date().getFullYear()} 路辰 <a href="http://beian.miit.gov.cn/" target="_blank">粤ICP备15021633号-3</a>`
+      message: '基于  Apache-2.0 License 许可发布',
+      copyright: `Copyright © ${new Date().getFullYear()}-present 路辰 <a href="http://beian.miit.gov.cn/" target="_blank">粤ICP备15021633号</a>`
     },
 
     docFooter: {
@@ -32,11 +32,7 @@ export const zh = defineConfig({
     },
 
     lastUpdated: {
-      text: '最后更新于',
-      formatOptions: {
-        dateStyle: 'short',
-        timeStyle: 'medium'
-      }
+      text: '最后更新于'
     },
 
     langMenuLabel: '多语言',
@@ -52,14 +48,19 @@ function nav(): DefaultTheme.NavItem[] {
   return [
     {
       text: '指南',
-      link: '/guide/what-is-vitepress',
+      link: '/guide/introduction',
       activeMatch: '/guide/'
     },
     {
       text: '参考',
-      link: '/reference/site-config',
+      link: '/reference/helloworld',
       activeMatch: '/reference/'
+    },
+    {
+      text: 'GoDoc',
+      link: 'https://pkg.go.dev/github.com/fengjx/luchen',
     }
+
   ]
 }
 
@@ -74,36 +75,31 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       ]
     },
     {
-      text: '写作',
+      text: '服务',
       collapsed: false,
       items: [
-        { text: 'Markdown 扩展', link: 'markdown' },
-        { text: '资源处理', link: 'asset-handling' },
-        { text: 'frontmatter', link: 'frontmatter' },
-        { text: '在 Markdown 使用 Vue', link: 'using-vue' },
-        { text: '国际化', link: 'i18n' }
+        { text: 'http server', link: 'http-server' },
+        { text: 'grpc server', link: 'grpc-server' },
+        { text: 'gateway', link: 'gateway' },
       ]
     },
     {
-      text: '自定义',
+      text: '客户端',
       collapsed: false,
       items: [
-        { text: '自定义主题', link: 'custom-theme' },
-        { text: '扩展默认主题', link: 'extending-default-theme' },
-        { text: '构建时数据加载', link: 'data-loading' },
-        { text: 'SSR 兼容性', link: 'ssr-compat' },
-        { text: '连接 CMS', link: 'cms' }
+        { text: 'http client', link: 'http-client' },
+        { text: 'grpc client', link: 'grpc-client' },
       ]
     },
     {
-      text: '实验性功能',
+      text: '内置功能',
       collapsed: false,
       items: [
-        { text: 'MPA 模式', link: 'mpa-mode' },
-        { text: 'sitemap 生成', link: 'sitemap-generation' }
+        { text: '环境', link: 'env' },
+        { text: '配置加载', link: 'config' },
+        { text: '日志', link: 'log' },
       ]
-    },
-    { text: '配置和 API 参考', base: '/reference/', link: 'site-config' }
+    }
   ]
 }
 
@@ -112,11 +108,9 @@ function sidebarReference(): DefaultTheme.SidebarItem[] {
     {
       text: '参考',
       items: [
-        { text: '配置加载', link: 'site-config' },
-        { text: 'http server', link: 'site-config' },
-        { text: 'grpc server', link: 'frontmatter-config' },
-        { text: 'gateway', link: 'runtime-api' },
-        { text: 'CLI', link: 'cli' },
+        { text: 'helloworld', link: 'helloworld' },
+        { text: '都协议&服务发现', link: 'multi-protocol-server' },
+        { text: '网关', link: 'gateway' },
       ]
     }
   ]

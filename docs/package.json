@@ -2,9 +2,9 @@
   "name": "docs",
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev",
+    "dev": "vitepress dev --port 5176",
     "build": "vitepress build",
-    "preview": "vitepress preview"
+    "preview": "vitepress preview --port 5176"
   },
   "devDependencies": {
     "markdown-it-mathjax3": "^4.3.2",

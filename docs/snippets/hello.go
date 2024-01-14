@@ -15,12 +15,6 @@ import (
 
 // test cmd: curl -i http://localhost:8080/say-hello?name=luchen
 
-func init() {
-	if luchen.IsLocal() {
-		luchen.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
-	}
-}
-
 func main() {
 	httpSvr := luchen.NewHTTPServer(
 		"helloworld",
