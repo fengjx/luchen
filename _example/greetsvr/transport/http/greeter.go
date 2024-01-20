@@ -5,7 +5,8 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/example/greetsvr/endpoint"
+
+	"github.com/fengjx/luchen/example/greetsvr/internal/hello"
 	"github.com/fengjx/luchen/example/greetsvr/pb"
 )
 
@@ -27,9 +28,9 @@ func (h *greeterHandler) sayHello() *httptransport.Server {
 		httptransport.ServerErrorEncoder(errorEncoder),
 	}
 	return httptransport.NewServer(
-		endpoint.GetInst().GreeterEndpoints.MakeSayHelloEndpoint(),
+		hello.GetInst().Endpoints.MakeSayHelloEndpoint(),
 		luchen.DecodeParamHTTPRequest[pb.HelloReq],
-		luchen.CreateHttpJSONEncoder(httpResponseWrapper),
+		luchen.CreateHTTPJSONEncoder(httpResponseWrapper),
 		options...,
 	)
 }

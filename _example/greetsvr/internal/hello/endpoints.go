@@ -1,4 +1,4 @@
-package endpoint
+package hello
 
 import (
 	"context"
@@ -6,23 +6,23 @@ import (
 	"github.com/go-kit/kit/endpoint"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/example/greetsvr/logic"
+
 	"github.com/fengjx/luchen/example/greetsvr/pb"
 )
 
-type greeterEndpoints struct {
+type endpoints struct {
 }
 
-func newGreeterEndpoints() *greeterEndpoints {
-	return &greeterEndpoints{}
+func newEndpoints() *endpoints {
+	return &endpoints{}
 }
 
-func (e *greeterEndpoints) MakeSayHelloEndpoint() endpoint.Endpoint {
+func (e *endpoints) MakeSayHelloEndpoint() endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		logger := luchen.Logger(ctx)
 		logger.Info("greeter say hello")
 		helloReq := request.(*pb.HelloReq)
-		msg, err := logic.GetInst().HelloLogic.SayHello(ctx, helloReq.Name)
+		msg, err := GetInst().helloLogic.SayHello(ctx, helloReq.Name)
 		if err != nil {
 			return nil, err
 		}
