@@ -111,7 +111,7 @@ func (s *HTTPServer) Start() error {
 	s.address = fmt.Sprintf("%s:%s", host, port)
 	s.metadata["ts"] = time.Now().UnixMilli()
 	s.started = true
-	RootLogger().Infof("http server[%s, %s] start", s.serviceName, s.id)
+	RootLogger().Infof("http server[%s, %s, %s] start", s.serviceName, s.address, s.id)
 	s.Unlock()
 	return s.httpServer.Serve(ln)
 }

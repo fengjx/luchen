@@ -1,9 +1,7 @@
-package logic
+package hello
 
 import (
 	"context"
-
-	"github.com/fengjx/luchen/example/greetsvr/service/hello"
 )
 
 type helloLogic struct {
@@ -14,7 +12,7 @@ func newHelloLogic() *helloLogic {
 }
 
 func (helloLogic) SayHello(ctx context.Context, name string) (string, error) {
-	msg, err := hello.GetInst().GreetSvc.SayHi(ctx, name)
+	msg, err := GetInst().GreetSvc.SayHi(ctx, name)
 	if err != nil {
 		return "", err
 	}
