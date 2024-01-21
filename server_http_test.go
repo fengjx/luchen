@@ -3,6 +3,7 @@ package luchen_test
 import (
 	"context"
 	"net/http"
+	"testing"
 
 	"github.com/fengjx/go-halo/json"
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -43,4 +44,11 @@ func encodeSayHello(_ context.Context, w http.ResponseWriter, resp interface{}) 
 	}
 	_, err = w.Write([]byte(jsonStr))
 	return err
+}
+
+func TestStatic(t *testing.T) {
+	httpServer := luchen.NewHTTPServer(
+		luchen.WithServerAddr(":8080"),
+	).Static("/static/", "docs/public")
+	httpServer.Start()
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"path"
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
@@ -124,6 +125,13 @@ func (s *HTTPServer) Handler(handlers ...HTTPHandler) *HTTPServer {
 	for _, handler := range handlers {
 		handler.Bind(s.router)
 	}
+	return s
+}
+
+// Static 静态文件路径
+func (s *HTTPServer) Static(prefix string, dir string) *HTTPServer {
+	fs := http.FileServer(http.Dir(dir))
+	s.router.Handle(path.Join(prefix, "/*"), http.StripPrefix(prefix, fs))
 	return s
 }
 
