@@ -78,8 +78,9 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: '服务',
       collapsed: false,
       items: [
-        { text: 'http server', link: 'http-server' },
-        { text: 'grpc server', link: 'grpc-server' },
+        { text: 'HTTP server', link: 'http-server' },
+        { text: 'gRPC server', link: 'grpc-server' },
+        { text: '服务注册', link: 'register' },
         { text: 'gateway', link: 'gateway' },
       ]
     },
@@ -87,8 +88,8 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: '客户端',
       collapsed: false,
       items: [
-        { text: 'http client', link: 'http-client' },
-        { text: 'grpc client', link: 'grpc-client' },
+        { text: 'HTTP client', link: 'http-client' },
+        { text: 'gRPC client', link: 'grpc-client' },
       ]
     },
     {
@@ -109,7 +110,7 @@ function sidebarReference(): DefaultTheme.SidebarItem[] {
       text: '参考',
       items: [
         { text: 'helloworld', link: 'helloworld' },
-        { text: '都协议&服务发现', link: 'multi-protocol-server' },
+        { text: '多协议支持和服务注册', link: 'multi-protocol-server' },
         { text: '网关', link: 'gateway' },
       ]
     }

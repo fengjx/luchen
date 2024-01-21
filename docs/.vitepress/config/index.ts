@@ -49,8 +49,7 @@ export default defineConfig({
         locales: { ...zhSearch }
       }
     },
-
-    carbonAds: { code: 'CEBDT27Y', placement: 'vuejsorg' }
+    // carbonAds: { code: 'CEBDT27Y', placement: 'vuejsorg' }
   },
 
   locales: {

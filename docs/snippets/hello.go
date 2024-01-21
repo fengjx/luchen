@@ -1,40 +1,26 @@
-package main
-
-import (
-	"context"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-
-	kitendpoint "github.com/go-kit/kit/endpoint"
-	httptransport "github.com/go-kit/kit/transport/http"
-
-	"github.com/fengjx/luchen"
-)
-
-// test cmd: curl -i http://localhost:8080/say-hello?name=luchen
-
 func main() {
+	// 启动一个 http server
 	httpSvr := luchen.NewHTTPServer(
 		"helloworld",
 		luchen.WithHTTPAddr(":8080"),
 	).Handler(
-		&helloHandler{},
+		&helloHandler{},	// 注册路由
 	)
-	luchen.Start(httpSvr)
+	luchen.Start(httpSvr)   // 启动服务
 
+	// 监听系统 kill 信号
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL)
 
 	<-quit
+	// 优雅停机
 	luchen.Stop()
 }
 
 type helloHandler struct {
 }
 
-// Bind 绑定 http 请求路径
+// Bind 绑定 http 路由
 func (h *helloHandler) Bind(router luchen.HTTPRouter) {
 	router.Handle("/say-hello", h.sayHello())
 }

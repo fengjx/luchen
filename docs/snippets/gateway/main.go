@@ -1,21 +1,3 @@
-package main
-
-import (
-	"os"
-	"os/signal"
-	"syscall"
-
-	"github.com/fengjx/go-halo/fs"
-	"github.com/fengjx/luchen"
-	"go.uber.org/zap"
-)
-
-func init() {
-	if luchen.IsLocal() {
-		luchen.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
-	}
-}
-
 func main() {
 	configFile, err := fs.Lookup("gateway.yaml", 3)
 	if err != nil {

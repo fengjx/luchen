@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/fengjx/luchen"
+
 	"github.com/fengjx/luchen/example/greetsvr/connom/config"
 	"github.com/fengjx/luchen/example/greetsvr/pb"
 )
@@ -19,10 +20,10 @@ func GetServer() *luchen.GRPCServer {
 	serverOnce.Do(func() {
 		serverConfig := config.GetConfig().Server.GRPC
 		server = luchen.NewGRPCServer(
-			serverConfig.ServerName,
-			luchen.WithGRPCAddr(serverConfig.Listen),
+			luchen.WithServiceName(serverConfig.ServerName),
+			luchen.WithServerAddr(serverConfig.Listen),
 		)
-		server.RegisterServer(func(grpcServer *grpc.Server) {
+		server.RegisterService(func(grpcServer *grpc.Server) {
 			pb.RegisterGreeterServer(grpcServer, newGreeterServer())
 		})
 	})

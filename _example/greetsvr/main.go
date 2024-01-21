@@ -8,7 +8,7 @@ import (
 
 	"github.com/fengjx/luchen"
 
-	"github.com/fengjx/luchen/example/greetsvr/internal"
+	"github.com/fengjx/luchen/example/greetsvr/service"
 	"github.com/fengjx/luchen/example/greetsvr/transport"
 )
 
@@ -22,7 +22,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	logger := luchen.Logger(ctx)
 	logger.Info("app start")
-	internal.Init()
+	service.Init()
 	transport.Start(ctx)
 
 	quit := make(chan os.Signal)

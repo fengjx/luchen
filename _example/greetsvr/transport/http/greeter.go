@@ -6,8 +6,8 @@ import (
 
 	"github.com/fengjx/luchen"
 
-	"github.com/fengjx/luchen/example/greetsvr/internal/hello"
 	"github.com/fengjx/luchen/example/greetsvr/pb"
+	"github.com/fengjx/luchen/example/greetsvr/service/hello"
 )
 
 type greeterHandler struct {
@@ -27,7 +27,7 @@ func (h *greeterHandler) sayHello() *httptransport.Server {
 	options := []httptransport.ServerOption{
 		httptransport.ServerErrorEncoder(errorEncoder),
 	}
-	return httptransport.NewServer(
+	return luchen.NewHTTPHandler(
 		hello.GetInst().Endpoints.MakeSayHelloEndpoint(),
 		luchen.DecodeParamHTTPRequest[pb.HelloReq],
 		luchen.CreateHTTPJSONEncoder(httpResponseWrapper),

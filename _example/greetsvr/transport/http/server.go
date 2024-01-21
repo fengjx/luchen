@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/fengjx/luchen"
+
 	"github.com/fengjx/luchen/example/greetsvr/connom/config"
 )
 
@@ -16,8 +17,8 @@ func GetServer() *luchen.HTTPServer {
 	serverOnce.Do(func() {
 		serverConfig := config.GetConfig().Server.HTTP
 		server = luchen.NewHTTPServer(
-			serverConfig.ServerName,
-			luchen.WithHTTPAddr(serverConfig.Listen),
+			luchen.WithServiceName(serverConfig.ServerName),
+			luchen.WithServerAddr(serverConfig.Listen),
 		).Handler(
 			newGreeterHandler(),
 		)
