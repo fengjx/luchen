@@ -1,0 +1,19 @@
+syntax = "proto3";
+package pb;
+option go_package="github.com/fengjx/luchen/example/greetsvrs/pb";
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloReq) returns (HelloResp) {}
+}
+
+// The request message containing the user's name.
+message HelloReq {
+  string name = 1;
+}
+
+// The response message containing the greetings
+message HelloResp {
+  string message = 1;
+}

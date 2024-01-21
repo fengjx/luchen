@@ -13,8 +13,8 @@ import (
 
 func newHelloHttpServer(serviceName, addr string) *luchen.HTTPServer {
 	server := luchen.NewHTTPServer(
-		serviceName,
-		luchen.WithHTTPAddr(addr),
+		luchen.WithServiceName(serviceName),
+		luchen.WithServerAddr(addr),
 	).Handler(
 		&helloHandler{},
 	)
@@ -29,7 +29,7 @@ func (h *helloHandler) Bind(router luchen.HTTPRouter) {
 }
 
 func (h *helloHandler) sayHello() *httptransport.Server {
-	return httptransport.NewServer(
+	return luchen.NewHTTPHandler(
 		makeSayHelloEndpoint(),
 		luchen.DecodeJSONRequest[pb.HelloRequest],
 		encodeSayHello,

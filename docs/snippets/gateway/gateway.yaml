@@ -1,0 +1,8 @@
+server-name: "luchen-gateway"
+listen: ":9000"
+routes:
+  - protocol: http
+    pattern: prefix
+    prefix: /open/api/greeter
+    service-name: greeter
+    rewrite-regex: "^/open/api/greeter(.*)"

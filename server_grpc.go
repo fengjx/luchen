@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"reflect"
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
@@ -17,29 +18,6 @@ import (
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 )
 
-// GRPCServerOptions grpc server 选项
-type GRPCServerOptions struct {
-	addr     string
-	metadata map[string]any
-}
-
-// GRPCServerOption grpc server 选项赋值
-type GRPCServerOption func(*GRPCServerOptions)
-
-// WithGRPCAddr grpc server 监听地址
-func WithGRPCAddr(addr string) GRPCServerOption {
-	return func(o *GRPCServerOptions) {
-		o.addr = addr
-	}
-}
-
-// WithGRPCMetadata grpc server 注册信息 metadata
-func WithGRPCMetadata(md map[string]any) GRPCServerOption {
-	return func(o *GRPCServerOptions) {
-		o.metadata = md
-	}
-}
-
 // GRPCServer grpc server 实现
 type GRPCServer struct {
 	*baseServer
@@ -47,13 +25,17 @@ type GRPCServer struct {
 }
 
 // NewGRPCServer 创建 grpc server
-func NewGRPCServer(serviceName string, opts ...GRPCServerOption) *GRPCServer {
-	options := &GRPCServerOptions{}
+// opts 查看 ServerOptions
+func NewGRPCServer(opts ...ServerOption) *GRPCServer {
+	options := &ServerOptions{}
 	for _, opt := range opts {
 		opt(options)
 	}
 	if options.addr == "" {
 		options.addr = defaultAddress
+	}
+	if options.serviceName == "" {
+		options.serviceName = fmt.Sprintf("%s-%s", GetAppName(), "grpc-server")
 	}
 	if options.metadata == nil {
 		options.metadata = make(map[string]any)
@@ -62,7 +44,7 @@ func NewGRPCServer(serviceName string, opts ...GRPCServerOption) *GRPCServer {
 	return &GRPCServer{
 		baseServer: &baseServer{
 			id:          uuid.NewString(),
-			serviceName: serviceName,
+			serviceName: options.serviceName,
 			protocol:    ProtocolGRPC,
 			address:     options.addr,
 			metadata:    make(map[string]any),
@@ -108,9 +90,9 @@ func (s *GRPCServer) Stop() error {
 // RegisterHandler 注册 grpc handler
 type RegisterHandler func(grpcServer *grpc.Server)
 
-// RegisterServer 注册 grpc 接口实现
-func (s *GRPCServer) RegisterServer(rh RegisterHandler) *GRPCServer {
-	rh(s.server)
+// RegisterService 注册 grpc 接口实现
+func (s *GRPCServer) RegisterService(reg RegisterHandler) *GRPCServer {
+	reg(s.server)
 	return s
 }
 
@@ -158,12 +140,16 @@ func (h *LogGRPCErrorHandler) Handle(ctx context.Context, err error) {
 
 // DecodePB protobuf 解码
 func DecodePB[T any](_ context.Context, req interface{}) (interface{}, error) {
-	pbReq := req.(*T)
-	return pbReq, nil
+	if pbReq, ok := req.(*T); ok {
+		return pbReq, nil
+	}
+	return nil, fmt.Errorf("proto decode request err, want type[%s] but[%s]", reflect.TypeOf(new(T)), reflect.TypeOf(req))
 }
 
 // EncodePB protobuf 编码
 func EncodePB[T any](_ context.Context, resp interface{}) (interface{}, error) {
-	pbResp := resp.(*T)
-	return pbResp, nil
+	if pbResp, ok := resp.(*T); ok {
+		return pbResp, nil
+	}
+	return nil, fmt.Errorf("proto encode response err, want type[%s] but[%s]", reflect.TypeOf(new(T)), reflect.TypeOf(resp))
 }

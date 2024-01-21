@@ -25,29 +25,6 @@ var (
 	HTTPRequestURLContextKey ctxType = "ctx.http.request.url"
 )
 
-// HTTPServerOptions http server 选项
-type HTTPServerOptions struct {
-	addr     string
-	metadata map[string]any
-}
-
-// HTTPServerOption http server 选项赋值
-type HTTPServerOption func(*HTTPServerOptions)
-
-// WithHTTPAddr http server 监听地址
-func WithHTTPAddr(addr string) HTTPServerOption {
-	return func(o *HTTPServerOptions) {
-		o.addr = addr
-	}
-}
-
-// WithHTTPMetadata http server 注册信息 metadata
-func WithHTTPMetadata(md map[string]any) HTTPServerOption {
-	return func(o *HTTPServerOptions) {
-		o.metadata = md
-	}
-}
-
 // HTTPRouter http 请求路由注册
 type HTTPRouter = *chi.Mux
 
@@ -59,13 +36,17 @@ type HTTPServer struct {
 }
 
 // NewHTTPServer 创建 http server
-func NewHTTPServer(serviceName string, opts ...HTTPServerOption) *HTTPServer {
-	options := &HTTPServerOptions{}
+// opts 查看 ServerOptions
+func NewHTTPServer(opts ...ServerOption) *HTTPServer {
+	options := &ServerOptions{}
 	for _, opt := range opts {
 		opt(options)
 	}
 	if options.addr == "" {
 		options.addr = defaultAddress
+	}
+	if options.serviceName == "" {
+		options.serviceName = fmt.Sprintf("%s-%s", GetAppName(), "http-server")
 	}
 	if options.metadata == nil {
 		options.metadata = make(map[string]any)
@@ -77,7 +58,7 @@ func NewHTTPServer(serviceName string, opts ...HTTPServerOption) *HTTPServer {
 	svr := &HTTPServer{
 		baseServer: &baseServer{
 			id:          uuid.NewString(),
-			serviceName: serviceName,
+			serviceName: options.serviceName,
 			protocol:    ProtocolHTTP,
 			address:     options.addr,
 			metadata:    make(map[string]any),

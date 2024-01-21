@@ -13,10 +13,10 @@ import (
 
 func newHelloGRPCServer(serviceName, addr string) *luchen.GRPCServer {
 	server := luchen.NewGRPCServer(
-		serviceName,
-		luchen.WithGRPCAddr(addr),
+		luchen.WithServiceName(serviceName),
+		luchen.WithServerAddr(addr),
 	)
-	server.RegisterServer(func(grpcServer *grpc.Server) {
+	server.RegisterService(func(grpcServer *grpc.Server) {
 		pb.RegisterGreeterServer(grpcServer, newGreeterServer())
 	})
 	return server

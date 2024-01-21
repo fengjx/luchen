@@ -29,6 +29,37 @@ var (
 	servers []Server
 )
 
+// ServerOptions server 选项
+type ServerOptions struct {
+	serviceName string
+	addr        string
+	metadata    map[string]any
+}
+
+// ServerOption grpc server 选项赋值
+type ServerOption func(*ServerOptions)
+
+// WithServerAddr server 监听地址
+func WithServerAddr(addr string) ServerOption {
+	return func(o *ServerOptions) {
+		o.addr = addr
+	}
+}
+
+// WithServerMetadata server 注册信息 metadata，单体服务无需关注
+func WithServerMetadata(md map[string]any) ServerOption {
+	return func(o *ServerOptions) {
+		o.metadata = md
+	}
+}
+
+// WithServiceName server 名称，在微服务中作为一组服务名称标识，单体服务则无需关注
+func WithServiceName(serviceName string) ServerOption {
+	return func(o *ServerOptions) {
+		o.serviceName = serviceName
+	}
+}
+
 // ServiceInfo 服务节点信息
 type ServiceInfo struct {
 	ID       string         `json:"id"`
