@@ -20,7 +20,7 @@ export default defineConfig({
   },
 
   sitemap: {
-    hostname: 'https://luchen.fun'
+    hostname: 'http://luchen.fun'
   },
 
   /* prettier-ignore */
