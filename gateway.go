@@ -18,12 +18,17 @@ import (
 	"go.uber.org/zap"
 )
 
+type (
+	gatewayConfigKey struct{}
+	gatewayErrKey    struct{}
+)
+
 var (
 	//nolint:gomnd
 	rewriteRegexpCache = lru.New(50)
 	// GatewayConfigContextKey 从 context 中获取网关配置
-	GatewayConfigContextKey ctxType = "ctx.gateway.config"
-	gatewayErrContextKey    ctxType = "ctx.gateway.err"
+	GatewayConfigContextKey = gatewayConfigKey{}
+	gatewayErrContextKey    = gatewayErrKey{}
 
 	defaultGatewayTransport = &http.Transport{
 		Proxy: http.ProxyFromEnvironment,

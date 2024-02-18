@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-type ctxType string
-
 // Context 网关请求上下文
 type Context struct {
 	ctx context.Context

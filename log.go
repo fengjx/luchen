@@ -14,9 +14,13 @@ import (
 	"go.uber.org/zap"
 )
 
+type (
+	loggerKey struct{}
+)
+
 var (
 	// LoggerCtxKey logger context key
-	LoggerCtxKey ctxType = "ctx.logger"
+	LoggerCtxKey = loggerKey{}
 
 	_log    logger.Logger
 	_logDir = filepath.Join("./", "logs")
