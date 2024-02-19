@@ -14,9 +14,13 @@ const (
 	TraceIDHeader = "X-Trace-ID"
 )
 
+type (
+	traceIDKey struct{}
+)
+
 var (
 	// TraceIDCtxKey traceID context key
-	TraceIDCtxKey ctxType = "ctx.traceID"
+	TraceIDCtxKey = traceIDKey{}
 )
 
 // TraceHTTPRequest 返回 traceID
