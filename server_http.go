@@ -19,11 +19,16 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
+type (
+	httpRequestHeaderKey struct{}
+	httpRequestURLKey    struct{}
+)
+
 var (
-	// HTTPRequestHeaderContextKey context http header
-	HTTPRequestHeaderContextKey ctxType = "ctx.http.request.header"
-	// HTTPRequestURLContextKey context http url
-	HTTPRequestURLContextKey ctxType = "ctx.http.request.url"
+	// HTTPRequestHeaderCtxKey context http header
+	HTTPRequestHeaderCtxKey = httpRequestHeaderKey{}
+	// HTTPRequestURLCtxKey context http url
+	HTTPRequestURLCtxKey = httpRequestURLKey{}
 )
 
 // HTTPRouter http 请求路由注册
@@ -172,8 +177,8 @@ func NewHTTPHandler(
 }
 
 func contextServerBefore(ctx context.Context, req *http.Request) context.Context {
-	ctx = context.WithValue(ctx, HTTPRequestHeaderContextKey, req.Header)
-	ctx = context.WithValue(ctx, HTTPRequestURLContextKey, req.URL)
+	ctx = context.WithValue(ctx, HTTPRequestHeaderCtxKey, req.Header)
+	ctx = context.WithValue(ctx, HTTPRequestURLCtxKey, req.URL)
 	return ctx
 }
 
