@@ -2,6 +2,7 @@ package luchen
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/google/uuid"
-	jsoniter "github.com/json-iterator/go"
 	"go.uber.org/zap"
 
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -216,15 +216,15 @@ func DecodeJSONRequest[T any](ctx context.Context, r *http.Request) (interface{}
 	return req, nil
 }
 
-// CreateHTTPJSONEncoder http 返回json数据
+// EncodeHTTPJSON http 返回json数据
 // wrapper 对数据重新包装
-func CreateHTTPJSONEncoder(wrapper DataWrapper) httptransport.EncodeResponseFunc {
+func EncodeHTTPJSON(wrapper DataWrapper) httptransport.EncodeResponseFunc {
 	return func(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 		traceID := TraceID(ctx)
 		if traceID != "" {
 			w.Header().Set(TraceIDHeader, traceID)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		return jsoniter.NewEncoder(w).Encode(wrapper(response))
+		return json.NewEncoder(w).Encode(wrapper(response))
 	}
 }
