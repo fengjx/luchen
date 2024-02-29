@@ -2,7 +2,6 @@ package luchen
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
+	"github.com/fengjx/go-halo/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-kit/kit/endpoint"
@@ -182,8 +182,8 @@ func contextServerBefore(ctx context.Context, req *http.Request) context.Context
 	return ctx
 }
 
-// DecodeParamHTTPRequest 解析 http request query 和 form 参数
-func DecodeParamHTTPRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
+// DecodeHTTPParamRequest 解析 http request query 和 form 参数
+func DecodeHTTPParamRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
 	logger := Logger(ctx)
 	req := new(T)
 	err := ShouldBind(r, req)
@@ -199,8 +199,8 @@ func DecodeParamHTTPRequest[T any](ctx context.Context, r *http.Request) (interf
 	return req, nil
 }
 
-// DecodeJSONRequest 解析 http request body json 参数
-func DecodeJSONRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
+// DecodeHTTPJSONRequest 解析 http request body json 参数
+func DecodeHTTPJSONRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
 	logger := Logger(ctx)
 	req := new(T)
 	err := ShouldBindJSON(r, req)

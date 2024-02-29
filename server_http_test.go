@@ -32,7 +32,7 @@ func (h *helloHandler) Bind(router luchen.HTTPRouter) {
 func (h *helloHandler) sayHello() *httptransport.Server {
 	return luchen.NewHTTPHandler(
 		makeSayHelloEndpoint(),
-		luchen.DecodeJSONRequest[pb.HelloRequest],
+		luchen.DecodeHTTPJSONRequest[pb.HelloRequest],
 		encodeSayHello,
 	)
 }

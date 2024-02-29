@@ -23,8 +23,8 @@ func init() {
 
 func main() {
 	httpSvr := luchen.NewHTTPServer(
-		"helloworld",
-		luchen.WithHTTPAddr(":8080"),
+		luchen.WithServiceName("helloworld"),
+		luchen.WithServerAddr(":8080"),
 	).Handler(
 		&helloHandler{},
 	)
