@@ -13,7 +13,7 @@ import (
 )
 
 func TestHTTPClient_Call(t *testing.T) {
-	serviceName := "hello"
+	serviceName := "hello-test-http-call"
 	registrar := luchen.NewEtcdV3Registrar(
 		newHelloHttpServer(serviceName, ":0"),
 	)

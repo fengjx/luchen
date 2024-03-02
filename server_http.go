@@ -10,9 +10,6 @@ import (
 
 	"github.com/fengjx/go-halo/addr"
 	"github.com/fengjx/go-halo/json"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -32,14 +29,11 @@ var (
 	HTTPRequestURLCtxKey = httpRequestURLKey{}
 )
 
-// HTTPRouter http 请求路由注册
-type HTTPRouter = *chi.Mux
-
 // HTTPServer http server 实现
 type HTTPServer struct {
 	*baseServer
 	httpServer *http.Server
-	router     HTTPRouter
+	router     *ServeMux
 }
 
 // NewHTTPServer 创建 http server
@@ -58,9 +52,9 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 	if options.metadata == nil {
 		options.metadata = make(map[string]any)
 	}
-	router := chi.NewRouter()
+	mux := NewServeMux()
 	httpServer := &http.Server{
-		Handler: router,
+		Handler: mux,
 	}
 	svr := &HTTPServer{
 		baseServer: &baseServer{
@@ -71,14 +65,9 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 			metadata:    make(map[string]any),
 		},
 		httpServer: httpServer,
-		router:     router,
+		router:     mux,
 	}
-	svr.Use(
-		middleware.Recoverer,
-		middleware.RealIP,
-		middleware.RequestID,
-		TraceHTTPMiddleware,
-	)
+	svr.Use(TraceHTTPMiddleware)
 	return svr
 }
 
@@ -141,9 +130,6 @@ func (s *HTTPServer) Static(prefix string, dir string) *HTTPServer {
 	return s
 }
 
-// HTTPMiddleware http 请求中间件
-type HTTPMiddleware func(http.Handler) http.Handler
-
 // TraceHTTPMiddleware 链路跟踪
 func TraceHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -155,20 +141,10 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// CorsOptions 跨域配置
-type CorsOptions = cors.Options
-
-// AllowAll 允许所有 header, method, host
-var AllowAll = cors.AllowAll
-
-func (s *HTTPServer) CorsMiddleware(opts CorsOptions) HTTPMiddleware {
-	return cors.Handler(opts)
-}
-
 // HTTPHandler http 请求处理器接口
 type HTTPHandler interface {
 	// Bind 绑定路由
-	Bind(router HTTPRouter)
+	Bind(router *ServeMux)
 }
 
 // NewHTTPHandler 绑定 http 请求处理逻辑
@@ -231,11 +207,26 @@ func DecodeHTTPJSONRequest[T any](ctx context.Context, r *http.Request) (interfa
 // wrapper 对数据重新包装
 func EncodeHTTPJSON(wrapper DataWrapper) httptransport.EncodeResponseFunc {
 	return func(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		if headerer, ok := response.(httptransport.Headerer); ok {
+			for k, values := range headerer.Headers() {
+				for _, v := range values {
+					w.Header().Add(k, v)
+				}
+			}
+		}
+		code := http.StatusOK
+		if sc, ok := response.(httptransport.StatusCoder); ok {
+			code = sc.StatusCode()
+		}
+		w.WriteHeader(code)
+		if code == http.StatusNoContent {
+			return nil
+		}
 		traceID := TraceID(ctx)
 		if traceID != "" {
 			w.Header().Set(TraceIDHeader, traceID)
 		}
-		w.Header().Set("Content-Type", "application/json")
 		return json.NewEncoder(w).Encode(wrapper(response))
 	}
 }

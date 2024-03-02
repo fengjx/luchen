@@ -10,12 +10,14 @@ import (
 )
 
 func TestEtcdV3Selector(t *testing.T) {
-	serviceName := "hello"
+	serviceName := "hello-test-selector"
 	registrar := luchen.NewEtcdV3Registrar(
 		newHelloHttpServer(serviceName, ":0"),
 	)
 	registrar.Register()
-	defer registrar.Deregister()
+	defer func() {
+		registrar.Deregister()
+	}()
 	selector := luchen.GetEtcdV3Selector(serviceName)
 	serviceInfo, err := selector.Next()
 	if err != nil {

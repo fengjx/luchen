@@ -25,7 +25,7 @@ func newHelloHttpServer(serviceName, addr string) *luchen.HTTPServer {
 type helloHandler struct {
 }
 
-func (h *helloHandler) Bind(router luchen.HTTPRouter) {
+func (h *helloHandler) Bind(router *luchen.ServeMux) {
 	router.Handle("/say-hello", h.sayHello())
 }
 

@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
-	"github.com/go-chi/chi/v5"
 	"github.com/golang/groupcache/lru"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -168,7 +167,7 @@ func (g *Gateway) Start() error {
 		g.Unlock()
 		return err
 	}
-	router := chi.NewRouter()
+	router := NewServeMux()
 	router.Handle("/*", g)
 	server := &http.Server{
 		Handler: router,
