@@ -12,6 +12,7 @@ import (
 	"github.com/fengjx/go-halo/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -152,6 +153,16 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 		ctx := WithLogger(r.Context(), logger)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// CorsOptions 跨域配置
+type CorsOptions = cors.Options
+
+// AllowAll 允许所有 header, method, host
+var AllowAll = cors.AllowAll
+
+func (s *HTTPServer) CorsMiddleware(opts CorsOptions) HTTPMiddleware {
+	return cors.Handler(opts)
 }
 
 // HTTPHandler http 请求处理器接口
