@@ -30,8 +30,8 @@ import (
 	"strings"
 )
 
-// Options is a configuration container to setup the CORS middleware.
-type Options struct {
+// CorsOptions is a configuration container to setup the CORS middleware.
+type CorsOptions struct {
 	// Debug logger
 	Log Log
 
@@ -112,7 +112,7 @@ type Cors struct {
 }
 
 // NewCORS creates a new Cors handler with the provided options.
-func NewCORS(options Options) *Cors {
+func NewCORS(options CorsOptions) *Cors {
 	c := &Cors{
 		exposedHeaders:    convert(options.ExposedHeaders, http.CanonicalHeaderKey),
 		allowOriginFunc:   options.AllowOriginFunc,
@@ -184,7 +184,7 @@ func NewCORS(options Options) *Cors {
 }
 
 // Handler creates a new Cors handler with passed options.
-func Handler(options Options) func(next http.Handler) http.Handler {
+func Handler(options CorsOptions) func(next http.Handler) http.Handler {
 	c := NewCORS(options)
 	return c.Handler
 }
@@ -192,7 +192,7 @@ func Handler(options Options) func(next http.Handler) http.Handler {
 // AllowAll create a new Cors handler with permissive configuration allowing all
 // origins with all standard methods with any header and credentials.
 func AllowAll() *Cors {
-	return NewCORS(Options{
+	return NewCORS(CorsOptions{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{
 			http.MethodHead,
@@ -221,6 +221,7 @@ func (c *Cors) Handler(next http.Handler) http.Handler {
 			if c.optionPassthrough {
 				next.ServeHTTP(w, r)
 			} else {
+				c.handleActualRequest(w, r)
 				w.WriteHeader(http.StatusOK)
 			}
 		} else {
