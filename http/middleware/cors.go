@@ -183,8 +183,8 @@ func NewCORS(options CorsOptions) *Cors {
 	return c
 }
 
-// Handler creates a new Cors handler with passed options.
-func Handler(options CorsOptions) func(next http.Handler) http.Handler {
+// CorsHandler creates a new Cors handler with passed options.
+func CorsHandler(options CorsOptions) func(next http.Handler) http.Handler {
 	c := NewCORS(options)
 	return c.Handler
 }
@@ -221,7 +221,6 @@ func (c *Cors) Handler(next http.Handler) http.Handler {
 			if c.optionPassthrough {
 				next.ServeHTTP(w, r)
 			} else {
-				c.handleActualRequest(w, r)
 				w.WriteHeader(http.StatusOK)
 			}
 		} else {
