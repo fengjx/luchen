@@ -1,7 +1,6 @@
 package http
 
 import (
-	"github.com/go-chi/chi/v5"
 	httptransport "github.com/go-kit/kit/transport/http"
 
 	"github.com/fengjx/luchen"
@@ -17,10 +16,8 @@ func newGreeterHandler() *greeterHandler {
 	return &greeterHandler{}
 }
 
-func (h *greeterHandler) Bind(router luchen.HTTPRouter) {
-	router.Route("/hello", func(r chi.Router) {
-		r.Handle("/say-hello", h.sayHello())
-	})
+func (h *greeterHandler) Bind(router *luchen.ServeMux) {
+	router.Handle("/hello/say-hello", h.sayHello())
 }
 
 func (h *greeterHandler) sayHello() *httptransport.Server {
@@ -29,8 +26,8 @@ func (h *greeterHandler) sayHello() *httptransport.Server {
 	}
 	return luchen.NewHTTPHandler(
 		hello.GetInst().Endpoints.MakeSayHelloEndpoint(),
-		luchen.DecodeParamHTTPRequest[pb.HelloReq],
-		luchen.CreateHTTPJSONEncoder(httpResponseWrapper),
+		luchen.DecodeHTTPParamRequest[pb.HelloReq],
+		luchen.EncodeHTTPJSON(httpResponseWrapper),
 		options...,
 	)
 }
