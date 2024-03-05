@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"path"
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
@@ -126,7 +125,7 @@ func (s *HTTPServer) Handler(handlers ...HTTPHandler) *HTTPServer {
 // Static 静态文件路径
 func (s *HTTPServer) Static(prefix string, dir string) *HTTPServer {
 	fs := http.FileServer(http.Dir(dir))
-	s.router.Handle(path.Join(prefix, "/*"), http.StripPrefix(prefix, fs))
+	s.router.Handle(prefix, http.StripPrefix(prefix, fs))
 	return s
 }
 
@@ -203,9 +202,9 @@ func DecodeHTTPJSONRequest[T any](ctx context.Context, r *http.Request) (interfa
 	return req, nil
 }
 
-// EncodeHTTPJSON http 返回json数据
+// EncodeHTTPJSONResponse http 返回json数据
 // wrapper 对数据重新包装
-func EncodeHTTPJSON(wrapper DataWrapper) httptransport.EncodeResponseFunc {
+func EncodeHTTPJSONResponse(wrapper DataWrapper) httptransport.EncodeResponseFunc {
 	return func(ctx context.Context, w http.ResponseWriter, response interface{}) error {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		if headerer, ok := response.(httptransport.Headerer); ok {
