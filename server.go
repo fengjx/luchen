@@ -158,12 +158,12 @@ func Stop() {
 
 // AddBeforeStopHook 注册服务停止前回调函数
 func AddBeforeStopHook(handler func()) {
-	hook.AddCustomStartHook(beforeStopHookEvent, handler, 100)
+	hook.AddHook(beforeStopHookEvent, 100, handler)
 }
 
 // DoStopHook 执行服务停止前的回调函数
 func DoStopHook() {
-	hook.DoCustomHooks(beforeStopHookEvent)
+	hook.DoHooks(beforeStopHookEvent)
 }
 
 // DataWrapper 对数据重新组装

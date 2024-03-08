@@ -9,6 +9,8 @@ github.com/fengjx/go-halo v0.0.1-rc14 h1:V62UWyylISIXwW+WlSgk7zPPKReQegBI68xRFM6
 github.com/fengjx/go-halo v0.0.1-rc14/go.mod h1:2+XqPtPM+OshHRoDfVH681Sh9zFJ95lOd5QRNMRaISs=
 github.com/fengjx/go-halo v0.0.2 h1:/BRWM0EE/+x0g6Rc5KeAYg8xZRlOaRYakXTXmM6sliA=
 github.com/fengjx/go-halo v0.0.2/go.mod h1:2+XqPtPM+OshHRoDfVH681Sh9zFJ95lOd5QRNMRaISs=
+github.com/fengjx/go-halo v0.0.3-rc01 h1:HbTgqh2cdgPlBzi0dkmcUJaxqE+DjavJR7thsJXM83c=
+github.com/fengjx/go-halo v0.0.3-rc01/go.mod h1:2+XqPtPM+OshHRoDfVH681Sh9zFJ95lOd5QRNMRaISs=
 github.com/fengjx/luchen v1.0.0-rc5 h1:P3gnkV974JWU2fsaOPrqzZPmTHe5AZf2qwkJB7SEj5Y=
 github.com/fengjx/luchen v1.0.0-rc5/go.mod h1:v+9pstv+fknD4YhtSD5xFRsU3MiBcZXDHhfuPNhjDZE=
 github.com/fengjx/luchen v1.0.0-rc6 h1:q1MKqo4Wf5h1wfu3Oa5/u+oca3uhinEaSSRB5sU8+zI=
