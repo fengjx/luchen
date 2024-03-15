@@ -7,16 +7,24 @@ import (
 
 type AccessLogOpt struct {
 	ContextFields map[string]any
-	printResp     bool
+	PrintResp     bool
 	AccessLog     AccessLog
 }
 
 // AccessMiddleware 请求日志
-func AccessMiddleware(opt AccessLogOpt) Middleware {
+func AccessMiddleware(opt *AccessLogOpt) Middleware {
 	return func(next Endpoint) Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+			var accesslog AccessLog
+			var contextFields map[string]any
+			var printResp bool
+			if opt != nil {
+				accesslog = opt.AccessLog
+				contextFields = opt.ContextFields
+				printResp = opt.PrintResp
+			}
 			fields := map[string]any{}
-			for field, ctxKey := range opt.ContextFields {
+			for field, ctxKey := range contextFields {
 				value := ctx.Value(ctxKey)
 				fields[field] = value
 			}
@@ -26,7 +34,7 @@ func AccessMiddleware(opt AccessLogOpt) Middleware {
 			fields["request"] = request
 
 			response, err = next(ctx, request)
-			if opt.printResp {
+			if printResp {
 				fields["response"] = response
 			}
 			code := 0
@@ -39,8 +47,7 @@ func AccessMiddleware(opt AccessLogOpt) Middleware {
 				fields["err"] = err.Error()
 			}
 			fields["code"] = code
-
-			accesslog := opt.AccessLog
+			fields["code"] = code
 			if accesslog == nil {
 				accesslog = NewAccessLog(1024, 7, 7)
 			}
