@@ -18,16 +18,13 @@ import (
 )
 
 type (
-	gatewayConfigKey struct{}
-	gatewayErrKey    struct{}
+	gatewayConfigCtxKey struct{}
+	gatewayErrCtxKey    struct{}
 )
 
 var (
 	//nolint:gomnd
 	rewriteRegexpCache = lru.New(50)
-	// GatewayConfigContextKey 从 context 中获取网关配置
-	GatewayConfigContextKey = gatewayConfigKey{}
-	gatewayErrContextKey    = gatewayErrKey{}
 
 	defaultGatewayTransport = &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
@@ -206,18 +203,16 @@ func (g *Gateway) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	log := Logger(ctx)
 	ctx = WithLogger(ctx, log)
-	ctx = NewContext(ctx)
 	req = req.WithContext(ctx)
 	g.ReverseProxy.ServeHTTP(rw, req)
 }
 
 func (g *Gateway) director(req *http.Request) {
-	ctx := req.Context().(*Context)
-	ctx.Set(GatewayConfigContextKey, g.config)
+	ctx := context.WithValue(req.Context(), gatewayConfigCtxKey{}, g.config)
 	for _, plugin := range g.plugins {
 		r, err := plugin.BeforeRoute(ctx, req)
 		if err != nil {
-			ctx.Set(gatewayErrContextKey, err)
+			ctx = context.WithValue(ctx, gatewayErrCtxKey{}, err)
 			return
 		}
 		req = r
@@ -275,7 +270,7 @@ func (g *Gateway) director(req *http.Request) {
 	for _, plugin := range g.plugins {
 		r, err := plugin.AfterRoute(ctx, req)
 		if err != nil {
-			ctx.Set(gatewayErrContextKey, err)
+			ctx = context.WithValue(ctx, gatewayErrCtxKey{}, err)
 			return
 		}
 		req = r
@@ -284,7 +279,7 @@ func (g *Gateway) director(req *http.Request) {
 
 func (g *Gateway) modifyResponse(res *http.Response) error {
 	res.Header.Set("Server", "luchen-gateway")
-	ctx := NewContext(res.Request.Context())
+	ctx := res.Request.Context()
 	for _, plugin := range g.plugins {
 		err := plugin.ModifyResponse(ctx, res)
 		if err != nil {
@@ -296,7 +291,7 @@ func (g *Gateway) modifyResponse(res *http.Response) error {
 
 func (g *Gateway) errorHandler(w http.ResponseWriter, req *http.Request, err error) {
 	RootLogger().Error("handler err", zap.Error(err))
-	ctx := NewContext(req.Context())
+	ctx := req.Context()
 	for _, plugin := range g.plugins {
 		plugin.ErrorHandler(ctx, w, req, err)
 	}
