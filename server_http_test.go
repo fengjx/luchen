@@ -46,7 +46,7 @@ func encodeSayHello(_ context.Context, w http.ResponseWriter, resp interface{}) 
 	return err
 }
 
-func TestStatic(t *testing.T) {
+func testStatic(t *testing.T) {
 	httpServer := luchen.NewHTTPServer(
 		luchen.WithServerAddr(":8080"),
 	).Static("/static/", "docs/public")

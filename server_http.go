@@ -165,6 +165,9 @@ func NewHTTPHandler(
 func contextServerBefore(ctx context.Context, req *http.Request) context.Context {
 	ctx = context.WithValue(ctx, HTTPRequestHeaderCtxKey, req.Header)
 	ctx = context.WithValue(ctx, HTTPRequestURLCtxKey, req.URL)
+	ctx = withRequestEndpoint(ctx, req.RequestURI)
+	ctx = withRequestProtocol(ctx, req.Proto)
+	ctx = withMethod(ctx, req.Method)
 	return ctx
 }
 

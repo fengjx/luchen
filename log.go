@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/fengjx/go-halo/halo"
@@ -12,6 +13,8 @@ import (
 	"github.com/fengjx/go-halo/utils"
 	kitlog "github.com/go-kit/log"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type (
@@ -133,4 +136,41 @@ func Logger(ctx context.Context) logger.Logger {
 // WithLogger context 注入 logger
 func WithLogger(ctx context.Context, logger logger.Logger) context.Context {
 	return context.WithValue(ctx, LoggerCtxKey, logger)
+}
+
+type accessLogImpl struct {
+	log *zap.Logger
+}
+
+func (impl accessLogImpl) Print(fields map[string]any) {
+	var zf []zap.Field
+	for field, value := range fields {
+		zf = append(zf, zap.Any(field, value))
+	}
+	impl.log.Info("", zf...)
+}
+
+// NewAccessLog 创建一个 AccessLog
+func NewAccessLog(maxSizeMB int, maxBackups int, maxAge int) AccessLog {
+	w := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   path.Join(GetLogDir(), "access.log"),
+		MaxSize:    maxSizeMB,
+		MaxBackups: maxBackups,
+		MaxAge:     maxAge,
+	})
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.TimeKey = "time"
+	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000")
+	encoderConfig.FunctionKey = ""
+	encoderConfig.LevelKey = ""
+	encoderConfig.MessageKey = ""
+	encoderConfig.NameKey = ""
+	encoderConfig.CallerKey = ""
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		w,
+		zapcore.InfoLevel,
+	)
+	l := zap.New(core, zap.AddCaller())
+	return &accessLogImpl{log: l}
 }
