@@ -1,12 +1,17 @@
 package luchen
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type (
 	requestEndpointCtxKey struct{}
 
 	protocolCtxKey struct{}
 	methodCtxKey   struct{}
+
+	requestStartTimeCtxKey struct{}
 )
 
 // RequestEndpoint 请求端点
@@ -46,4 +51,13 @@ func RequestMethod(ctx context.Context) string {
 
 func withMethod(ctx context.Context, method string) context.Context {
 	return context.WithValue(ctx, methodCtxKey{}, method)
+}
+
+// RequestStartTime 请求开始时间
+func RequestStartTime(ctx context.Context) time.Time {
+	return ctx.Value(requestStartTimeCtxKey{}).(time.Time)
+}
+
+func withRequestStartTime(ctx context.Context, t time.Time) context.Context {
+	return context.WithValue(ctx, requestStartTimeCtxKey{}, t)
 }
