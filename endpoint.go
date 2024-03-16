@@ -3,6 +3,7 @@ package luchen
 import (
 	"context"
 	"errors"
+	"time"
 )
 
 type AccessLogOpt struct {
@@ -47,7 +48,8 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 				fields["err"] = err.Error()
 			}
 			fields["code"] = code
-			fields["code"] = code
+			startTime := RequestStartTime(ctx)
+			fields["rt"] = time.Since(startTime).Nanoseconds()
 			if accesslog == nil {
 				accesslog = NewAccessLog(1024, 7, 7)
 			}
