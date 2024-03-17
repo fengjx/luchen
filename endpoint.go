@@ -6,8 +6,11 @@ import (
 	"time"
 )
 
+// 从 context 中获取值
+type getCtxValueFn func(ctx context.Context) any
+
 type AccessLogOpt struct {
-	ContextFields map[string]any
+	ContextFields map[string]getCtxValueFn
 	PrintResp     bool
 	AccessLog     AccessLog
 }
@@ -17,7 +20,7 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 	return func(next Endpoint) Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			var accesslog AccessLog
-			var contextFields map[string]any
+			var contextFields map[string]getCtxValueFn
 			var printResp bool
 			if opt != nil {
 				accesslog = opt.AccessLog
@@ -25,8 +28,8 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 				printResp = opt.PrintResp
 			}
 			fields := map[string]any{}
-			for field, ctxKey := range contextFields {
-				value := ctx.Value(ctxKey)
+			for field, fn := range contextFields {
+				value := fn(ctx)
 				fields[field] = value
 			}
 			fields["endpoint"] = RequestEndpoint(ctx)
