@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-// 从 context 中获取值
-type getCtxValueFn func(ctx context.Context) any
+// GetValueFromContext 从 context 中获取值
+type GetValueFromContext func(ctx context.Context) any
 
 type AccessLogOpt struct {
-	ContextFields map[string]getCtxValueFn
+	ContextFields map[string]GetValueFromContext
 	PrintResp     bool
 	AccessLog     AccessLog
 }
@@ -20,7 +20,7 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 	return func(next Endpoint) Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			var accesslog AccessLog
-			var contextFields map[string]getCtxValueFn
+			var contextFields map[string]GetValueFromContext
 			var printResp bool
 			if opt != nil {
 				accesslog = opt.AccessLog
