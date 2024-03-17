@@ -50,6 +50,7 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 			fields["code"] = code
 			startTime := RequestStartTime(ctx)
 			fields["rt"] = time.Since(startTime).Nanoseconds()
+			fields["rts"] = time.Since(startTime).String()
 			if accesslog == nil {
 				accesslog = NewAccessLog(1024, 7, 7)
 			}
