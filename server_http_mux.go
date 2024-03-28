@@ -5,40 +5,41 @@ import "net/http"
 // HTTPMiddleware http 请求中间件
 type HTTPMiddleware func(http.Handler) http.Handler
 
-type ServeMux struct {
+type HTTPServeMux struct {
 	*http.ServeMux
 	middlewares []HTTPMiddleware
+	handler     http.Handler
 }
 
-func NewServeMux() *ServeMux {
+// NewHTTPServeMux 创建一个 mux
+func NewHTTPServeMux() *HTTPServeMux {
 	mux := http.NewServeMux()
-	return &ServeMux{
+	return &HTTPServeMux{
 		ServeMux: mux,
 	}
 }
 
-func (mux *ServeMux) Use(middlewares ...HTTPMiddleware) *ServeMux {
+func (mux *HTTPServeMux) Use(middlewares ...HTTPMiddleware) *HTTPServeMux {
 	for _, middleware := range middlewares {
 		mux.middlewares = append(mux.middlewares, middleware)
 	}
+	mux.then(mux.ServeMux)
 	return mux
 }
 
-func (mux *ServeMux) then(h http.Handler) http.Handler {
-	size := len(mux.middlewares)
-	for i := range mux.middlewares {
-		h = mux.middlewares[size-1-i](h)
+func (mux *HTTPServeMux) then(h http.Handler) {
+	mux.handler = HandlerChain(h, mux.middlewares...)
+}
+
+func (mux *HTTPServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	mux.handler.ServeHTTP(w, r)
+}
+
+// HandlerChain 使用中间件包装 handler
+func HandlerChain(h http.Handler, middlewares ...HTTPMiddleware) http.Handler {
+	size := len(middlewares)
+	for i := range middlewares {
+		h = middlewares[size-1-i](h)
 	}
 	return h
-}
-
-func (mux *ServeMux) thenFunc(fn http.HandlerFunc) http.Handler {
-	if fn == nil {
-		return mux.then(nil)
-	}
-	return mux.then(fn)
-}
-
-func (mux *ServeMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	mux.then(mux.ServeMux).ServeHTTP(w, r)
 }

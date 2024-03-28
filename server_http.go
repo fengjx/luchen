@@ -32,7 +32,7 @@ var (
 type HTTPServer struct {
 	*baseServer
 	httpServer *http.Server
-	router     *ServeMux
+	router     *HTTPServeMux
 }
 
 // NewHTTPServer 创建 http server
@@ -51,7 +51,7 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 	if options.metadata == nil {
 		options.metadata = make(map[string]any)
 	}
-	mux := NewServeMux()
+	mux := NewHTTPServeMux()
 	httpServer := &http.Server{
 		Handler: mux,
 	}
@@ -143,7 +143,7 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 // HTTPHandler http 请求处理器接口
 type HTTPHandler interface {
 	// Bind 绑定路由
-	Bind(router *ServeMux)
+	Bind(router *HTTPServeMux)
 }
 
 // NewHTTPHandler 绑定 http 请求处理逻辑
