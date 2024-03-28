@@ -12,11 +12,11 @@ type PprofHandler struct {
 	Prefix string
 }
 
-func (h PprofHandler) Bind(router *ServeMux) {
+func (h PprofHandler) Bind(router *HTTPServeMux) {
 	h.routeRegister(router)
 }
 
-func (h PprofHandler) routeRegister(router *ServeMux) {
+func (h PprofHandler) routeRegister(router *HTTPServeMux) {
 	prefix := h.Prefix
 	if prefix == "" {
 		prefix = defaultPrefix
