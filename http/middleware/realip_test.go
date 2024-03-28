@@ -16,7 +16,7 @@ func TestXRealIP(t *testing.T) {
 	req.Header.Add("X-Real-IP", "100.100.100.100")
 	w := httptest.NewRecorder()
 
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 	r.Use(RealIP)
 
 	realIP := ""
@@ -43,7 +43,7 @@ func TestXForwardForIP(t *testing.T) {
 	}
 
 	for _, v := range xForwardedForIPs {
-		r := luchen.NewServeMux()
+		r := luchen.NewHTTPServeMux()
 		r.Use(RealIP)
 		req, _ := http.NewRequest("GET", "/", nil)
 		req.Header.Add("X-Forwarded-For", v)
@@ -73,7 +73,7 @@ func TestXForwardForXRealIPPrecedence(t *testing.T) {
 	req.Header.Add("X-Real-IP", "100.100.100.100")
 	w := httptest.NewRecorder()
 
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 	r.Use(RealIP)
 
 	realIP := ""
@@ -97,7 +97,7 @@ func TestInvalidIP(t *testing.T) {
 	req.Header.Add("X-Real-IP", "100.100.100.1000")
 	w := httptest.NewRecorder()
 
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 	r.Use(RealIP)
 
 	realIP := ""

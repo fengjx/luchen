@@ -77,7 +77,7 @@ func TestContentCharset(t *testing.T) {
 
 			var recorder = httptest.NewRecorder()
 
-			var r = luchen.NewServeMux()
+			var r = luchen.NewHTTPServeMux()
 			r.Use(ContentCharset(tt.inputContentCharset...))
 			r.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {})
 

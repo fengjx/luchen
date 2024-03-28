@@ -18,7 +18,7 @@ import (
 var testContent = []byte("Hello world!")
 
 func TestThrottleBacklog(t *testing.T) {
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 
 	r.Use(ThrottleBacklog(10, 50, time.Second*10))
 
@@ -59,7 +59,7 @@ func TestThrottleBacklog(t *testing.T) {
 }
 
 func TestThrottleClientTimeout(t *testing.T) {
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 
 	r.Use(ThrottleBacklog(10, 50, time.Second*10))
 
@@ -91,7 +91,7 @@ func TestThrottleClientTimeout(t *testing.T) {
 }
 
 func TestThrottleTriggerGatewayTimeout(t *testing.T) {
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 
 	r.Use(ThrottleBacklog(50, 100, time.Second*5))
 
@@ -147,7 +147,7 @@ func TestThrottleTriggerGatewayTimeout(t *testing.T) {
 }
 
 func TestThrottleMaximum(t *testing.T) {
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 
 	r.Use(ThrottleBacklog(10, 10, time.Second*5))
 

@@ -21,7 +21,7 @@ import (
 //		return r
 //	}
 func Profiler() http.Handler {
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 	r.Use(NoCache)
 
 	r.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {

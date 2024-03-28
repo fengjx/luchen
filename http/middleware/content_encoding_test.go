@@ -71,7 +71,7 @@ func TestContentEncodingMiddleware(t *testing.T) {
 			}
 
 			w := httptest.NewRecorder()
-			router := luchen.NewServeMux()
+			router := luchen.NewHTTPServeMux()
 			router.Use(middleware)
 			router.HandleFunc("POST /", func(w http.ResponseWriter, r *http.Request) {})
 

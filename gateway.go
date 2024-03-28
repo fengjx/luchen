@@ -164,7 +164,7 @@ func (g *Gateway) Start() error {
 		g.Unlock()
 		return err
 	}
-	router := NewServeMux()
+	router := NewHTTPServeMux()
 	router.Handle("/*", g)
 	server := &http.Server{
 		Handler: router,

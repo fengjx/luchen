@@ -6,8 +6,7 @@ toolchain go1.22.0
 
 require (
 	github.com/fengjx/go-halo v0.0.3-rc01
-	github.com/fengjx/luchen v1.0.1-rc03
-	github.com/go-chi/chi/v5 v5.0.11
+	github.com/fengjx/luchen v1.0.1-rc10
 	github.com/go-kit/kit v0.13.0
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.60.1

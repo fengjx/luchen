@@ -53,7 +53,7 @@ func TestRequestID(t *testing.T) {
 	for _, test := range tests {
 		w := httptest.NewRecorder()
 
-		r := luchen.NewServeMux()
+		r := luchen.NewHTTPServeMux()
 
 		RequestIDHeader = test.requestIDHeader
 

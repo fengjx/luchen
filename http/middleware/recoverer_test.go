@@ -16,7 +16,7 @@ import (
 func panickingHandler(http.ResponseWriter, *http.Request) { panic("foo") }
 
 func TestRecoverer(t *testing.T) {
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 
 	oldRecovererErrorWriter := recovererErrorWriter
 	defer func() { recovererErrorWriter = oldRecovererErrorWriter }()
@@ -54,7 +54,7 @@ func TestRecovererAbortHandler(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 	r.Use(Recoverer)
 
 	r.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {

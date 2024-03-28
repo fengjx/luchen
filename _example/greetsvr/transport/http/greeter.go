@@ -16,7 +16,7 @@ func newGreeterHandler() *greeterHandler {
 	return &greeterHandler{}
 }
 
-func (h *greeterHandler) Bind(router *luchen.ServeMux) {
+func (h *greeterHandler) Bind(router *luchen.HTTPServeMux) {
 	router.Handle("/hello/say-hello", h.sayHello())
 }
 
@@ -27,7 +27,7 @@ func (h *greeterHandler) sayHello() *httptransport.Server {
 	return luchen.NewHTTPHandler(
 		hello.GetInst().Endpoints.MakeSayHelloEndpoint(),
 		luchen.DecodeHTTPParamRequest[pb.HelloReq],
-		luchen.EncodeHTTPJSON(httpResponseWrapper),
+		luchen.EncodeHTTPJSONResponse(httpResponseWrapper),
 		options...,
 	)
 }

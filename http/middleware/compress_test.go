@@ -18,7 +18,7 @@ import (
 )
 
 func TestCompressor(t *testing.T) {
-	r := luchen.NewServeMux()
+	r := luchen.NewHTTPServeMux()
 
 	compressor := NewCompressor(5, "text/html", "text/css")
 	if len(compressor.encoders) != 0 || len(compressor.pooledEncoders) != 2 {

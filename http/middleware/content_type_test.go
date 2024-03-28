@@ -66,7 +66,7 @@ func TestContentType(t *testing.T) {
 
 			recorder := httptest.NewRecorder()
 
-			r := luchen.NewServeMux()
+			r := luchen.NewHTTPServeMux()
 			r.Use(AllowContentType(tt.allowedContentTypes...))
 			r.HandleFunc("POST /", func(w http.ResponseWriter, r *http.Request) {})
 
