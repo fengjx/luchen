@@ -34,8 +34,10 @@ func (mux *HTTPServeMux) Use(middlewares ...HTTPMiddleware) *HTTPServeMux {
 }
 
 // Sub 注册子路由
-func (mux *HTTPServeMux) Sub(prefix string, subMux *HTTPServeMux) {
-	mux.Handle(prefix+"/", http.StripPrefix(prefix, subMux))
+func (mux *HTTPServeMux) Sub(prefix string, fn func(sub *HTTPServeMux)) {
+	sub := NewHTTPServeMux()
+	fn(sub)
+	mux.Handle(prefix+"/", http.StripPrefix(prefix, sub))
 }
 
 func (mux *HTTPServeMux) then(h http.Handler) {

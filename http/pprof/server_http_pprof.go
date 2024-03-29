@@ -42,22 +42,22 @@ func (h Handler) routeRegister(router *luchen.HTTPServeMux) {
 	if prefix == "" {
 		prefix = defaultPrefix
 	}
-	mux := luchen.NewHTTPServeMux()
-	mux.HandleFunc("/", pprof.Index)
-	mux.HandleFunc("/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/profile", pprof.Profile)
-	mux.HandleFunc("/symbol", pprof.Symbol)
-	mux.HandleFunc("/trace", pprof.Trace)
+	router.Sub(prefix, func(sub *luchen.HTTPServeMux) {
+		sub.HandleFunc("/", pprof.Index)
+		sub.HandleFunc("/cmdline", pprof.Cmdline)
+		sub.HandleFunc("/profile", pprof.Profile)
+		sub.HandleFunc("/symbol", pprof.Symbol)
+		sub.HandleFunc("/trace", pprof.Trace)
 
-	mux.Handle("/vars", expvar.Handler())
-	mux.Handle("/allocs", pprof.Handler("allocs"))
-	mux.Handle("/block", pprof.Handler("block"))
-	mux.Handle("/goroutine", pprof.Handler("goroutine"))
-	mux.Handle("/heap", pprof.Handler("heap"))
-	mux.Handle("/mutex", pprof.Handler("mutex"))
-	mux.Handle("/threadcreate", pprof.Handler("threadcreate"))
-	if len(h.creds) > 0 {
-		mux.Use(middleware.BasicAuth("pprof", h.creds))
-	}
-	router.Sub(prefix, mux)
+		sub.Handle("/vars", expvar.Handler())
+		sub.Handle("/allocs", pprof.Handler("allocs"))
+		sub.Handle("/block", pprof.Handler("block"))
+		sub.Handle("/goroutine", pprof.Handler("goroutine"))
+		sub.Handle("/heap", pprof.Handler("heap"))
+		sub.Handle("/mutex", pprof.Handler("mutex"))
+		sub.Handle("/threadcreate", pprof.Handler("threadcreate"))
+		if len(h.creds) > 0 {
+			sub.Use(middleware.BasicAuth("pprof", h.creds))
+		}
+	})
 }
