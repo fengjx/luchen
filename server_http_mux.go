@@ -1,10 +1,13 @@
 package luchen
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // HTTPMiddleware http 请求中间件
 type HTTPMiddleware func(http.Handler) http.Handler
 
+// HTTPServeMux http 路由
 type HTTPServeMux struct {
 	*http.ServeMux
 	middlewares []HTTPMiddleware
@@ -14,17 +17,25 @@ type HTTPServeMux struct {
 // NewHTTPServeMux 创建一个 mux
 func NewHTTPServeMux() *HTTPServeMux {
 	mux := http.NewServeMux()
-	return &HTTPServeMux{
+	router := &HTTPServeMux{
 		ServeMux: mux,
 	}
+	router.then(mux)
+	return router
 }
 
+// Use 注册中间件
 func (mux *HTTPServeMux) Use(middlewares ...HTTPMiddleware) *HTTPServeMux {
 	for _, middleware := range middlewares {
 		mux.middlewares = append(mux.middlewares, middleware)
 	}
 	mux.then(mux.ServeMux)
 	return mux
+}
+
+// Sub 注册子路由
+func (mux *HTTPServeMux) Sub(prefix string, subMux *HTTPServeMux) {
+	mux.Handle(prefix+"/", http.StripPrefix(prefix, subMux))
 }
 
 func (mux *HTTPServeMux) then(h http.Handler) {
