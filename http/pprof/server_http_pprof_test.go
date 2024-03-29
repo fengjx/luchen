@@ -15,7 +15,7 @@ func TestPprofHandler(t *testing.T) {
 		luchen.WithServiceName(serviceName),
 		luchen.WithServerAddr(":8080"),
 	).Handler(
-		pprof.NewPprofHandler().BasicAuth(map[string]string{
+		pprof.NewHandler().BasicAuth(map[string]string{
 			"foo": "bar",
 		}),
 	)

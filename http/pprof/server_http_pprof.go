@@ -1,6 +1,7 @@
 package pprof
 
 import (
+	"expvar"
 	"net/http/pprof"
 
 	"github.com/fengjx/luchen"
@@ -16,7 +17,7 @@ type Handler struct {
 	creds  map[string]string
 }
 
-func NewPprofHandler() Handler {
+func NewHandler() Handler {
 	return Handler{}
 }
 
@@ -47,6 +48,8 @@ func (h Handler) routeRegister(router *luchen.HTTPServeMux) {
 	mux.HandleFunc("/profile", pprof.Profile)
 	mux.HandleFunc("/symbol", pprof.Symbol)
 	mux.HandleFunc("/trace", pprof.Trace)
+
+	mux.Handle("/vars", expvar.Handler())
 	mux.Handle("/allocs", pprof.Handler("allocs"))
 	mux.Handle("/block", pprof.Handler("block"))
 	mux.Handle("/goroutine", pprof.Handler("goroutine"))
