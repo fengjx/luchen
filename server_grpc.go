@@ -18,6 +18,11 @@ import (
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 )
 
+type (
+	// GRPCTransportServer grpc transport server
+	GRPCTransportServer = grpctransport.Server
+)
+
 // GRPCServer grpc server 实现
 type GRPCServer struct {
 	*baseServer
@@ -102,7 +107,7 @@ func NewGRPCHandler(
 	dec grpctransport.DecodeRequestFunc,
 	enc grpctransport.EncodeResponseFunc,
 	options ...grpctransport.ServerOption,
-) *grpctransport.Server {
+) *GRPCTransportServer {
 	opts := []grpctransport.ServerOption{
 		grpctransport.ServerBefore(func(ctx context.Context, md metadata.MD) context.Context {
 			ctx, traceID := TraceGRPC(ctx, md)

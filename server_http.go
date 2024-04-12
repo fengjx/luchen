@@ -19,6 +19,9 @@ import (
 type (
 	httpRequestHeaderKey struct{}
 	httpRequestURLKey    struct{}
+
+	// HTTPTransportServer go-kit http transport server
+	HTTPTransportServer = httptransport.Server
 )
 
 var (
@@ -26,6 +29,9 @@ var (
 	HTTPRequestHeaderCtxKey = httpRequestHeaderKey{}
 	// HTTPRequestURLCtxKey context http url
 	HTTPRequestURLCtxKey = httpRequestURLKey{}
+
+	// NopHTTPRequestDecoder 不需要解析请求参数
+	NopHTTPRequestDecoder = httptransport.NopRequestDecoder
 )
 
 // HTTPServer http server 实现
@@ -152,7 +158,7 @@ func NewHTTPHandler(
 	dec httptransport.DecodeRequestFunc,
 	enc httptransport.EncodeResponseFunc,
 	options ...httptransport.ServerOption,
-) *httptransport.Server {
+) *HTTPTransportServer {
 	options = append(options, httptransport.ServerBefore(contextServerBefore))
 	return httptransport.NewServer(
 		e,
