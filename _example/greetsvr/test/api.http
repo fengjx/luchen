@@ -1,0 +1,4 @@
+
+### say-hello
+POST http://localhost:8080/hello/say-hello?name=fengjx
+

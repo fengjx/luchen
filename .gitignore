@@ -19,3 +19,23 @@
 
 # Go workspace file
 go.work
+
+.idea
+.vscode
+
+logs
+
+/coverage
+/src/client/shared.ts
+/src/node/shared.ts
+*.log
+*.tgz
+.DS_Store
+.temp
+.vite_opt_cache
+dist
+cache
+temp
+examples-temp
+node_modules
+pnpm-global

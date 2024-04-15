@@ -1,0 +1,14 @@
+{
+  "name": "docs",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev --port 5176",
+    "build": "vitepress build",
+    "preview": "vitepress preview --port 5176"
+  },
+  "devDependencies": {
+    "markdown-it-mathjax3": "^4.3.2",
+    "vitepress": "1.0.0-rc.36",
+    "vue": "^3.4.7"
+  }
+}
