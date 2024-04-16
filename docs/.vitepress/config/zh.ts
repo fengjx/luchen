@@ -13,7 +13,7 @@ export const zh = defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/fengjx/luchen/main/docs/:path',
+      pattern: 'https://github.com/fengjx/luchen/tree/master/docs/:path',
       text: '在 GitHub 上编辑此页面'
     },
 
@@ -81,7 +81,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: 'HTTP server', link: 'http-server' },
         { text: 'gRPC server', link: 'grpc-server' },
         { text: '服务注册', link: 'register' },
-        { text: 'gateway', link: 'gateway' },
+        { text: 'gateway（alpha）', link: 'gateway' },
       ]
     },
     {

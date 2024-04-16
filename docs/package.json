@@ -2,7 +2,7 @@
   "name": "docs",
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev --port 5176",
+    "dev": "vitepress dev --port 5176 --open",
     "build": "vitepress build",
     "preview": "vitepress preview --port 5176"
   },
