@@ -7,7 +7,7 @@ titleTemplate: 基于go-kit封装的微服务框架
 hero:
   name: luchen
   text: 基于 go-kit 封装的微服务框架
-  tagline: 开始这个项目的时候，我女儿刚出生，取名【路辰】，所以将项目名命名为 luchen。
+  tagline: 开箱即用，封装了工程实践中常用的组件和工具 
   actions:
     - theme: brand
       text: 快速开始
@@ -27,7 +27,7 @@ features:
     title: 微服务
     details: 在单体服务的基础上，只需要增加一个 Register 即可完成服务注册。
   - icon: ⚙
-    title: 网关支持
+    title: 网关支持（alpha）
     details: 实现了支持静态路由和动态服务发现网关服务，通过插件化很容易对功能进行扩展。
 ---
 <style>
