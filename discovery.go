@@ -16,6 +16,9 @@ import (
 	"github.com/go-kit/kit/sd"
 	"github.com/go-kit/kit/sd/etcdv3"
 	"go.uber.org/zap"
+
+	"github.com/fengjx/luchen/env"
+	"github.com/fengjx/luchen/log"
 )
 
 const (
@@ -51,7 +54,7 @@ func (r *EtcdV3Registrar) Register() {
 		svr := server
 		go func() {
 			if err := svr.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				RootLogger().Panic(
+				log.Panic(
 					"server start err",
 					zap.String("name", svr.GetServiceInfo().Name),
 					zap.Error(err),
@@ -71,10 +74,10 @@ func (r *EtcdV3Registrar) register(serviceInfo *ServiceInfo) {
 	registar := etcdv3.NewRegistrar(NewDefaultEtcdV3Client(), etcdv3.Service{
 		Key:   key,
 		Value: value,
-	}, NewKitLogger(fmt.Sprintf("%s-%s", "register", serviceInfo.Name), logger.InfoLevel))
+	}, log.NewKitLogger(fmt.Sprintf("%s-%s", "register", serviceInfo.Name), logger.InfoLevel))
 	r.delegate[serviceInfo.ID] = registar
 	registar.Register()
-	RootLogger().Infof("server[%s, %s] register", serviceInfo.Name, serviceInfo.ID)
+	log.Infof("server[%s, %s] register", serviceInfo.Name, serviceInfo.ID)
 }
 
 // Deregister 摘除服务注册信息并停止服务
@@ -84,13 +87,11 @@ func (r *EtcdV3Registrar) Deregister() {
 		r.deregister(server.GetServiceInfo())
 		// 停止服务
 		if err := server.Stop(); err != nil {
-			RootLogger().Error(
-				"server stop err",
+			log.Error("server stop err",
 				zap.String("name", server.GetServiceInfo().Name),
 				zap.Error(err))
 		}
-		RootLogger().Info(
-			"server stop gracefully",
+		log.Info("server stop gracefully",
 			zap.String("name", server.GetServiceInfo().Name),
 		)
 	}
@@ -99,13 +100,13 @@ func (r *EtcdV3Registrar) Deregister() {
 func (r *EtcdV3Registrar) deregister(serviceInfo *ServiceInfo) {
 	// 摘除服务节点
 	r.delegate[serviceInfo.ID].Deregister()
-	RootLogger().Infof("server[%s, %s] deregister", serviceInfo.Name, serviceInfo.ID)
+	log.Infof("server[%s, %s] deregister", serviceInfo.Name, serviceInfo.ID)
 }
 
 // NewDefaultEtcdV3Client 创建默认 etcdv3.Client
 // etcd 地址通过 GetDefaultEtcdAddress 方法获得
 func NewDefaultEtcdV3Client() etcdv3.Client {
-	return MustNewEtcdV3Client(GetDefaultEtcdAddress())
+	return MustNewEtcdV3Client(env.GetDefaultEtcdAddress())
 }
 
 // MustNewEtcdV3Client 创建 etcdv3.Client
@@ -116,7 +117,7 @@ func MustNewEtcdV3Client(address []string) etcdv3.Client {
 	}
 	client, err := etcdv3.NewClient(context.Background(), address, options)
 	if err != nil {
-		RootLogger().Panic("new etcdv3 client err", zap.Error(err))
+		log.Panic("new etcdv3 client err", zap.Error(err))
 	}
 	return client
 }
@@ -149,9 +150,9 @@ func GetEtcdV3Selector(serviceName string) *EtcdV3Selector {
 	defer lock.Unlock()
 	client := NewDefaultEtcdV3Client()
 	prefix := path.Join(servicePrefix, serviceName)
-	instancer, err := etcdv3.NewInstancer(client, prefix, NewKitLogger("selector-instancer", logger.InfoLevel))
+	instancer, err := etcdv3.NewInstancer(client, prefix, log.NewKitLogger("selector-instancer", logger.InfoLevel))
 	if err != nil {
-		RootLogger().Panic("new etcdv3 instancer err", zap.Error(err))
+		log.Panic("new etcdv3 instancer err", zap.Error(err))
 	}
 	s := &EtcdV3Selector{
 		serviceName:       serviceName,
@@ -182,7 +183,7 @@ func (s *EtcdV3Selector) update(event sd.Event) {
 		s.updateCache(event.Instances)
 		return
 	}
-	RootLogger().Error("receive err event", zap.Error(event.Err))
+	log.Error("receive err event", zap.Error(event.Err))
 	s.invalidateCache()
 }
 
@@ -193,7 +194,7 @@ func (s *EtcdV3Selector) invalidateCache() {
 
 // updateCache 更新节点缓存，因为没有加锁，所以不要直接调用这个方法，统一通过 update 方法来更新
 func (s *EtcdV3Selector) updateCache(instances []string) {
-	RootLogger().Info("instance update", zap.Any("instances", instances))
+	log.Info("instance update", zap.Any("instances", instances))
 	s.instances = instances
 	// 增加缓存失效时间
 	s.invalidateDeadline = time.Now().Add(s.invalidateTimeout)
@@ -201,13 +202,13 @@ func (s *EtcdV3Selector) updateCache(instances []string) {
 	for _, instance := range instances {
 		u, err := url.Parse(instance)
 		if err != nil {
-			RootLogger().Error("parse instance err", zap.String("instance", instance), zap.Error(err))
+			log.Error("parse instance err", zap.String("instance", instance), zap.Error(err))
 			continue
 		}
 		info := &ServiceInfo{}
 		err = json.FromJson(u.Query().Get("info"), info)
 		if err != nil {
-			RootLogger().Error("decode instance err", zap.String("instance", instance), zap.Error(err))
+			log.Error("decode instance err", zap.String("instance", instance), zap.Error(err))
 			continue
 		}
 		services = append(services, info)

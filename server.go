@@ -9,6 +9,8 @@ import (
 
 	"github.com/fengjx/go-halo/hook"
 	"go.uber.org/zap"
+
+	"github.com/fengjx/luchen/log"
 )
 
 // Protocol 服务协议
@@ -124,7 +126,7 @@ func start(ctx context.Context, svrs ...Server) {
 		svr := server
 		go func() {
 			if err := svr.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				RootLogger().Panic(
+				log.Panic(
 					"server start err",
 					zap.String("server_name", svr.GetServiceInfo().Name),
 					zap.Error(err),
@@ -147,9 +149,9 @@ func Stop() {
 	for _, server := range servers {
 		// 停止服务
 		if err := server.Stop(); err != nil {
-			RootLogger().Error("server stop err", zap.Error(err))
+			log.Error("server stop err", zap.Error(err))
 		}
-		RootLogger().Info(
+		log.Info(
 			"server stop gracefully",
 			zap.String("name", server.GetServiceInfo().Name),
 		)

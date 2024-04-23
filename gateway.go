@@ -15,6 +15,8 @@ import (
 	"github.com/golang/groupcache/lru"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
+
+	"github.com/fengjx/luchen/log"
 )
 
 type (
@@ -106,7 +108,7 @@ func NewGateway(cfg GatewayConfig, opts ...GatewayOption) *Gateway {
 	// 静态路由初始化
 	for _, route := range cfg.Routes {
 		if route.Protocol != "http" {
-			RootLogger().Panic("route protocol not support now", zap.String("protocol", route.Protocol))
+			log.Panic("route protocol not support now", zap.String("protocol", route.Protocol))
 			continue
 		}
 		routes = append(routes, &httpRoute{
@@ -179,7 +181,7 @@ func (g *Gateway) Start() error {
 	g.address = fmt.Sprintf("%s:%s", host, port)
 	g.metadata["ts"] = time.Now().UnixMilli()
 	g.started = true
-	RootLogger().Infof("gateway server[%s, %s] start", g.serviceName, g.id)
+	log.Infof("gateway server[%s, %s] start", g.serviceName, g.id)
 	g.Unlock()
 	return g.server.Serve(ln)
 }
@@ -192,7 +194,7 @@ func (g *Gateway) Stop() error {
 		return nil
 	}
 	g.RUnlock()
-	RootLogger().Info("gateway server stop")
+	log.Info("gateway server stop")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	return g.server.Shutdown(ctx)
@@ -201,8 +203,7 @@ func (g *Gateway) Stop() error {
 // ServeHTTP 重新定义 request context
 func (g *Gateway) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	log := Logger(ctx)
-	ctx = WithLogger(ctx, log)
+	ctx = log.WithLogger(ctx)
 	req = req.WithContext(ctx)
 	g.ReverseProxy.ServeHTTP(rw, req)
 }
@@ -217,7 +218,7 @@ func (g *Gateway) director(req *http.Request) {
 		}
 		req = r
 	}
-	log := Logger(ctx).With(zap.String("trace_id", TraceIDOrNew(ctx)))
+	ctx = log.WithLogger(ctx, zap.String("trace_id", TraceIDOrNew(ctx)))
 	var ro *httpRoute
 	// 静态路由匹配
 	for _, route := range g.routes {
@@ -227,14 +228,14 @@ func (g *Gateway) director(req *http.Request) {
 		}
 	}
 	if ro == nil {
-		log.Warn("no route match", zap.String("path", req.URL.Path))
+		log.WarnCtx(ctx, "no route match", zap.String("path", req.URL.Path))
 		return
 	}
 	upstream := ro.upstream
 	if upstream == "" {
 		serviceInfo, err := g.selectServiceInfo(ro)
 		if err != nil {
-			log.Error("select service err",
+			log.ErrorCtx(ctx, "select service err",
 				zap.String("service_name", ro.serviceName),
 				zap.Error(err),
 			)
@@ -250,12 +251,12 @@ func (g *Gateway) director(req *http.Request) {
 	}
 	req.URL.Scheme = ro.protocol
 	req.URL.Host = upstream
-	reg := g.getRewriteRegexp(ro.rewriteRegex)
+	reg := g.getRewriteRegexp(ctx, ro.rewriteRegex)
 	// url 重写
 	if reg != nil {
 		req.URL.Path = reg.ReplaceAllString(req.URL.Path, "$1")
 	}
-	log.Info("upstream info",
+	log.InfoCtx(ctx, "upstream info",
 		zap.String("service_name", ro.serviceName),
 		zap.String("upstream", upstream),
 		zap.String("path", req.URL.Path),
@@ -290,7 +291,7 @@ func (g *Gateway) modifyResponse(res *http.Response) error {
 }
 
 func (g *Gateway) errorHandler(w http.ResponseWriter, req *http.Request, err error) {
-	RootLogger().Error("handler err", zap.Error(err))
+	log.ErrorCtx(req.Context(), "handler err", zap.Error(err))
 	ctx := req.Context()
 	for _, plugin := range g.plugins {
 		plugin.ErrorHandler(ctx, w, req, err)
@@ -315,7 +316,7 @@ func (g *Gateway) match(req *http.Request, route *httpRoute) *httpRoute {
 			return route
 		}
 	}
-	RootLogger().Warn("route pattern not support", zap.String("pattern", route.pattern))
+	log.WarnCtx(req.Context(), "route pattern not support", zap.String("pattern", route.pattern))
 	return nil
 }
 
@@ -332,7 +333,7 @@ func (g *Gateway) selectServiceInfo(r *httpRoute) (*ServiceInfo, error) {
 	return serviceInfo, nil
 }
 
-func (g *Gateway) getRewriteRegexp(rewriteRegex string) *regexp.Regexp {
+func (g *Gateway) getRewriteRegexp(ctx context.Context, rewriteRegex string) *regexp.Regexp {
 	if rewriteRegex == "" {
 		return nil
 	}
@@ -344,7 +345,7 @@ func (g *Gateway) getRewriteRegexp(rewriteRegex string) *regexp.Regexp {
 		var err error
 		reg, err = regexp.Compile(rewriteRegex)
 		if err != nil {
-			RootLogger().Error("regexp compile error", zap.String("regexp", rewriteRegex), zap.Error(err))
+			log.ErrorCtx(ctx, "regexp compile error", zap.String("regexp", rewriteRegex), zap.Error(err))
 		} else {
 			rewriteRegexpCache.Add(rewriteRegex, reg)
 		}

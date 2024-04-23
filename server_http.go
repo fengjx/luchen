@@ -14,6 +14,9 @@ import (
 	"go.uber.org/zap"
 
 	httptransport "github.com/go-kit/kit/transport/http"
+
+	"github.com/fengjx/luchen/env"
+	"github.com/fengjx/luchen/log"
 )
 
 type (
@@ -52,7 +55,7 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 		options.addr = defaultAddress
 	}
 	if options.serviceName == "" {
-		options.serviceName = fmt.Sprintf("%s-%s", GetAppName(), "http-server")
+		options.serviceName = fmt.Sprintf("%s-%s", env.GetAppName(), "http-server")
 	}
 	if options.metadata == nil {
 		options.metadata = make(map[string]any)
@@ -93,7 +96,7 @@ func (s *HTTPServer) Start() error {
 	s.address = fmt.Sprintf("%s:%s", host, port)
 	s.metadata["ts"] = time.Now().UnixMilli()
 	s.started = true
-	RootLogger().Infof("http server[%s, %s, %s] start", s.serviceName, s.address, s.id)
+	log.Infof("http server[%s, %s, %s] start", s.serviceName, s.address, s.id)
 	s.Unlock()
 	return s.httpServer.Serve(ln)
 }
@@ -139,9 +142,7 @@ func (s *HTTPServer) Static(prefix string, dir string) *HTTPServer {
 func TraceHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r, traceID := TraceHTTPRequest(r)
-		logger := Logger(r.Context())
-		logger = logger.With(zap.String("traceId", traceID))
-		ctx := WithLogger(r.Context(), logger)
+		ctx := log.WithLogger(r.Context(), zap.String("traceId", traceID))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -181,11 +182,10 @@ func contextServerBefore(ctx context.Context, req *http.Request) context.Context
 
 // DecodeHTTPParamRequest 解析 http request query 和 form 参数
 func DecodeHTTPParamRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
-	logger := Logger(ctx)
 	req := new(T)
 	err := ShouldBind(r, req)
 	if err != nil {
-		logger.Error("decode request err", zap.Error(err))
+		log.ErrorCtx(ctx, "decode request err", zap.Error(err))
 		errn := &Errno{
 			Code:     4,
 			HTTPCode: http.StatusBadRequest,
@@ -198,11 +198,10 @@ func DecodeHTTPParamRequest[T any](ctx context.Context, r *http.Request) (interf
 
 // DecodeHTTPJSONRequest 解析 http request body json 参数
 func DecodeHTTPJSONRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
-	logger := Logger(ctx)
 	req := new(T)
 	err := ShouldBindJSON(r, req)
 	if err != nil {
-		logger.Error("decode request err", zap.Error(err))
+		log.ErrorCtx(ctx, "decode request err", zap.Error(err))
 		errn := &Errno{
 			Code:     4,
 			HTTPCode: http.StatusBadRequest,

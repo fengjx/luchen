@@ -1,11 +1,10 @@
-package luchen
+package env
 
 import (
 	"os"
 	"path/filepath"
 
 	"github.com/fengjx/go-halo/utils"
-	"go.uber.org/zap"
 )
 
 var (
@@ -17,7 +16,7 @@ var (
 func init() {
 	appPath, err := os.Getwd()
 	if err != nil {
-		RootLogger().Panic("os.Getwd() return err", zap.Error(err))
+		panic(err)
 	}
 	_appPath = appPath
 }

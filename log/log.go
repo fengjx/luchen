@@ -1,10 +1,9 @@
-package luchen
+package log
 
 import (
 	"context"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/fengjx/go-halo/halo"
@@ -13,8 +12,8 @@ import (
 	"github.com/fengjx/go-halo/utils"
 	kitlog "github.com/go-kit/log"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/fengjx/luchen/env"
 )
 
 type (
@@ -31,7 +30,7 @@ var (
 
 func init() {
 	level := logger.DebugLevel
-	if IsProd() {
+	if env.IsProd() {
 		level = logger.InfoLevel
 	}
 	logDir := os.Getenv("LUCHEN_LOG_DIR")
@@ -40,7 +39,7 @@ func init() {
 		_log.SetLevel(level)
 		return
 	}
-	if IsLocal() {
+	if env.IsLocal() {
 		_log = logger.NewConsole()
 		_log.SetLevel(level)
 		return
@@ -50,7 +49,7 @@ func init() {
 }
 
 func createFileLog(level logger.Level, logDir string) logger.Logger {
-	app := GetAppName()
+	app := env.GetAppName()
 	targetDir := filepath.Join(logDir, app)
 	err := os.MkdirAll(targetDir, os.ModePerm)
 	if err != nil {
@@ -93,7 +92,7 @@ func (l kitLogger) Log(kv ...interface{}) error {
 
 // NewKitLogger returns a Go kit log.Logger that sends
 func NewKitLogger(name string, level logger.Level) kitlog.Logger {
-	targetLog := RootLogger().With(zap.String("name", name))
+	targetLog := _log.With(zap.String("name", name))
 	targetLog.SetLevel(level)
 	var klog kitLogger
 	switch level {
@@ -117,60 +116,16 @@ func NewKitLogger(name string, level logger.Level) kitlog.Logger {
 	return klog
 }
 
-// RootLogger 返回默认 logger
-func RootLogger() logger.Logger {
-	return _log
-}
-
-// Logger 从 context 获得 logger
-func Logger(ctx context.Context) logger.Logger {
+func GetLogger(ctx context.Context) logger.Logger {
 	if lclog, ok := ctx.Value(LoggerCtxKey).(logger.Logger); ok {
 		return lclog
 	}
 	goid := halo.GetGoID()
 	lclog := _log.With(zap.Int64("goid", goid))
-	ctx = WithLogger(ctx, lclog)
 	return lclog
 }
 
 // WithLogger context 注入 logger
-func WithLogger(ctx context.Context, logger logger.Logger) context.Context {
-	return context.WithValue(ctx, LoggerCtxKey, logger)
-}
-
-type accessLogImpl struct {
-	log *zap.Logger
-}
-
-func (impl accessLogImpl) Print(fields map[string]any) {
-	var zf []zap.Field
-	for field, value := range fields {
-		zf = append(zf, zap.Any(field, value))
-	}
-	impl.log.Info("", zf...)
-}
-
-// NewAccessLog 创建一个 AccessLog
-func NewAccessLog(maxSizeMB int, maxBackups int, maxAge int) AccessLog {
-	w := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   path.Join(GetLogDir(), "access.log"),
-		MaxSize:    maxSizeMB,
-		MaxBackups: maxBackups,
-		MaxAge:     maxAge,
-	})
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.TimeKey = "time"
-	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000")
-	encoderConfig.FunctionKey = ""
-	encoderConfig.LevelKey = ""
-	encoderConfig.MessageKey = ""
-	encoderConfig.NameKey = ""
-	encoderConfig.CallerKey = ""
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		w,
-		zapcore.InfoLevel,
-	)
-	l := zap.New(core, zap.AddCaller())
-	return &accessLogImpl{log: l}
+func WithLogger(ctx context.Context, fields ...zap.Field) context.Context {
+	return context.WithValue(ctx, LoggerCtxKey, GetLogger(ctx).With(fields...))
 }

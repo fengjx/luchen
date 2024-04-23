@@ -16,6 +16,9 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	grpctransport "github.com/go-kit/kit/transport/grpc"
+
+	"github.com/fengjx/luchen/env"
+	"github.com/fengjx/luchen/log"
 )
 
 type (
@@ -40,7 +43,7 @@ func NewGRPCServer(opts ...ServerOption) *GRPCServer {
 		options.addr = defaultAddress
 	}
 	if options.serviceName == "" {
-		options.serviceName = fmt.Sprintf("%s-%s", GetAppName(), "grpc-server")
+		options.serviceName = fmt.Sprintf("%s-%s", env.GetAppName(), "grpc-server")
 	}
 	if options.metadata == nil {
 		options.metadata = make(map[string]any)
@@ -75,7 +78,7 @@ func (s *GRPCServer) Start() error {
 	s.address = fmt.Sprintf("%s:%s", host, port)
 	s.metadata["ts"] = time.Now().UnixMilli()
 	s.started = true
-	RootLogger().Infof("grpc server[%s, %s, %s] start", s.serviceName, s.address, s.id)
+	log.Infof("grpc server[%s, %s, %s] start", s.serviceName, s.address, s.id)
 	s.Unlock()
 	return s.server.Serve(ln)
 }
@@ -111,9 +114,7 @@ func NewGRPCHandler(
 	opts := []grpctransport.ServerOption{
 		grpctransport.ServerBefore(func(ctx context.Context, md metadata.MD) context.Context {
 			ctx, traceID := TraceGRPC(ctx, md)
-			logger := Logger(ctx)
-			logger = logger.With(zap.String("traceId", traceID))
-			ctx = WithLogger(ctx, logger)
+			ctx = log.WithLogger(ctx, zap.String("traceId", traceID))
 			ctx = metadata.NewOutgoingContext(ctx, md)
 			return ctx
 		}),
@@ -139,8 +140,7 @@ func NewLogGRPCErrorHandler() *LogGRPCErrorHandler {
 
 // Handle 统一错误处理
 func (h *LogGRPCErrorHandler) Handle(ctx context.Context, err error) {
-	logger := Logger(ctx)
-	logger.Error("handle grpc err", zap.Error(err))
+	log.ErrorCtx(ctx, "handle grpc err", zap.Error(err))
 }
 
 // DecodePB protobuf 解码

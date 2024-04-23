@@ -13,6 +13,8 @@ import (
 	"github.com/fengjx/go-halo/httpc"
 	"github.com/samber/lo"
 	"go.uber.org/zap"
+
+	"github.com/fengjx/luchen/log"
 )
 
 var (
@@ -95,7 +97,7 @@ func (c *HTTPClient) Call(ctx context.Context, req *HTTPRequest) (*HTTPResponse,
 				break
 			}
 			if lo.Contains(retryHTTPCode, response.StatusCode()) {
-				RootLogger().Warn("retry http call",
+				log.WarnCtx(ctx, "retry http call",
 					zap.String("service_name", c.serviceName),
 					zap.Any("req", req),
 				)
