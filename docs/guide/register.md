@@ -18,7 +18,7 @@ registrar.Deregister()
 etcd 地址读取方式
 
 1. 通过环境变量`LUCHEN_ETCD_ADDRESS`设置
-2. 调用`luchen.SetDefaultEtcdAddress(etcdAddrs)`
+2. 调用`env.SetDefaultEtcdAddress(etcdAddrs)`
 
 详细可以查看源码[env.go](https://github.com/fengjx/luchen/blob/dev/env.go)
 

@@ -75,7 +75,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       ]
     },
     {
-      text: '服务',
+      text: '服务端',
       collapsed: false,
       items: [
         { text: 'HTTP server', link: 'http-server' },
