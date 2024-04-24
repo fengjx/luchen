@@ -7,11 +7,12 @@ import (
 	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 
 	"github.com/fengjx/luchen"
+	"github.com/fengjx/luchen/env"
 )
 
 func init() {
-	if luchen.IsLocal() {
-		luchen.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
+	if env.IsLocal() {
+		env.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
 	}
 }
 
