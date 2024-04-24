@@ -7,19 +7,21 @@ import (
 
 	"github.com/fengjx/go-halo/fs"
 	"github.com/fengjx/luchen"
+	"github.com/fengjx/luchen/env"
+	"github.com/fengjx/luchen/log"
 	"go.uber.org/zap"
 )
 
 func init() {
-	if luchen.IsLocal() {
-		luchen.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
+	if env.IsLocal() {
+		env.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
 	}
 }
 
 func main() {
 	configFile, err := fs.Lookup("gateway.yaml", 3)
 	if err != nil {
-		luchen.RootLogger().Panic("config file not found", zap.Error(err))
+		log.Panic("config file not found", zap.Error(err))
 	}
 	config := luchen.MustLoadConfig[luchen.GatewayConfig](configFile)
 	gateway := luchen.NewGateway(

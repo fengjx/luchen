@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/fengjx/go-halo/fs"
+	"github.com/fengjx/luchen/log"
 
 	"github.com/fengjx/luchen"
 )
@@ -41,7 +42,7 @@ func init() {
 	if configFile == "" {
 		confFile, err := fs.Lookup("conf/app.yaml", 3)
 		if err != nil {
-			luchen.RootLogger().Panic("config file not found")
+			log.Panic("config file not found")
 		}
 		configFile = confFile
 	}

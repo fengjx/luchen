@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/fengjx/go-halo/json"
+	"github.com/fengjx/luchen/log"
 	"go.uber.org/zap"
 
 	"github.com/fengjx/luchen"
@@ -31,16 +32,14 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 		Msg:  "ok",
 		Data: response,
 	}
-	logger := luchen.Logger(ctx)
-	logger.Info("http response", zap.Any("data", res))
+	log.InfoCtx(ctx, "http response", zap.Any("data", res))
 	w.Header().Set("Content-Type", "application/json")
 	return json.NewEncoder(w).Encode(res)
 }
 
 // 统一异常处理
 func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
-	logger := luchen.Logger(ctx)
-	logger.Error("handler error", zap.Error(err))
+	log.ErrorCtx(ctx, "handler error", zap.Error(err))
 	httpCode := 500
 	msg := luchen.ErrSystem.Msg
 	var errn *luchen.Errno
@@ -56,6 +55,6 @@ func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
 	}
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
-		logger.Error("write error msg fail", zap.Error(err))
+		log.ErrorCtx(ctx, "write error msg fail", zap.Error(err))
 	}
 }
