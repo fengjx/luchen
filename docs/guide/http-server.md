@@ -50,10 +50,9 @@ func (h *helloHandler) Bind(router *luchen.HTTPServeMux) {
     router.Handle("/say-hello", h.sayHello())
 }
 
-// 端点绑定，端点的定义在下面说明
 func (h *helloHandler) sayHello() *httptransport.Server {
-    return httptransport.NewServer(
-        makeSayHelloEndpoint(),
+    return luchen.NewHTTPTransportServer(
+        makeSayHelloEndpoint(), // 端点绑定，端点的定义在下面说明
         decodeSayHello,
         encodeSayHello,
     )
@@ -123,12 +122,11 @@ func encodeSayHello(_ context.Context, w http.ResponseWriter, resp interface{}) 
 }
 ```
 
-## 参数解析
+## 参数编解码
 
-`luchen` 内置了一些 http 协议的请求和响应参数编解码方法，如不满足需求，可以自己实现编解码接口。
+通过编解码处理将不同协议转换为统一的结构体，交给 endpoint 处理。 
 
-
-接口定义
+接口定义在：<https://github.com/go-kit/kit/blob/master/transport/http/encode_decode.go>
 ```go
 // http 请求参数解码
 type DecodeRequestFunc func(context.Context, *http.Request) (request interface{}, err error)
@@ -136,6 +134,8 @@ type DecodeRequestFunc func(context.Context, *http.Request) (request interface{}
 // http 响应参数编码
 type EncodeRequestFunc func(context.Context, *http.Request, interface{}) error
 ```
+
+`luchen` 内置了一些 http 协议的请求和响应参数编解码方法，如不满足需求，可以自己实现编解码接口。
 
 解码
 ```go
@@ -148,9 +148,9 @@ func DecodeJSONRequest[T any](ctx context.Context, r *http.Request) (interface{}
 
 编码
 ```go
-// CreateHTTPJSONEncoder http 返回json数据
+// EncodeHTTPJSONResponse http 返回json数据
 // wrapper 对数据重新包装
-func CreateHTTPJSONEncoder(wrapper DataWrapper) httptransport.EncodeResponseFunc
+func EncodeHTTPJSONResponse(wrapper DataWrapper) httptransport.EncodeResponseFunc
 ```
 
 ## 静态文件服务
@@ -162,5 +162,5 @@ httpServer.Static("/assets/", "static")
 
 ## 示例源码
 
-完整示例代码：[feathtto](https://github.com/fengjx/luchen/tree/dev/_example/feathttp)
+完整示例代码：[feathttp](https://github.com/fengjx/luchen/tree/dev/_example/feathttp)
 

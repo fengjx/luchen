@@ -14,6 +14,8 @@ github.com/fengjx/luchen v1.0.1-rc11 h1:ruyoxh+Zsz/vznGvAHALLtzb6VpT3FZ0lIaJXxk6
 github.com/fengjx/luchen v1.0.1-rc11/go.mod h1:zPoxiZUGigwI95Jc9Q4lcafkISFHyYxH3ysOchcfYn0=
 github.com/fengjx/luchen v1.0.1-rc15.0.20240423104734-cdc1db04fd0c h1:H9ZshQVfdYKgagy+7nQJ+FdTQ224EUz4TyjgYWOD/Ec=
 github.com/fengjx/luchen v1.0.1-rc15.0.20240423104734-cdc1db04fd0c/go.mod h1:zPoxiZUGigwI95Jc9Q4lcafkISFHyYxH3ysOchcfYn0=
+github.com/fengjx/luchen v1.0.1-rc15.0.20240426030158-ebe228fdea87 h1:L/Z/s1OIvwNNn//ycIao92J79434+AC0jU5tik73Dbo=
+github.com/fengjx/luchen v1.0.1-rc15.0.20240426030158-ebe228fdea87/go.mod h1:zPoxiZUGigwI95Jc9Q4lcafkISFHyYxH3ysOchcfYn0=
 github.com/fengjx/luchen v1.0.2 h1:tMEBCDwWateC3sdWfoYqyx6huxaylp85wOh9I729kBw=
 github.com/fengjx/luchen v1.0.2/go.mod h1:zPoxiZUGigwI95Jc9Q4lcafkISFHyYxH3ysOchcfYn0=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
