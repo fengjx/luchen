@@ -104,8 +104,8 @@ func (s *GRPCServer) RegisterService(reg RegisterHandler) *GRPCServer {
 	return s
 }
 
-// NewGRPCHandler 绑定 grpc 请求处理逻辑
-func NewGRPCHandler(
+// NewGRPCTransportServer grpc handler 绑定 endpoint
+func NewGRPCTransportServer(
 	e endpoint.Endpoint,
 	dec grpctransport.DecodeRequestFunc,
 	enc grpctransport.EncodeResponseFunc,

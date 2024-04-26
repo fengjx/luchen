@@ -153,8 +153,8 @@ type HTTPHandler interface {
 	Bind(router *HTTPServeMux)
 }
 
-// NewHTTPHandler 绑定 http 请求处理逻辑
-func NewHTTPHandler(
+// NewHTTPTransportServer http handler 绑定 endpoint
+func NewHTTPTransportServer(
 	e endpoint.Endpoint,
 	dec httptransport.DecodeRequestFunc,
 	enc httptransport.EncodeResponseFunc,
