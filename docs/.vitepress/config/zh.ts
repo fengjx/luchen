@@ -57,6 +57,16 @@ function nav(): DefaultTheme.NavItem[] {
       activeMatch: '/reference/'
     },
     {
+      text: '实践案例',
+      items: [
+        {
+          text: "低代码后台系统",
+          link: '/glca/introduction',
+          activeMatch: '/glca/'
+        }
+      ],
+    },
+    {
       text: 'GoDoc',
       link: 'https://pkg.go.dev/github.com/fengjx/luchen',
     }
@@ -90,6 +100,14 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: 'HTTP client', link: 'http-client' },
         { text: 'gRPC client', link: 'grpc-client' },
+      ]
+    },
+    {
+      text: '端点',
+      collapsed: false,
+      items: [
+        { text: '端点定义', link: '' },
+        { text: '中间件', link: '' },
       ]
     },
     {
