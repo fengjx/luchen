@@ -1,14 +1,38 @@
-package grpc
+package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/fengjx/luchen"
+	kitendpoint "github.com/go-kit/kit/endpoint"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
+	"google.golang.org/grpc"
 
-	"github.com/fengjx/luchen/example/greetsvr/pb"
-	"github.com/fengjx/luchen/example/greetsvr/service/hello"
+	"github.com/fengjx/luchen/example/featgrpc/pb"
 )
+
+// grpc server 功能示例
+
+func main() {
+	grpcSvr := luchen.NewGRPCServer(
+		luchen.WithServiceName("featgrpc"),
+		luchen.WithServerAddr(":8088"),
+	)
+	grpcSvr.RegisterService(func(gs *grpc.Server) {
+		// 注册 grpc 服务
+		pb.RegisterGreeterServer(gs, newGreeterServer())
+	})
+	luchen.Start(grpcSvr)
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL)
+
+	<-quit
+	luchen.Stop()
+}
 
 type GreeterServer struct {
 	pb.UnimplementedGreeterServer
@@ -18,7 +42,7 @@ type GreeterServer struct {
 func newGreeterServer() pb.GreeterServer {
 	svr := &GreeterServer{}
 	svr.sayHello = luchen.NewGRPCTransportServer(
-		hello.GetInst().Endpoints.MakeSayHelloEndpoint(),
+		makeSayHelloEndpoint(),
 		luchen.DecodePB[pb.HelloReq],
 		luchen.EncodePB[pb.HelloResp],
 	)
@@ -45,4 +69,12 @@ func (s *GreeterServer) encodeSayHello(_ context.Context, resp interface{}) (int
 	return &pb.HelloResp{
 		Message: helloResp.Message,
 	}, nil
+}
+
+func makeSayHelloEndpoint() kitendpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		name := request.(string)
+		response = "hello: " + name
+		return
+	}
 }
