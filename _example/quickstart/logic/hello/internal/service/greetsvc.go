@@ -1,4 +1,4 @@
-package hello
+package service
 
 import (
 	"context"
@@ -8,11 +8,13 @@ import (
 	"go.uber.org/zap"
 )
 
-type greetService struct {
+var GreetSvc *greetService
+
+func init() {
+	GreetSvc = &greetService{}
 }
 
-func newGreetService() *greetService {
-	return &greetService{}
+type greetService struct {
 }
 
 func (svc *greetService) SayHi(ctx context.Context, name string) (string, error) {

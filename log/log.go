@@ -40,7 +40,7 @@ func init() {
 		return
 	}
 	if env.IsLocal() {
-		_log = logger.NewConsole()
+		_log = logger.NewConsole(zap.AddCallerSkip(2))
 		_log.SetLevel(level)
 		return
 	}
@@ -56,7 +56,7 @@ func createFileLog(level logger.Level, logDir string) logger.Logger {
 		panic(err)
 	}
 	logfile := filepath.Join(targetDir, app+".log")
-	appLog := logger.New(level, logfile, 1024, 7)
+	appLog := logger.New(level, logfile, 1024, 7, zap.AddCallerSkip(2))
 	log.Println("log file", logfile)
 	appLog.Infof("log file: %s", logfile)
 	return appLog

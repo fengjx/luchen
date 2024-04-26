@@ -1,4 +1,4 @@
-package grpc
+package endpoint
 
 import (
 	"context"
@@ -6,8 +6,7 @@ import (
 	"github.com/fengjx/luchen"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 
-	"github.com/fengjx/luchen/example/greetsvr/pb"
-	"github.com/fengjx/luchen/example/greetsvr/service/hello"
+	"github.com/fengjx/luchen/example/quickstart/pb"
 )
 
 type GreeterServer struct {
@@ -18,7 +17,7 @@ type GreeterServer struct {
 func newGreeterServer() pb.GreeterServer {
 	svr := &GreeterServer{}
 	svr.sayHello = luchen.NewGRPCTransportServer(
-		hello.GetInst().Endpoints.MakeSayHelloEndpoint(),
+		greetEdp.makeSayHelloEndpoint(),
 		luchen.DecodePB[pb.HelloReq],
 		luchen.EncodePB[pb.HelloResp],
 	)
