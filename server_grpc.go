@@ -145,7 +145,7 @@ func (h *LogGRPCErrorHandler) Handle(ctx context.Context, err error) {
 
 // DecodePB protobuf 解码
 func DecodePB[T any](_ context.Context, req interface{}) (interface{}, error) {
-	if pbReq, ok := req.(*T); ok {
+	if pbReq, ok := req.(T); ok {
 		return pbReq, nil
 	}
 	return nil, fmt.Errorf("proto decode request err, want type[%s] but[%s]", reflect.TypeOf(new(T)), reflect.TypeOf(req))
@@ -153,7 +153,7 @@ func DecodePB[T any](_ context.Context, req interface{}) (interface{}, error) {
 
 // EncodePB protobuf 编码
 func EncodePB[T any](_ context.Context, resp interface{}) (interface{}, error) {
-	if pbResp, ok := resp.(*T); ok {
+	if pbResp, ok := resp.(T); ok {
 		return pbResp, nil
 	}
 	return nil, fmt.Errorf("proto encode response err, want type[%s] but[%s]", reflect.TypeOf(new(T)), reflect.TypeOf(resp))
