@@ -128,8 +128,10 @@ func (c *HTTPClient) call(ctx context.Context, req *HTTPRequest) (*HTTPResponse,
 	if req.Body != nil {
 		bodyBuf := bytes.NewBuffer(req.Body)
 		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, bodyBuf)
+		httpReq.Header.Set("Content-Type", "application/json")
 	} else if len(req.Form) > 0 {
 		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, strings.NewReader(req.Form.Encode()))
+		httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	} else {
 		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, nil)
 	}
