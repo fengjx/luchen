@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"path"
 	"sync"
 	"sync/atomic"
@@ -67,10 +66,7 @@ func (r *EtcdV3Registrar) Register() {
 
 func (r *EtcdV3Registrar) register(serviceInfo *ServiceInfo) {
 	key := path.Join(servicePrefix, serviceInfo.Name, serviceInfo.ID)
-	params := url.Values{}
-	info, _ := json.ToJson(serviceInfo)
-	params.Set("info", info)
-	value := fmt.Sprintf("%s://%s?%s", serviceInfo.Protocol, serviceInfo.Addr, params.Encode())
+	value, _ := json.ToJson(serviceInfo)
 	registar := etcdv3.NewRegistrar(NewDefaultEtcdV3Client(), etcdv3.Service{
 		Key:   key,
 		Value: value,
@@ -200,13 +196,11 @@ func (s *EtcdV3Selector) updateCache(instances []string) {
 	s.invalidateDeadline = time.Now().Add(s.invalidateTimeout)
 	var services []*ServiceInfo
 	for _, instance := range instances {
-		u, err := url.Parse(instance)
-		if err != nil {
-			log.Error("parse instance err", zap.String("instance", instance), zap.Error(err))
+		if instance == "" {
 			continue
 		}
 		info := &ServiceInfo{}
-		err = json.FromJson(u.Query().Get("info"), info)
+		err := json.FromJson(instance, info)
 		if err != nil {
 			log.Error("decode instance err", zap.String("instance", instance), zap.Error(err))
 			continue
