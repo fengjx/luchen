@@ -9,7 +9,6 @@ export const zh = defineConfig({
 
     sidebar: {
       '/guide/': { base: '/guide/', items: sidebarGuide() },
-      '/reference/': { base: '/reference/', items: sidebarReference() }
     },
 
     editLink: {
@@ -52,11 +51,6 @@ function nav(): DefaultTheme.NavItem[] {
       activeMatch: '/guide/'
     },
     {
-      text: '参考',
-      link: '/reference/helloworld',
-      activeMatch: '/reference/'
-    },
-    {
       text: '实践案例',
       items: [
         {
@@ -82,6 +76,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: '简介', link: 'introduction' },
         { text: '快速开始', link: 'getting-started' },
+        { text: '工程规范', link: 'specification' },
       ]
     },
     {
@@ -90,8 +85,16 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: 'HTTP server', link: 'http-server' },
         { text: 'gRPC server', link: 'grpc-server' },
-        { text: '服务注册', link: 'register' },
+        { text: '服务注册&发现', link: 'register' },
         { text: 'gateway（alpha）', link: 'gateway' },
+      ]
+    },
+    {
+      text: '端点',
+      collapsed: false,
+      items: [
+        { text: '端点定义', link: 'endpoint' },
+        { text: '中间件', link: 'endpoint-middleware' },
       ]
     },
     {
@@ -103,33 +106,12 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       ]
     },
     {
-      text: '端点',
-      collapsed: false,
-      items: [
-        { text: '端点定义', link: '' },
-        { text: '中间件', link: '' },
-      ]
-    },
-    {
       text: '内置功能',
       collapsed: false,
       items: [
         { text: '环境', link: 'env' },
         { text: '配置加载', link: 'config' },
         { text: '日志', link: 'log' },
-      ]
-    }
-  ]
-}
-
-function sidebarReference(): DefaultTheme.SidebarItem[] {
-  return [
-    {
-      text: '参考',
-      items: [
-        { text: 'helloworld', link: 'helloworld' },
-        { text: '多协议支持和服务注册', link: 'multi-protocol-server' },
-        { text: '网关', link: 'gateway' },
       ]
     }
   ]

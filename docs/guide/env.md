@@ -36,5 +36,4 @@ func GetDefaultEtcdAddress() (address []string)
 func SetDefaultEtcdAddress(address []string) 
 ```
 
-详细可查看源码 [env.go](https://github.com/fengjx/luchen/blob/dev/env.go)
-
+详细可查看源码 [env.go](https://github.com/fengjx/luchen/blob/master/env/env.go)

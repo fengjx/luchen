@@ -162,5 +162,5 @@ httpServer.Static("/assets/", "static")
 
 ## 示例源码
 
-完整示例代码：[feathttp](https://github.com/fengjx/luchen/tree/dev/_example/feathttp)
+完整示例代码：[feathttp](https://github.com/fengjx/luchen/tree/master/_example/feathttp)
 
