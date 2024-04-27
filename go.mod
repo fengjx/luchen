@@ -3,7 +3,7 @@ module github.com/fengjx/luchen
 go 1.22
 
 require (
-	github.com/fengjx/go-halo v0.0.3-rc01.0.20240426181528-31c37abd0b43
+	github.com/fengjx/go-halo v0.0.4-rc01
 	github.com/go-kit/kit v0.13.0
 	github.com/go-kit/log v0.2.0
 	github.com/go-playground/validator/v10 v10.16.0
@@ -17,6 +17,7 @@ require (
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.60.1
 	google.golang.org/grpc/examples v0.0.0-20231228223359-71cc0f167537
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (
@@ -57,6 +58,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231120223509-83a465c0220f // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
