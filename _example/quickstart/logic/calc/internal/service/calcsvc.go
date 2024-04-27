@@ -13,6 +13,6 @@ func init() {
 type calcService struct {
 }
 
-func (svc *calcService) Add(_ context.Context, a, b int) (int, error) {
+func (svc *calcService) Add(_ context.Context, a, b int32) (int32, error) {
 	return a + b, nil
 }

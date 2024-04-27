@@ -10,10 +10,10 @@ import (
 func Init(hs *luchen.HTTPServer, gs *luchen.GRPCServer) {
 	// 注册 http 路由
 	hs.Handler(
-		&greeterHandler{},
+		&calcHandler{},
 	)
 	// 注册 grpc 服务
 	gs.RegisterService(func(s *grpc.Server) {
-		pb.RegisterGreeterServer(s, newGreeterServer())
+		pb.RegisterCalcServer(s, newCalcServer())
 	})
 }

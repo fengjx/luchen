@@ -9,24 +9,20 @@ import (
 	"github.com/fengjx/luchen/example/quickstart/transport/http"
 )
 
-type greeterHandler struct {
+type calcHandler struct {
 }
 
-func newGreeterHandler() *greeterHandler {
-	return &greeterHandler{}
+func (h *calcHandler) Bind(router *luchen.HTTPServeMux) {
+	router.Handle("/calc/add", h.sayHello())
 }
 
-func (h *greeterHandler) Bind(router *luchen.HTTPServeMux) {
-	router.Handle("/hello/say-hello", h.sayHello())
-}
-
-func (h *greeterHandler) sayHello() *httptransport.Server {
+func (h *calcHandler) sayHello() *httptransport.Server {
 	options := []httptransport.ServerOption{
 		httptransport.ServerErrorEncoder(http.ErrorEncoder),
 	}
 	return luchen.NewHTTPTransportServer(
-		greetEdp.makeSayHelloEndpoint(),
-		luchen.DecodeHTTPParamRequest[pb.HelloReq],
+		calcEdp.makeAddEndpoint(),
+		luchen.DecodeHTTPParamRequest[*pb.AddReq],
 		luchen.EncodeHTTPJSONResponse(http.ResponseWrapper),
 		options...,
 	)

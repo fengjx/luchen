@@ -1,16 +1,16 @@
 package main
 
 import (
-	"context"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/fengjx/luchen"
 	"github.com/fengjx/luchen/env"
 	"github.com/fengjx/luchen/log"
 
-	"github.com/fengjx/luchen/example/greetsvr/service"
-	"github.com/fengjx/luchen/example/greetsvr/transport"
+	"github.com/fengjx/luchen/example/quickstart/connom/config"
+	"github.com/fengjx/luchen/example/quickstart/logic"
 )
 
 func init() {
@@ -20,16 +20,29 @@ func init() {
 }
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	log.Info("app start")
-	service.Init()
-	transport.Start(ctx)
+	log.Info("server start")
+	serverConfig := config.GetConfig().Server
+	hs := luchen.NewHTTPServer(
+		luchen.WithServiceName(serverConfig.HTTP.ServerName),
+		luchen.WithServerAddr(serverConfig.HTTP.Listen), // 不指定则使用随机端口
+	)
+	gs := luchen.NewGRPCServer(
+		luchen.WithServiceName(serverConfig.GRPC.ServerName),
+		luchen.WithServerAddr(serverConfig.GRPC.Listen), // 不指定则使用随机端口
+	)
+	registrar := luchen.NewEtcdV3Registrar(
+		hs,
+		gs,
+	)
+	logic.Init(hs, gs)
+	// 注册并启动服务
+	registrar.Register()
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL)
 
 	<-quit
-	log.Info("app stop")
-	cancel()
-	transport.Stop(ctx)
+	log.Info("server stop")
+	// 摘除并停止服务
+	registrar.Deregister()
 }

@@ -9,39 +9,25 @@ import (
 	"github.com/fengjx/luchen/example/quickstart/pb"
 )
 
-type GreeterServer struct {
-	pb.UnimplementedGreeterServer
-	sayHello grpctransport.Handler
+type calcServer struct {
+	pb.UnimplementedCalcServer
+	add grpctransport.Handler
 }
 
-func newGreeterServer() pb.GreeterServer {
-	svr := &GreeterServer{}
-	svr.sayHello = luchen.NewGRPCTransportServer(
-		greetEdp.makeSayHelloEndpoint(),
-		luchen.DecodePB[pb.HelloReq],
-		luchen.EncodePB[pb.HelloResp],
+func newCalcServer() pb.CalcServer {
+	svr := &calcServer{}
+	svr.add = luchen.NewGRPCTransportServer(
+		calcEdp.makeAddEndpoint(),
+		luchen.DecodePB[*pb.AddReq],
+		luchen.EncodePB[*pb.AddResp],
 	)
 	return svr
 }
 
-func (s *GreeterServer) SayHello(ctx context.Context, req *pb.HelloReq) (*pb.HelloResp, error) {
-	_, resp, err := s.sayHello.ServeGRPC(ctx, req)
+func (s *calcServer) Add(ctx context.Context, req *pb.AddReq) (*pb.AddResp, error) {
+	_, resp, err := s.add.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return resp.(*pb.HelloResp), nil
-}
-
-func (s *GreeterServer) decodeSayHello(_ context.Context, req interface{}) (interface{}, error) {
-	helloReq := req.(*pb.HelloReq)
-	return &pb.HelloReq{
-		Name: helloReq.Name,
-	}, nil
-}
-
-func (s *GreeterServer) encodeSayHello(_ context.Context, resp interface{}) (interface{}, error) {
-	helloResp := resp.(*pb.HelloResp)
-	return &pb.HelloResp{
-		Message: helloResp.Message,
-	}, nil
+	return resp.(*pb.AddResp), nil
 }

@@ -1,6 +1,6 @@
 syntax = "proto3";
 package pb;
-option go_package="github.com/fengjx/luchen/example/greetsvr/pb";
+option go_package="github.com/fengjx/luchen/example/quickstart/pb";
 
 // The greeting service definition.
 service Greeter {

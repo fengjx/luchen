@@ -1,0 +1,17 @@
+syntax = "proto3";
+package pb;
+option go_package="github.com/fengjx/luchen/example/quickstart/pb";
+
+service Calc {
+  // 相加
+  rpc Add (AddReq) returns (AddResp);
+}
+
+message AddReq {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+message AddResp {
+  int32 result = 1;
+}

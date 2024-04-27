@@ -12,10 +12,6 @@ import (
 type greeterHandler struct {
 }
 
-func newGreeterHandler() *greeterHandler {
-	return &greeterHandler{}
-}
-
 func (h *greeterHandler) Bind(router *luchen.HTTPServeMux) {
 	router.Handle("/hello/say-hello", h.sayHello())
 }

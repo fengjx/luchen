@@ -8,12 +8,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/fengjx/luchen/example/greetsvr/pb"
+	"github.com/fengjx/luchen/example/quickstart/pb"
 )
 
 func main() {
 	clientConn, err := grpc.Dial(
-		"localhost:8090",
+		"localhost:8088",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -25,5 +25,8 @@ func main() {
 	helloResp, err := greeterClient.SayHello(ctx, &pb.HelloReq{
 		Name: "fengjx",
 	})
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Println(helloResp.Message)
 }

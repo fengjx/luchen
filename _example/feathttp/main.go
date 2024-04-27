@@ -8,11 +8,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fengjx/luchen/log"
-	kitendpoint "github.com/go-kit/kit/endpoint"
-	httptransport "github.com/go-kit/kit/transport/http"
-
 	"github.com/fengjx/luchen"
+	"github.com/fengjx/luchen/log"
 )
 
 // http server 功能演示
@@ -42,7 +39,7 @@ func (h *helloHandler) Bind(router *luchen.HTTPServeMux) {
 	router.Handle("/say-hello", h.sayHello())
 }
 
-func (h *helloHandler) sayHello() *httptransport.Server {
+func (h *helloHandler) sayHello() *luchen.HTTPTransportServer {
 	return luchen.NewHTTPTransportServer(
 		makeSayHelloEndpoint(),
 		decodeSayHello,
@@ -50,7 +47,7 @@ func (h *helloHandler) sayHello() *httptransport.Server {
 	)
 }
 
-func makeSayHelloEndpoint() kitendpoint.Endpoint {
+func makeSayHelloEndpoint() luchen.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		name := request.(string)
 		response = "hello: " + name

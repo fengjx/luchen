@@ -5,8 +5,8 @@ go 1.22
 toolchain go1.22.0
 
 require (
-	github.com/fengjx/go-halo v0.0.3
-	github.com/fengjx/luchen v1.0.1-rc15.0.20240426030158-ebe228fdea87
+	github.com/fengjx/go-halo v0.0.4-rc01
+	github.com/fengjx/luchen v1.0.3-rc06
 	github.com/go-kit/kit v0.13.0
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.60.1

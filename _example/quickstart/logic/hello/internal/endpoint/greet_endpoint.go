@@ -6,16 +6,16 @@ import (
 	"github.com/fengjx/luchen/log"
 	"github.com/go-kit/kit/endpoint"
 
-	"github.com/fengjx/luchen/example/quickstart/logic/hello/service"
+	"github.com/fengjx/luchen/example/quickstart/logic/hello/internal/service"
 	"github.com/fengjx/luchen/example/quickstart/pb"
 )
 
-var greetEdp = &greetEndpoints{}
+var greetEdp = &greetEndpoint{}
 
-type greetEndpoints struct {
+type greetEndpoint struct {
 }
 
-func (e *greetEndpoints) makeSayHelloEndpoint() endpoint.Endpoint {
+func (e *greetEndpoint) makeSayHelloEndpoint() endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		log.InfoCtx(ctx, "greeter say hello")
 		helloReq := request.(*pb.HelloReq)

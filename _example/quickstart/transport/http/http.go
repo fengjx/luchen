@@ -18,7 +18,8 @@ type result struct {
 	Data any    `json:"data"`
 }
 
-func httpResponseWrapper(data interface{}) interface{} {
+// ResponseWrapper 响应数据包装
+func ResponseWrapper(data interface{}) interface{} {
 	res := &result{
 		Msg:  "ok",
 		Data: data,
@@ -26,19 +27,8 @@ func httpResponseWrapper(data interface{}) interface{} {
 	return res
 }
 
-// 统一返回值处理
-func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
-	res := &result{
-		Msg:  "ok",
-		Data: response,
-	}
-	log.InfoCtx(ctx, "http response", zap.Any("data", res))
-	w.Header().Set("Content-Type", "application/json")
-	return json.NewEncoder(w).Encode(res)
-}
-
-// 统一异常处理
-func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
+// ErrorEncoder 统一异常处理
+func ErrorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
 	log.ErrorCtx(ctx, "handler error", zap.Error(err))
 	httpCode := 500
 	msg := luchen.ErrSystem.Msg

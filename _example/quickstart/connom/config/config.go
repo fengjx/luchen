@@ -40,7 +40,7 @@ func init() {
 		configFile = os.Args[1]
 	}
 	if configFile == "" {
-		confFile, err := fs.Lookup("conf/app.yaml", 3)
+		confFile, err := fs.Lookup("conf/app.yml", 3)
 		if err != nil {
 			log.Panic("config file not found")
 		}
