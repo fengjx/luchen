@@ -3,6 +3,7 @@ package luchen
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -31,7 +32,7 @@ func TraceHTTPRequest(r *http.Request) (*http.Request, string) {
 		traceID = TraceID(r.Context())
 	}
 	if traceID == "" {
-		traceID = uuid.NewString()
+		traceID = genTraceID()
 	}
 	r.Header.Set(TraceIDHeader, traceID)
 	ctx := WithTraceID(r.Context(), traceID)
@@ -41,7 +42,7 @@ func TraceHTTPRequest(r *http.Request) (*http.Request, string) {
 // TraceGRPC 返回 traceID
 // grpc 请求携带 traceID 处理
 func TraceGRPC(ctx context.Context, md metadata.MD) (context.Context, string) {
-	traceID := uuid.NewString()
+	traceID := genTraceID()
 	if len(md.Get(TraceIDHeader)) > 0 {
 		traceID = md.Get(TraceIDHeader)[0]
 	}
@@ -54,7 +55,7 @@ func TraceGRPC(ctx context.Context, md metadata.MD) (context.Context, string) {
 func TraceGRPCClient(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	traceID := TraceID(ctx)
 	if traceID == "" {
-		traceID = uuid.NewString()
+		traceID = genTraceID()
 		ctx = WithTraceID(ctx, traceID)
 	}
 	ctx = metadata.AppendToOutgoingContext(ctx, TraceIDHeader, traceID)
@@ -74,7 +75,7 @@ func TraceID(ctx context.Context) string {
 func TraceIDOrNew(ctx context.Context) string {
 	traceID := TraceID(ctx)
 	if traceID == "" {
-		return uuid.NewString()
+		return genTraceID()
 	}
 	return traceID
 }
@@ -82,4 +83,8 @@ func TraceIDOrNew(ctx context.Context) string {
 // WithTraceID context 注入 traceID
 func WithTraceID(ctx context.Context, traceID string) context.Context {
 	return context.WithValue(ctx, TraceIDCtxKey, traceID)
+}
+
+func genTraceID() string {
+	return strings.ReplaceAll(uuid.NewString(), "-", "")
 }
