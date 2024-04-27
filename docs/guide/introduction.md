@@ -1,6 +1,6 @@
 # 简介
 
-`luchen` 是一个基于 go-kit 二次封装的微服务框架。遵循 go-kit 的开发理念，集成了部分工程实践方案，并简化了使用方式。
+[luchen](https://github.com/fengjx/luchen) 是一个基于 [go-kit](https://github.com/go-kit/kit) 二次封装的微服务框架。遵循 go-kit 的开发理念，集成了部分工程实践方案，并简化了使用方式。
 
 > 开始这个项目的时候，我的女儿刚出生，取名【路辰】,这就是 luchen 的由来
 
