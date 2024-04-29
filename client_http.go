@@ -13,6 +13,8 @@ import (
 	"github.com/fengjx/go-halo/httpc"
 	"github.com/samber/lo"
 	"go.uber.org/zap"
+
+	"github.com/fengjx/luchen/log"
 )
 
 var (
@@ -95,7 +97,7 @@ func (c *HTTPClient) Call(ctx context.Context, req *HTTPRequest) (*HTTPResponse,
 				break
 			}
 			if lo.Contains(retryHTTPCode, response.StatusCode()) {
-				RootLogger().Warn("retry http call",
+				log.WarnCtx(ctx, "retry http call",
 					zap.String("service_name", c.serviceName),
 					zap.Any("req", req),
 				)
@@ -126,8 +128,10 @@ func (c *HTTPClient) call(ctx context.Context, req *HTTPRequest) (*HTTPResponse,
 	if req.Body != nil {
 		bodyBuf := bytes.NewBuffer(req.Body)
 		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, bodyBuf)
+		httpReq.Header.Set("Content-Type", "application/json")
 	} else if len(req.Form) > 0 {
 		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, strings.NewReader(req.Form.Encode()))
+		httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	} else {
 		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, nil)
 	}

@@ -9,14 +9,44 @@
 ## 方法说明
 
 ```go
-// RootLogger 返回默认 logger
-func RootLogger() logger.Logger
-
-// Logger 从 context 获得 logger
-func Logger(ctx context.Context) logger.Logger
+// GetLogger 从上下文获取当前 logger
+func GetLogger(ctx context.Context) logger.Logger
 
 // WithLogger context 注入 logger
-func WithLogger(ctx context.Context, logger logger.Logger)
+func WithLogger(ctx context.Context, fields ...zap.Field) context.Context
+
+// GetLogDir 返回日志路径
+func GetLogDir() string
 ```
 
-内部是对zap的一层包装，更多使用细节参考：[zap](https://github.com/uber-go/zap)
+## 日志打印
+
+日志打印 api 
+
+```go
+func Debug(msg string, fields ...zap.Field)
+func DebugCtx(ctx context.Context, msg string, fields ...zap.Field)
+func Debugf(format string, args ...interface{})
+func DebugfCtx(ctx context.Context, format string, args ...interface{})
+func Error(msg string, fields ...zap.Field)
+func ErrorCtx(ctx context.Context, msg string, fields ...zap.Field)
+func Errorf(format string, args ...interface{})
+func ErrorfCtx(ctx context.Context, format string, args ...interface{})
+func Fatal(msg string, fields ...zap.Field)
+func FatalCtx(ctx context.Context, msg string, fields ...zap.Field)
+func Fatalf(format string, args ...interface{})
+func FatalfCtx(ctx context.Context, format string, args ...interface{})
+func Info(msg string, fields ...zap.Field)
+func InfoCtx(ctx context.Context, msg string, fields ...zap.Field)
+func Infof(format string, args ...interface{})
+func InfofCtx(ctx context.Context, format string, args ...interface{})
+func NewKitLogger(name string, level logger.Level) kitlog.Logger
+func Panic(msg string, fields ...zap.Field)
+func PanicCtx(ctx context.Context, msg string, fields ...zap.Field)
+func Panicf(format string, args ...interface{})
+func PanicfCtx(ctx context.Context, format string, args ...interface{})
+func Warn(msg string, fields ...zap.Field)
+func WarnCtx(ctx context.Context, msg string, fields ...zap.Field)
+func Warnf(format string, args ...interface{})
+func WarnfCtx(ctx context.Context, format string, args ...interface{})
+```

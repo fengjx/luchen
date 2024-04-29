@@ -30,7 +30,7 @@ func (h *helloHandler) Bind(router *luchen.HTTPServeMux) {
 }
 
 func (h *helloHandler) sayHello() *httptransport.Server {
-	return luchen.NewHTTPHandler(
+	return luchen.NewHTTPTransportServer(
 		makeSayHelloEndpoint(),
 		luchen.DecodeHTTPJSONRequest[pb.HelloRequest],
 		encodeSayHello,
@@ -46,9 +46,9 @@ func encodeSayHello(_ context.Context, w http.ResponseWriter, resp interface{}) 
 	return err
 }
 
-func testStatic(t *testing.T) {
+func TestStatic(t *testing.T) {
 	httpServer := luchen.NewHTTPServer(
-		luchen.WithServerAddr(":8080"),
+		luchen.WithServerAddr(":8000"),
 	).Static("/static/", "docs/public")
 	httpServer.Start()
 }

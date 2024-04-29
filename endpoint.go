@@ -3,7 +3,14 @@ package luchen
 import (
 	"context"
 	"errors"
+	"path"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/fengjx/luchen/log"
 )
 
 // GetValueFromContext 从 context 中获取值
@@ -65,4 +72,41 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 
 type AccessLog interface {
 	Print(map[string]any)
+}
+
+type accessLogImpl struct {
+	log *zap.Logger
+}
+
+func (impl accessLogImpl) Print(fields map[string]any) {
+	var zf []zap.Field
+	for field, value := range fields {
+		zf = append(zf, zap.Any(field, value))
+	}
+	impl.log.Info("", zf...)
+}
+
+// NewAccessLog 创建一个 AccessLog
+func NewAccessLog(maxSizeMB int, maxBackups int, maxAge int) AccessLog {
+	w := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   path.Join(log.GetLogDir(), "access.log"),
+		MaxSize:    maxSizeMB,
+		MaxBackups: maxBackups,
+		MaxAge:     maxAge,
+	})
+	encoderConfig := zap.NewProductionEncoderConfig()
+	encoderConfig.TimeKey = "time"
+	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000")
+	encoderConfig.FunctionKey = ""
+	encoderConfig.LevelKey = ""
+	encoderConfig.MessageKey = ""
+	encoderConfig.NameKey = ""
+	encoderConfig.CallerKey = ""
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		w,
+		zapcore.InfoLevel,
+	)
+	l := zap.New(core, zap.AddCaller())
+	return &accessLogImpl{log: l}
 }

@@ -24,7 +24,7 @@ func newHelloGRPCServer(serviceName, addr string) *luchen.GRPCServer {
 
 func newGreeterServer() pb.GreeterServer {
 	svr := &GreeterServer{}
-	svr.sayHello = luchen.NewGRPCHandler(
+	svr.sayHello = luchen.NewGRPCTransportServer(
 		makeSayHelloEndpoint(),
 		luchen.DecodePB[pb.HelloRequest],
 		luchen.EncodePB[pb.HelloReply],

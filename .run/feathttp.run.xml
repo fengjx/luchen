@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="feathttp" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="luchen" />
+    <working_directory value="$PROJECT_DIR$/_example/feathttp" />
+    <kind value="PACKAGE" />
+    <package value="github.com/fengjx/luchen/example/feathttp" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/_example/feathttp/main.go" />
+    <method v="2" />
+  </configuration>
+</component>
