@@ -27,9 +27,7 @@ $ curl http://localhost:8080/say-hello?name=fjx
 hello: fjx
 ```
 
-### 文档和示例
-
-参考文档: <http://luchen.fun>
+### 示例
 
 - [helloworld](_example/helloworld) 简单示例
 - [feathttp](_example/feathttp) http 功能特性示例
@@ -37,16 +35,20 @@ hello: fjx
 - [quickstart](_example/quickstart) 多协议支持示例
 - [gateway](_example/gateway) 网关服务示例
 
-## 作者
+## 文档
 
-![个人微信](docs/public/assets/img/wx.jpg)
-
-- blog: <http://blog.fengjx.com>
-- email: fengjianxin2012@gmail.com
+详细的文档请查阅: <http://luchen.fun>
 
 ## 生态
 
 - [lca](https://github.com/fengjx/lca) 基于 amis 开发的低代码后台系统
 - [glca](https://github.com/fengjx/lca) 基于`luchen`开发 `lca` 后台服务实现
 - [lc](https://github.com/fengjx/lc) glca 命令行工具，可以快速生成通用代码
+
+## 作者
+
+![个人微信](docs/public/assets/img/wx.jpg)
+
+- blog: <http://blog.fengjx.com>
+- email: fengjianxin2012@gmail.com
 
