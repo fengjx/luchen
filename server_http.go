@@ -131,10 +131,17 @@ func (s *HTTPServer) Handler(handlers ...HTTPHandler) *HTTPServer {
 	return s
 }
 
-// Static 静态文件路径
-func (s *HTTPServer) Static(prefix string, dir string) *HTTPServer {
-	fs := http.FileServer(http.Dir(dir))
-	s.router.Handle(prefix, http.StripPrefix(prefix, fs))
+// Static 注册静态文件服务
+// 默认不显示文件目录
+func (s *HTTPServer) Static(prefix string, root string) *HTTPServer {
+	return s.StaticFS(prefix, Dir(root, false))
+}
+
+// StaticFS 注册静态文件服务，自定义文件系统
+// fs 可以使用 luchen.Dir() 创建
+func (s *HTTPServer) StaticFS(prefix string, fs http.FileSystem) *HTTPServer {
+	handler := http.FileServer(fs)
+	s.router.Handle(prefix, http.StripPrefix(prefix, handler))
 	return s
 }
 
