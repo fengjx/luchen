@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/fengjx/go-halo/json"
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -49,6 +50,15 @@ func encodeSayHello(_ context.Context, w http.ResponseWriter, resp interface{}) 
 func TestStatic(t *testing.T) {
 	httpServer := luchen.NewHTTPServer(
 		luchen.WithServerAddr(":8000"),
-	).Static("/static/", "docs/public")
+	).
+		Static("/static/", "docs/public").
+		StaticFS("/fs/", luchen.Dir("docs", true))
+
+	if testing.Short() {
+		select {
+		case <-time.After(1 * time.Second * 10):
+			httpServer.Stop()
+		}
+	}
 	httpServer.Start()
 }
