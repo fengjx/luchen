@@ -1,4 +1,4 @@
-import { defineConfig, type DefaultTheme } from 'vitepress'
+import {type DefaultTheme, defineConfig} from 'vitepress'
 
 export const zh = defineConfig({
   lang: 'zh-Hans',
@@ -8,7 +8,8 @@ export const zh = defineConfig({
     nav: nav(),
 
     sidebar: {
-      '/guide/': { base: '/guide/', items: sidebarGuide() },
+      '/guide/': {base: '/guide/', items: sidebarGuide()},
+      '/lca/': {base: '/lca/', items: sidebarLca()},
     },
 
     editLink: {
@@ -74,44 +75,65 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: '开始',
       collapsed: false,
       items: [
-        { text: '简介', link: 'introduction' },
-        { text: '快速开始', link: 'getting-started' },
-        { text: '工程规范', link: 'specification' },
+        {text: '简介', link: 'introduction'},
+        {text: '快速开始', link: 'getting-started'},
+        {text: '工程规范', link: 'specification'},
       ]
     },
     {
       text: '服务端',
       collapsed: false,
       items: [
-        { text: 'HTTP server', link: 'http-server' },
-        { text: 'gRPC server', link: 'grpc-server' },
-        { text: '服务注册&发现', link: 'register' },
-        { text: 'gateway（alpha）', link: 'gateway' },
+        {text: 'HTTP server', link: 'http-server'},
+        {text: 'gRPC server', link: 'grpc-server'},
+        {text: '服务注册&发现', link: 'register'},
+        {text: 'gateway（alpha）', link: 'gateway'},
       ]
     },
     {
       text: '端点',
       collapsed: false,
       items: [
-        { text: '端点定义', link: 'endpoint' },
-        { text: '中间件', link: 'endpoint-middleware' },
+        {text: '端点定义', link: 'endpoint'},
+        {text: '中间件', link: 'endpoint-middleware'},
       ]
     },
     {
       text: '客户端',
       collapsed: false,
       items: [
-        { text: 'HTTP client', link: 'http-client' },
-        { text: 'gRPC client', link: 'grpc-client' },
+        {text: 'HTTP client', link: 'http-client'},
+        {text: 'gRPC client', link: 'grpc-client'},
       ]
     },
     {
       text: '内置功能',
       collapsed: false,
       items: [
-        { text: '环境', link: 'env' },
-        { text: '配置加载', link: 'config' },
-        { text: '日志', link: 'log' },
+        {text: '环境', link: 'env'},
+        {text: '配置加载', link: 'config'},
+        {text: '日志', link: 'log'},
+      ]
+    }
+  ]
+}
+
+function sidebarLca(): DefaultTheme.SidebarItem[] {
+  return [
+    {
+      text: '开始',
+      collapsed: false,
+      items: [
+        {text: '简介', link: 'introduction'},
+        {text: '快速开始', link: 'getting-started'},
+        {text: '工程规范', link: 'specification'},
+      ]
+    },
+    {
+      text: '服务端',
+      collapsed: false,
+      items: [
+        {text: 'HTTP server', link: 'http-server'}
       ]
     }
   ]
