@@ -55,8 +55,8 @@ func TestStatic(t *testing.T) {
 	httpServer := luchen.NewHTTPServer(
 		luchen.WithServerAddr(":8000"),
 	).
-		Static("/static/", "docs/public").
-		StaticFS("/fs/", luchen.Dir("docs", true)).
+		Static("/static/", "testdata/static").
+		StaticFS("/fs/", luchen.Dir("testdata/static", true)).
 		StaticFS("/efs/", luchen.OnlyFilesFS(embedFS, "/testdata/static"))
 
 	if testing.Short() {

@@ -34,10 +34,12 @@ func OnlyFilesFS(efs fs.FS, root string) http.FileSystem {
 
 // Open conforms to http.Filesystem.
 func (ofs onlyFilesFS) Open(name string) (http.File, error) {
+	const indexPage = "index.html"
+	fname := name
 	if ofs.root != "" {
-		name = filepath.Join(ofs.root, name)
+		fname = filepath.Join(ofs.root, name)
 	}
-	f, err := ofs.fs.Open(name)
+	f, err := ofs.fs.Open(fname)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +48,8 @@ func (ofs onlyFilesFS) Open(name string) (http.File, error) {
 		return nil, err
 	}
 	if stat.IsDir() {
-		return nil, fs.ErrNotExist
+		// 访问目录自动定向到 index.html
+		return ofs.Open(filepath.Join(name, indexPage))
 	}
 	return f, nil
 }
