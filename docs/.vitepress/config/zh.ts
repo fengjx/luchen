@@ -9,7 +9,7 @@ export const zh = defineConfig({
 
     sidebar: {
       '/guide/': {base: '/guide/', items: sidebarGuide()},
-      '/lca/': {base: '/lca/', items: sidebarLca()},
+      '/lca/': {base: '/lca/', items: sidebarLcKit()},
     },
 
     editLink: {
@@ -118,7 +118,7 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
   ]
 }
 
-function sidebarLca(): DefaultTheme.SidebarItem[] {
+function sidebarLcKit(): DefaultTheme.SidebarItem[] {
   return [
     {
       text: '开始',
