@@ -2,6 +2,7 @@ package luchen_test
 
 import (
 	"context"
+	"embed"
 	"net/http"
 	"testing"
 	"time"
@@ -47,12 +48,16 @@ func encodeSayHello(_ context.Context, w http.ResponseWriter, resp interface{}) 
 	return err
 }
 
+//go:embed testdata
+var embedFS embed.FS
+
 func TestStatic(t *testing.T) {
 	httpServer := luchen.NewHTTPServer(
 		luchen.WithServerAddr(":8000"),
 	).
 		Static("/static/", "docs/public").
-		StaticFS("/fs/", luchen.Dir("docs", true))
+		StaticFS("/fs/", luchen.Dir("docs", true)).
+		StaticFS("/efs/", luchen.OnlyFilesFS(embedFS, "/testdata/static"))
 
 	if testing.Short() {
 		select {
