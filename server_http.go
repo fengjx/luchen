@@ -3,8 +3,10 @@ package luchen
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
@@ -133,15 +135,20 @@ func (s *HTTPServer) Handler(handlers ...HTTPHandler) *HTTPServer {
 
 // Static 注册静态文件服务
 // 默认不显示文件目录
-func (s *HTTPServer) Static(prefix string, root string) *HTTPServer {
-	return s.StaticFS(prefix, Dir(root, false))
+func (s *HTTPServer) Static(pattern string, root string) *HTTPServer {
+	return s.StaticFS(pattern, Dir(root, false))
 }
 
 // StaticFS 注册静态文件服务，自定义文件系统
 // fs 可以使用 luchen.Dir() 创建
-func (s *HTTPServer) StaticFS(prefix string, fs http.FileSystem) *HTTPServer {
-	handler := http.FileServer(fs)
-	s.router.Handle(prefix, http.StripPrefix(prefix, handler))
+func (s *HTTPServer) StaticFS(pattern string, fs fs.FS) *HTTPServer {
+	prefix := pattern
+	// 1.22 支持 [GET /path] 写法
+	arr := strings.Fields(pattern)
+	if len(arr) > 1 {
+		prefix = arr[1]
+	}
+	s.router.Handle(pattern, FileHandler(prefix, fs))
 	return s
 }
 

@@ -57,7 +57,7 @@ func TestStatic(t *testing.T) {
 	).
 		Static("/static/", "testdata/static").
 		StaticFS("/fs/", luchen.Dir("testdata/static", true)).
-		StaticFS("/efs/", luchen.OnlyFilesFS(embedFS, "/testdata/static"))
+		StaticFS("/", luchen.OnlyFilesFS(embedFS, false, "testdata/static"))
 
 	if testing.Short() {
 		select {
