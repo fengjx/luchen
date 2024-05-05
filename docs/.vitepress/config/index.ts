@@ -6,7 +6,7 @@ export default defineConfig({
 
   lastUpdated: true,
   cleanUrls: true,
-
+  ignoreDeadLinks: true,
   markdown: {
     math: true,
     codeTransformers: [
