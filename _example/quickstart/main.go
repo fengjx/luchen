@@ -9,27 +9,22 @@ import (
 	"github.com/fengjx/luchen/env"
 	"github.com/fengjx/luchen/log"
 
-	"github.com/fengjx/luchen/example/quickstart/connom/config"
 	"github.com/fengjx/luchen/example/quickstart/logic"
+	"github.com/fengjx/luchen/example/quickstart/transport/grpc"
+	"github.com/fengjx/luchen/example/quickstart/transport/http"
 )
 
 func init() {
+	// 这里是为了演示，实际开发建议通过环境变量设置
+	// 查看文档：https://luchen.fun/guide/env
 	if env.IsLocal() {
 		env.SetDefaultEtcdAddress([]string{"host.etcd.dev:2379"})
 	}
 }
 
 func main() {
-	log.Info("server start")
-	serverConfig := config.GetConfig().Server
-	hs := luchen.NewHTTPServer(
-		luchen.WithServiceName(serverConfig.HTTP.ServerName),
-		luchen.WithServerAddr(serverConfig.HTTP.Listen), // 不指定则使用随机端口
-	)
-	gs := luchen.NewGRPCServer(
-		luchen.WithServiceName(serverConfig.GRPC.ServerName),
-		luchen.WithServerAddr(serverConfig.GRPC.Listen), // 不指定则使用随机端口
-	)
+	hs := http.GetServer()
+	gs := grpc.GetServer()
 	registrar := luchen.NewEtcdV3Registrar(
 		hs,
 		gs,
@@ -38,11 +33,11 @@ func main() {
 	// 注册并启动服务
 	registrar.Register()
 
-	quit := make(chan os.Signal)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	<-quit
-	log.Info("server stop")
+	log.Info("server shutdown")
 	// 摘除并停止服务
 	registrar.Deregister()
 }

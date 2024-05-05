@@ -2,16 +2,13 @@ module github.com/fengjx/luchen/example
 
 go 1.22
 
-toolchain go1.22.0
-
 require (
 	github.com/fengjx/go-halo v0.0.4-rc01
 	github.com/fengjx/luchen v1.0.3-rc07
 	github.com/go-kit/kit v0.13.0
 	go.uber.org/zap v1.26.0
 	google.golang.org/grpc v1.60.1
-	google.golang.org/grpc/examples v0.0.0-20231228223359-71cc0f167537
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.34.0
 )
 
 require (
