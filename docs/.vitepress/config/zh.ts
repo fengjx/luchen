@@ -9,7 +9,7 @@ export const zh = defineConfig({
 
     sidebar: {
       '/guide/': {base: '/guide/', items: sidebarGuide()},
-      '/lca/': {base: '/lca/', items: sidebarLcKit()},
+      '/lucky/': {base: '/lucky/', items: sidebarLucky()},
     },
 
     editLink: {
@@ -55,17 +55,20 @@ function nav(): DefaultTheme.NavItem[] {
       text: '实践案例',
       items: [
         {
-          text: "低代码后台系统",
-          link: '/glca/introduction',
-          activeMatch: '/glca/'
+          text: "lucky",
+          link: '/lucky/introduction',
+          activeMatch: '/lucky/'
         }
       ],
     },
     {
       text: 'GoDoc',
       link: 'https://pkg.go.dev/github.com/fengjx/luchen',
+    },
+    {
+      text: '交流反馈',
+      link: 'about',
     }
-
   ]
 }
 
@@ -107,18 +110,25 @@ function sidebarGuide(): DefaultTheme.SidebarItem[] {
       ]
     },
     {
-      text: '内置功能',
+      text: '其他',
       collapsed: false,
       items: [
         {text: '环境', link: 'env'},
         {text: '配置加载', link: 'config'},
         {text: '日志', link: 'log'},
       ]
+    },
+    {
+      text: '工具链',
+      collapsed: false,
+      items: [
+        {text: 'cli命令', link: 'lc'},
+      ]
     }
   ]
 }
 
-function sidebarLcKit(): DefaultTheme.SidebarItem[] {
+function sidebarLucky(): DefaultTheme.SidebarItem[] {
   return [
     {
       text: '开始',
@@ -126,14 +136,14 @@ function sidebarLcKit(): DefaultTheme.SidebarItem[] {
       items: [
         {text: '简介', link: 'introduction'},
         {text: '快速开始', link: 'getting-started'},
-        {text: '工程规范', link: 'specification'},
       ]
     },
     {
-      text: '服务端',
+      text: '指南',
       collapsed: false,
       items: [
-        {text: 'HTTP server', link: 'http-server'}
+        {text: 'lucky 后端工程', link: 'lucky'},
+        {text: 'lucky-web 前端工程', link: 'lucky-web'},
       ]
     }
   ]
