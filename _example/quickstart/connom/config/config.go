@@ -1,10 +1,12 @@
 package config
 
 import (
+	"flag"
 	"os"
 
 	"github.com/fengjx/go-halo/fs"
 	"github.com/fengjx/luchen/log"
+	"go.uber.org/zap"
 
 	"github.com/fengjx/luchen"
 )
@@ -31,26 +33,33 @@ type GRPCServerConfig struct {
 }
 
 func init() {
-	var configFile string
-	envConfigPath := os.Getenv("APP_CONFIG")
-	if envConfigPath != "" {
-		configFile = envConfigPath
+	configArg := flag.String("c", "", "custom config file path")
+	flag.Parse()
+
+	appConfigFile, err := fs.Lookup("conf/app.yml", 5)
+	if err != nil {
+		log.Panic("config file not found")
 	}
-	if configFile == "" && len(os.Args) > 1 {
-		configFile = os.Args[1]
+	configs := []string{appConfigFile}
+	var configFile string
+	if configArg != nil {
+		configFile = *configArg
 	}
 	if configFile == "" {
-		confFile, err := fs.Lookup("conf/app.yml", 3)
-		if err != nil {
-			log.Panic("config file not found")
+		envConfig := os.Getenv("APP_CONFIG")
+		if envConfig != "" {
+			configFile = envConfig
 		}
-		configFile = confFile
 	}
-	configFile, err := fs.Lookup(configFile, 3)
-	if err != nil {
-		panic(err)
+	if configFile != "" {
+		configFile, err = fs.Lookup(configFile, 5)
+		if err != nil {
+			log.Panic("config file not found", zap.String("file", configFile), zap.Error(err))
+		}
+		log.Infof("load custom config file: %s", configFile)
+		configs = append(configs, configFile)
 	}
-	appConfig = luchen.MustLoadConfig[AppConfig](configFile)
+	appConfig = luchen.MustLoadConfig[AppConfig](configs...)
 }
 
 func GetConfig() AppConfig {
