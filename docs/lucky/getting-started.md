@@ -63,8 +63,7 @@ pnpm run dev
 
 账号密码：lucky / luchen
 
-![截图](./login.png)
+![截图](/screenshot/lucky/login.png)
 
-![截图](./admin-user.png)
-
+![截图](/screenshot/lucky/admin-user.png)
 

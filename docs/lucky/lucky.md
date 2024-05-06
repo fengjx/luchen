@@ -62,8 +62,6 @@ lc migrate -c tools/gen.yml
 make migrate
 ```
 
-
-
 ## 打包
 
 ### 编译二进制包

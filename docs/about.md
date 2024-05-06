@@ -9,7 +9,7 @@ editLink: false
 ## issues
 
 - luchen <https://github.com/fengjx/luchen/issues>
-- lc-kit <https://github.com/fengjx/lc-kit/issues>
+- lucky <https://github.com/fengjx/lucky/issues>
 
 ## 加入交流群
 
