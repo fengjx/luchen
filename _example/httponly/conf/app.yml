@@ -1,0 +1,4 @@
+server:
+  http:
+    server-name: "httponly"
+    listen: ":8080"
