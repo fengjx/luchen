@@ -3,7 +3,7 @@
 ## 安装
 
 ```bash
-go install https://github.com/fengjx/lc@latest
+go install github.com/fengjx/lc@latest
 ```
 
 `lc -h`可以查看帮助文档
@@ -27,17 +27,17 @@ USAGE:
 OPTIONS:
    --gomod value, -m value     指定 go.mod module
    --out value, -o value       文件生成目录，默认从 gomod 读取
-   --template value, -t value  使用模板，可选参数：lckit, simple (default: "simple")
+   --template value, -t value  使用模板，可选参数：lucky, httponly, micro (default: "httponly")
    --help, -h                  show help
 ```
 
 模板说明
 
-| 模板名称      | 说明                    |
-|-----------|-----------------------|
-| httponly  | 仅支持http协议模板           |
-| discovery | 支持http、grpc协议的服务注册模板  |
-| lckit     | lc-kit快速开发模板，附带管理后台功能 |
+| 模板名称     | 说明                    |
+|----------|-----------------------|
+| httponly | 仅支持http协议模板           |
+| micro    | 支持http、grpc协议的微服务模板   |
+| lucky    | lucky 快速开发模板，附带管理后台功能 |
 
 ## 代码生成
 
@@ -61,36 +61,30 @@ target:
       simple-name: user
 ```
 
-生成代码
+生成代码命令
 
 ```bash
 lc migrate -c gen.yml
 ```
 
-生成代码说明
-
-```bash
-
-```
-
 配置说明
 
-| 参数                                      | 默认值   | 说明                                                      |
-|-----------------------------------------|-------|---------------------------------------------------------|
-| ds.type                                 | mysql | 目前只支持 mysql                                             |
-| ds.dsn                                  | -     | 数据连接                                                    |
-| target.custom.tag-name                  | json  | 生成 entity 的 tag name                                    |
-| target.custom.template-dir              | -     | 自定义模板路径，不指定则使用内置模板                                      |
-| target.custom.out-dir                   | ./    | 生成代码目录，默认为当前路径                                          |
-| target.custom.out-dir                   | ./    | 生成代码目录，默认为当前路径                                          |
-| target.custom.use-admin                 | false | 是否生成基于[lc-kit](https://github.com/fengjx/lc-kit)的管理后台代码 |
-| target.custom.gomod                     | -     | 项目 go module path                                       |
-| target.custom.var                       | -     | 自定义参数，key-value格式，在自定义模板中可以通过`.Var.xxx`获取               |
-| target.tables                           | -     | 数据库表                                                    |
-| target.tables.${table_name}.use-admin   | false | 与参数`target.custom.use-admin`相同，优先级更高                    |
-| target.tables.${table_name}.module      | -     | 模块名称                                                    |
-| target.tables.${table_name}.simple-name | -     | 数据库表在模块内的简称，如：sys_user表，simple-name可以使用user，默认与表名相同     |
-| target.tables.${table_name}.Var         | -     | i自定义表参数，key-value格式，在自定义模板中可以通过`.TableOpt.Var.xxx`获取    |
+| 参数                                      | 默认值   | 说明                                                    |
+|-----------------------------------------|-------|-------------------------------------------------------|
+| ds.type                                 | mysql | 目前只支持 mysql                                           |
+| ds.dsn                                  | -     | 数据连接                                                  |
+| target.custom.tag-name                  | json  | 生成 entity 的 tag name                                  |
+| target.custom.template-dir              | -     | 自定义模板路径，不指定则使用内置模板                                    |
+| target.custom.out-dir                   | ./    | 生成代码目录，默认为当前路径                                        |
+| target.custom.out-dir                   | ./    | 生成代码目录，默认为当前路径                                        |
+| target.custom.use-admin                 | false | 是否生成基于[lucky](https://github.com/fengjx/lucky)的管理后台代码 |
+| target.custom.gomod                     | -     | 项目 go module path                                     |
+| target.custom.var                       | -     | 自定义参数，key-value格式，在自定义模板中可以通过`.Var.xxx`获取             |
+| target.tables                           | -     | 数据库表                                                  |
+| target.tables.${table_name}.use-admin   | false | 与参数`target.custom.use-admin`相同，优先级更高                  |
+| target.tables.${table_name}.module      | -     | 模块名称                                                  |
+| target.tables.${table_name}.simple-name | -     | 数据库表在模块内的简称，如：sys_user表，simple-name可以使用user，默认与表名相同   |
+| target.tables.${table_name}.Var         | -     | i自定义表参数，key-value格式，在自定义模板中可以通过`.TableOpt.Var.xxx`获取  |
 
 自定义函数，可以在自定义模板中使用，源码：<https://github.com/fengjx/lc/blob/dev/commands/migrate/migrate.go#L226>
 

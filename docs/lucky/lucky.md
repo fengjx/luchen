@@ -12,14 +12,14 @@ lc start -m github.com/fengjx/lucky-demo --template lucky
 
 ## 工程规范
 
-工程目录及规范说明：<a href="/guide/specification" target="_blank">luchen推荐工程规范</a>
+工程目录规范说明：<a href="/guide/specification" target="_blank">luchen推荐工程规范</a>
 
 ## 代码生成
 
 以一个新闻表为例，演示通用crud代码生成。
 
-表结构定义
 ```sql
+# 表结构定义
 create table if not exists cms_news
 (
     `id`      bigint auto_increment primary key,
@@ -37,17 +37,15 @@ create table if not exists cms_news
 ```
 
 
-配置文件`gem.yml`
+配置文件`tools/gen/config.yml`
 ```yml
 ds:
   type: mysql
   dsn: root:1234@tcp(192.168.1.200:3306)/lca2?charset=utf8mb4
 target:
   custom:
-    tag-name: json
-    out-dir: ./
-    use-admin: true
     gomod: github.com/fengjx/lucky-demo
+    use-admin: true
   tables:
     cms_news:
       module: cms
@@ -61,6 +59,20 @@ lc migrate -c tools/gen.yml
 # 或者
 make migrate
 ```
+
+生成文件
+```bash
+logic/cms/internal/dao/news.go  
+logic/cms/internal/data/entity/cms_news.go 
+logic/cms/internal/data/meta/cms_news.go
+logic/cms/internal/endpoint/news_admin_endpoint.go
+logic/cms/internal/endpoint/news_admin_http.go
+logic/cms/internal/service/news_base.go
+static/pages/cms/news/index.json
+```
+
+
+
 
 ## 打包
 

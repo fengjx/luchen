@@ -9,15 +9,15 @@
 ## 项目特性
 
 - 通过 cli 命令生成通用crud代码，缩短项目交付时间
-- 通过json配置实现页面定制化开发，无需编写前端代码
+- 通过json配置编写管理后台页面，无需编写前端代码
 - 统一工程规范，良好的分层设计，代码结构清晰、易扩展
 - go 语言开发，节约服务器成本
 
 ## 适合场景
 
 1. go 开发者，你在寻找一款基于go实现类似`django`的快速开发平台。
-2. 没有专职前端开发，后端兼顾前端页面开发（管理后台）。
-3. 前端页面使用 [amis](https://github.com/baidu/amis) 开发，你需要学习`amis`如何使用，[快速入门文档](https://baidu.github.io/amis/zh-CN/docs/start/getting-started)。
+2. 没有专职前端开发，后端兼顾前端页面开发（管理后台页面）。
+3. 前端页面使用 [amis](https://github.com/baidu/amis) 开发，你需要学习如何使用`amis`，[快速入门文档](https://baidu.github.io/amis/zh-CN/docs/start/getting-started)。
 4. 虽然[amis](https://github.com/baidu/amis)通过json配置页面，但是如果你有一些定制化需求，还是需要懂一些基础的js知识。
 
 ## 工程说明
@@ -30,7 +30,7 @@
 
 演示地址：<http://admin.luchen.fun>
 
-账号密码：lucky / luchen
+账号密码：admin / luchen
 
 ## 系统截图
 
