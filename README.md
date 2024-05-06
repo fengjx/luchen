@@ -33,17 +33,22 @@ hello: fjx
 - [feathttp](_example/feathttp) http 功能特性示例
 - [featgrpc](_example/featgrpc) grpc 功能特性示例
 - [quickstart](_example/quickstart) 多协议支持示例
+- [httponly](_example/httponly) 仅支持http协议项目模板
 - [gateway](_example/gateway) 网关服务示例
 
 ## 文档
 
-详细的文档请查阅: <http://luchen.fun>
+详细的文档请查阅: <https://luchen.fun>
 
 ## 生态
 
-- [lca](https://github.com/fengjx/lca) 基于 amis 开发的低代码后台系统
-- [glca](https://github.com/fengjx/lca) 基于`luchen`开发 `lca` 后台服务实现
-- [lc](https://github.com/fengjx/lc) glca 命令行工具，可以快速生成通用代码
+- [lc](https://github.com/fengjx/lc) 配套命令行工具，可以快速生成项目和通用crud代码
+- [lucky](https://github.com/fengjx/lucky) 基于`luchen`开发的快速开发平台，通过命令生成crud代码
+- [lucky-web](https://github.com/fengjx/lucky-web) 基于[amis](https://github.com/baidu/amis)开发的低代码后台系统，通过json编写前端页面
+
+## 版权声明
+
+你可以自由使用本项目用于个人、商业用途及二次开发，但请保留源码出处。
 
 ## 作者
 

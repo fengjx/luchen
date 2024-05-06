@@ -11,7 +11,6 @@
 ```bash
 lc start -m github.com/fengjx/lucky-demo --template lucky
 ```
-> 文件目录默认按 gomod 创建，可以通过参数 -o 指定
 
 ## 初始化数据
 
@@ -61,7 +60,7 @@ pnpm run dev
 
 访问地址：<http://localhost:3001>
 
-账号密码：lucky / luchen
+账号密码：admin / luchen
 
 ![截图](/screenshot/lucky/login.png)
 
