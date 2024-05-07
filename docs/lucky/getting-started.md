@@ -12,6 +12,8 @@
 lc start -m github.com/fengjx/lucky-demo --template lucky
 ```
 
+> 更多参数说明可以查看：<a href="/guide/lc" target="_blank">cli工具</a>
+
 ## 初始化数据
 
 创建数据库

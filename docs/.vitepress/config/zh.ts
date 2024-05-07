@@ -142,8 +142,11 @@ function sidebarLucky(): DefaultTheme.SidebarItem[] {
       text: '指南',
       collapsed: false,
       items: [
-        {text: 'lucky 后端工程', link: 'lucky'},
-        {text: 'lucky-web 前端工程', link: 'lucky-web'},
+        {text: '工程说明', link: 'project'},
+        {text: '代码生成', link: 'migrate'},
+        {text: '页面配置', link: 'page'},
+        {text: '数据字典', link: 'dict'},
+        {text: '系统配置', link: 'config'},
       ]
     }
   ]
