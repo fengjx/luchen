@@ -35,16 +35,10 @@ const (
 // GetEnv 返回当前环境
 func GetEnv() string {
 	env := os.Getenv("APP_ENV")
-	switch env {
-	case Test:
-		return Test
-	case Prod:
-		return Prod
-	case Dev:
-		return Dev
-	default:
+	if env == "" {
 		return Local
 	}
+	return env
 }
 
 // Is 返回是否是指定环境
