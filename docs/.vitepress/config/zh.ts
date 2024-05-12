@@ -32,7 +32,7 @@ export const zh = defineConfig({
     },
 
     lastUpdated: {
-      text: '最后更新于'
+      text: '最后更新于',
     },
 
     langMenuLabel: '多语言',
@@ -144,7 +144,8 @@ function sidebarLucky(): DefaultTheme.SidebarItem[] {
       items: [
         {text: '工程说明', link: 'project'},
         {text: '代码生成', link: 'migrate'},
-        {text: '页面配置', link: 'page'},
+        {text: '菜单配置', link: 'menu'},
+        {text: '页面开发', link: 'page'},
         {text: '数据字典', link: 'dict'},
         {text: '系统配置', link: 'config'},
       ]

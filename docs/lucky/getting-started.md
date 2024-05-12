@@ -18,7 +18,7 @@ lc start -m github.com/fengjx/lucky-demo --template lucky
 
 创建数据库
 ```sql
-create database lca default character set utf8mb4 collate utf8mb4_bin;
+create database lucky_demo default character set utf8mb4 collate utf8mb4_bin;
 ```
 
 修改数据库配置 `conf/app.yml`
@@ -28,10 +28,7 @@ db:
   default:
     type: mysql
     # 修改为自己的数据库连接地址
-    dsn: root:1234@tcp(localhost:3306)/lca?charset=utf8mb4,utf8&tls=false&timeout=10s&parseTime=true
-    show-sql: true
-    max-idle: 5
-    max-conn: 10
+    dsn: root:1234@tcp(localhost:3306)/lucky-demo?charset=utf8mb4,utf8&tls=false&timeout=10s&parseTime=true
 ```
 
 ```bash
@@ -46,6 +43,11 @@ go run tools/init/main.go
 
 ```bash
 go run main.go
+```
+
+测试服务访问是否正常
+```bash
+curl -i http://localhost:8080/api/open/app/data
 ```
 
 ## 启动前端工程
