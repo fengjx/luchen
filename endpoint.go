@@ -20,20 +20,28 @@ type AccessLogOpt struct {
 	ContextFields map[string]GetValueFromContext
 	PrintResp     bool
 	AccessLog     AccessLog
+	maxAge        int
 }
 
 // AccessMiddleware 请求日志
 func AccessMiddleware(opt *AccessLogOpt) Middleware {
 	return func(next Endpoint) Endpoint {
-		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-			var accesslog AccessLog
-			var contextFields map[string]GetValueFromContext
-			var printResp bool
-			if opt != nil {
-				accesslog = opt.AccessLog
-				contextFields = opt.ContextFields
-				printResp = opt.PrintResp
+		var accesslog AccessLog
+		var contextFields map[string]GetValueFromContext
+		var printResp bool
+		maxAge := 7
+		if opt != nil {
+			accesslog = opt.AccessLog
+			contextFields = opt.ContextFields
+			printResp = opt.PrintResp
+			if opt.maxAge > 0 {
+				maxAge = opt.maxAge
 			}
+		}
+		if accesslog == nil {
+			accesslog = NewAccessLog(1024, 7, maxAge)
+		}
+		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			fields := map[string]any{}
 			for field, fn := range contextFields {
 				value := fn(ctx)
@@ -61,9 +69,6 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 			startTime := RequestStartTime(ctx)
 			fields["rt"] = time.Since(startTime).Nanoseconds()
 			fields["rts"] = time.Since(startTime).String()
-			if accesslog == nil {
-				accesslog = NewAccessLog(1024, 7, 7)
-			}
 			accesslog.Print(fields)
 			return
 		}
@@ -88,8 +93,9 @@ func (impl accessLogImpl) Print(fields map[string]any) {
 
 // NewAccessLog 创建一个 AccessLog
 func NewAccessLog(maxSizeMB int, maxBackups int, maxAge int) AccessLog {
+	logPath := path.Join(log.GetLogDir(), "access.log")
 	w := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   path.Join(log.GetLogDir(), "access.log"),
+		Filename:   logPath,
 		MaxSize:    maxSizeMB,
 		MaxBackups: maxBackups,
 		MaxAge:     maxAge,
