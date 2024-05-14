@@ -40,20 +40,20 @@ hello: fjx
 
 详细的文档请查阅: <https://luchen.fun>
 
-## 生态
+## 相关项目
 
-- [lc](https://github.com/fengjx/lc) 配套命令行工具，可以快速生成项目和通用crud代码
-- [lucky](https://github.com/fengjx/lucky) 基于`luchen`开发的快速开发平台，通过命令生成crud代码
-- [lucky-web](https://github.com/fengjx/lucky-web) 基于[amis](https://github.com/baidu/amis)开发的低代码后台系统，通过json编写前端页面
+- [lucky](https://github.com/fengjx/lucky) 基于`luchen`实现的快速开发平台-后端工程
+- [lucky-web](https://github.com/fengjx/lucky-web) `lucky`前端工程
+- [lc](https://github.com/fengjx/lc) cli 工具
+- [daox](https://github.com/fengjx/daox) 数据库访问辅助类库
+
+## 技术交流
+
+加我微信拉你进群，请备注：`luchen`
+
+<img src="https://luchen.fun/assets/img/wx.jpg" width="40%">
 
 ## 版权声明
 
-你可以自由使用本项目用于个人、商业用途及二次开发，但请保留源码出处。
-
-## 作者
-
-![个人微信](docs/public/assets/img/wx.jpg)
-
-- blog: <http://blog.fengjx.com>
-- email: fengjianxin2012@gmail.com
+你可以自由使用本项目用于个人、商业用途及二次开发，但请注明源码出处。
 
