@@ -20,7 +20,7 @@ type AccessLogOpt struct {
 	ContextFields map[string]GetValueFromContext
 	PrintResp     bool
 	AccessLog     AccessLog
-	maxAge        int
+	MaxAge        int
 }
 
 // AccessMiddleware 请求日志
@@ -34,8 +34,8 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 			accesslog = opt.AccessLog
 			contextFields = opt.ContextFields
 			printResp = opt.PrintResp
-			if opt.maxAge > 0 {
-				maxAge = opt.maxAge
+			if opt.MaxAge > 0 {
+				maxAge = opt.MaxAge
 			}
 		}
 		if accesslog == nil {
