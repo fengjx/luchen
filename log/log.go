@@ -52,12 +52,11 @@ func init() {
 
 func createFileLog(level logger.Level, logDir string) logger.Logger {
 	app := env.GetAppName()
-	targetDir := filepath.Join(logDir, app)
-	err := os.MkdirAll(targetDir, os.ModePerm)
+	err := os.MkdirAll(logDir, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
-	logfile := filepath.Join(targetDir, app+".log")
+	logfile := filepath.Join(logDir, app+".log")
 	appLog := logger.New(level, logfile, 1024, 7, zap.AddCallerSkip(2))
 	log.Println("log file", logfile)
 	appLog.Infof("log file: %s", logfile)

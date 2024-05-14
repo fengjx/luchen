@@ -113,6 +113,6 @@ func NewAccessLog(maxSizeMB int, maxBackups int, maxAge int) AccessLog {
 		w,
 		zapcore.InfoLevel,
 	)
-	l := zap.New(core, zap.AddCaller())
+	l := zap.New(core)
 	return &accessLogImpl{log: l}
 }
