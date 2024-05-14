@@ -3,7 +3,7 @@ package luchen
 import (
 	"context"
 	"errors"
-	"path"
+	"path/filepath"
 	"time"
 
 	"go.uber.org/zap"
@@ -93,7 +93,7 @@ func (impl accessLogImpl) Print(fields map[string]any) {
 
 // NewAccessLog 创建一个 AccessLog
 func NewAccessLog(maxSizeMB int, maxBackups int, maxAge int) AccessLog {
-	logPath := path.Join(log.GetLogDir(), "access.log")
+	logPath := filepath.Join(log.GetLogDir(), "access.log")
 	w := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   logPath,
 		MaxSize:    maxSizeMB,
