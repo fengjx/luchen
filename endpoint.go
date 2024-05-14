@@ -3,7 +3,7 @@ package luchen
 import (
 	"context"
 	"errors"
-	"path"
+	"path/filepath"
 	"time"
 
 	"go.uber.org/zap"
@@ -20,7 +20,7 @@ type AccessLogOpt struct {
 	ContextFields map[string]GetValueFromContext
 	PrintResp     bool
 	AccessLog     AccessLog
-	maxAge        int
+	MaxAge        int
 }
 
 // AccessMiddleware 请求日志
@@ -34,8 +34,8 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 			accesslog = opt.AccessLog
 			contextFields = opt.ContextFields
 			printResp = opt.PrintResp
-			if opt.maxAge > 0 {
-				maxAge = opt.maxAge
+			if opt.MaxAge > 0 {
+				maxAge = opt.MaxAge
 			}
 		}
 		if accesslog == nil {
@@ -93,7 +93,7 @@ func (impl accessLogImpl) Print(fields map[string]any) {
 
 // NewAccessLog 创建一个 AccessLog
 func NewAccessLog(maxSizeMB int, maxBackups int, maxAge int) AccessLog {
-	logPath := path.Join(log.GetLogDir(), "access.log")
+	logPath := filepath.Join(log.GetLogDir(), "access.log")
 	w := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   logPath,
 		MaxSize:    maxSizeMB,
