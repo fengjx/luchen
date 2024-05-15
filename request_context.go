@@ -12,6 +12,8 @@ type (
 	methodCtxKey   struct{}
 
 	requestStartTimeCtxKey struct{}
+
+	requestClientIP struct{}
 )
 
 // RequestEndpoint 请求端点
@@ -60,4 +62,13 @@ func RequestStartTime(ctx context.Context) time.Time {
 
 func withRequestStartTime(ctx context.Context, t time.Time) context.Context {
 	return context.WithValue(ctx, requestStartTimeCtxKey{}, t)
+}
+
+func withRequestClientIP(ctx context.Context, ip string) context.Context {
+	return context.WithValue(ctx, requestClientIP{}, ip)
+}
+
+// ClientIP 返回客户端IP
+func ClientIP(ctx context.Context) string {
+	return ctx.Value(requestClientIP{}).(string)
 }

@@ -67,3 +67,8 @@ func TestStatic(t *testing.T) {
 	}
 	httpServer.Start()
 }
+
+func TestHTTPServer(t *testing.T) {
+	s := newHelloHttpServer("http-test", ":8001")
+	s.Start()
+}

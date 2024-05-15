@@ -39,7 +39,7 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 			}
 		}
 		if accesslog == nil {
-			accesslog = NewAccessLog(1024, 7, maxAge)
+			accesslog = NewAccessLog(1024, maxAge, maxAge)
 		}
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			fields := map[string]any{}
@@ -50,6 +50,7 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 			fields["endpoint"] = RequestEndpoint(ctx)
 			fields["protocol"] = RequestProtocol(ctx)
 			fields["method"] = RequestMethod(ctx)
+			fields["ip"] = ClientIP(ctx)
 			fields["request"] = request
 
 			response, err = next(ctx, request)
