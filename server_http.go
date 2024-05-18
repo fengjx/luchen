@@ -18,7 +18,7 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 
 	"github.com/fengjx/luchen/env"
-	"github.com/fengjx/luchen/http/middleware"
+	"github.com/fengjx/luchen/http/httpkit"
 	"github.com/fengjx/luchen/log"
 )
 
@@ -79,7 +79,6 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 		router:     mux,
 	}
 	svr.Use(
-		middleware.RealIP,
 		ClientIPHTTPMiddleware,
 		TraceHTTPMiddleware,
 	)
@@ -169,8 +168,10 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 // ClientIPHTTPMiddleware 获取客户端IP
 func ClientIPHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// r.RemoteAddr 在 middleware.RealIP 已经赋值
-		ctx := withRequestClientIP(r.Context(), r.RemoteAddr)
+		ctx := r.Context()
+		if rip := httpkit.GetRealIP(r); rip != "" {
+			ctx = withRequestClientIP(r.Context(), rip)
+		}
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -6,9 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/fengjx/go-halo/logger"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/fengjx/luchen/log"
 )
@@ -20,7 +19,7 @@ type AccessLogOpt struct {
 	ContextFields map[string]GetValueFromContext
 	PrintResp     bool
 	AccessLog     AccessLog
-	MaxAge        int
+	MaxDay        int
 }
 
 // AccessMiddleware 请求日志
@@ -29,17 +28,17 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 		var accesslog AccessLog
 		var contextFields map[string]GetValueFromContext
 		var printResp bool
-		maxAge := 7
+		maxDay := 7
 		if opt != nil {
 			accesslog = opt.AccessLog
 			contextFields = opt.ContextFields
 			printResp = opt.PrintResp
-			if opt.MaxAge > 0 {
-				maxAge = opt.MaxAge
+			if opt.MaxDay > 0 {
+				maxDay = opt.MaxDay
 			}
 		}
 		if accesslog == nil {
-			accesslog = NewAccessLog(1024, maxAge, maxAge)
+			accesslog = NewAccessLog(10*1024, maxDay, maxDay)
 		}
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			fields := map[string]any{}
@@ -81,7 +80,7 @@ type AccessLog interface {
 }
 
 type accessLogImpl struct {
-	log *zap.Logger
+	log logger.Logger
 }
 
 func (impl accessLogImpl) Print(fields map[string]any) {
@@ -93,27 +92,13 @@ func (impl accessLogImpl) Print(fields map[string]any) {
 }
 
 // NewAccessLog 创建一个 AccessLog
-func NewAccessLog(maxSizeMB int, maxBackups int, maxAge int) AccessLog {
-	logPath := filepath.Join(log.GetLogDir(), "access.log")
-	w := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   logPath,
-		MaxSize:    maxSizeMB,
+func NewAccessLog(maxSizeMB int, maxBackups int, maxDay int) AccessLog {
+	logFile := filepath.Join(log.GetLogDir(), "access.log")
+	l := logger.New(&logger.Options{
+		LogFile:    logFile,
+		MaxSizeMB:  maxSizeMB,
 		MaxBackups: maxBackups,
-		MaxAge:     maxAge,
+		MaxDays:    maxDay,
 	})
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.TimeKey = "time"
-	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000")
-	encoderConfig.FunctionKey = ""
-	encoderConfig.LevelKey = ""
-	encoderConfig.MessageKey = ""
-	encoderConfig.NameKey = ""
-	encoderConfig.CallerKey = ""
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),
-		w,
-		zapcore.InfoLevel,
-	)
-	l := zap.New(core)
 	return &accessLogImpl{log: l}
 }
