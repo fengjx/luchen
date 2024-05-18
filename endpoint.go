@@ -99,6 +99,7 @@ func NewAccessLog(maxSizeMB int, maxBackups int, maxDay int) AccessLog {
 		MaxSizeMB:  maxSizeMB,
 		MaxBackups: maxBackups,
 		MaxDays:    maxDay,
+		Thin:       true,
 	})
 	return &accessLogImpl{log: l}
 }
