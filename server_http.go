@@ -169,9 +169,11 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 func ClientIPHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		if rip := httpkit.GetRealIP(r); rip != "" {
-			ctx = withRequestClientIP(r.Context(), rip)
+		rip := httpkit.GetRealIP(r)
+		if rip == "" {
+			rip = r.RemoteAddr
 		}
+		ctx = withRequestClientIP(r.Context(), rip)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
