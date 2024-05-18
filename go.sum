@@ -14,6 +14,8 @@ github.com/fengjx/go-halo v0.0.4-rc02 h1:CNe970zakbI0lQrTFUxrbAYMEJl5GPnuXjN64JD
 github.com/fengjx/go-halo v0.0.4-rc02/go.mod h1:2+XqPtPM+OshHRoDfVH681Sh9zFJ95lOd5QRNMRaISs=
 github.com/fengjx/go-halo v0.0.4-rc03 h1:kI9GXV8sdX7m6wlbsoZvScAjO8+5iPCuVs8KQgOiCOU=
 github.com/fengjx/go-halo v0.0.4-rc03/go.mod h1:2+XqPtPM+OshHRoDfVH681Sh9zFJ95lOd5QRNMRaISs=
+github.com/fengjx/go-halo v0.1.0-rc02 h1:T/n2LsvTRTARAie78kB3j3l/mK1TZHG3rkf+4AI0itk=
+github.com/fengjx/go-halo v0.1.0-rc02/go.mod h1:2+XqPtPM+OshHRoDfVH681Sh9zFJ95lOd5QRNMRaISs=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=

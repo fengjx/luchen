@@ -57,7 +57,12 @@ func createFileLog(level logger.Level, logDir string) logger.Logger {
 		panic(err)
 	}
 	logfile := filepath.Join(logDir, app+".log")
-	appLog := logger.New(level, logfile, 2*1024, 15, zap.AddCallerSkip(2))
+	appLog := logger.New(&logger.Options{
+		Level:     level,
+		LogFile:   logfile,
+		MaxSizeMB: 2 * 1024,
+		MaxDays:   15,
+	}, zap.AddCallerSkip(2))
 	log.Println("log file", logfile)
 	appLog.Infof("log file: %s", logfile)
 	return appLog
