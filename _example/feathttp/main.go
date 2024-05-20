@@ -36,7 +36,14 @@ type helloHandler struct {
 }
 
 func (h *helloHandler) Bind(router *luchen.HTTPServeMux) {
+	// curl http://localhost:8080/say-hello?name=fjx
 	router.Handle("/say-hello", h.sayHello())
+
+	// 为子路由添加中间件
+	router.Sub("/log", func(sub *luchen.HTTPServeMux) {
+		sub.Use(logMiddleware)
+		sub.Handle("/say-hello", h.sayHello()) // curl http://localhost:8080/log/say-hello?name=fjx
+	})
 }
 
 func (h *helloHandler) sayHello() *luchen.HTTPTransportServer {
@@ -73,6 +80,14 @@ func timeMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			log.Infof("take time: %s, %v", requestURI, time.Since(start))
 		}()
+		next.ServeHTTP(w, r)
+	})
+}
+
+// 打印日志
+func logMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.InfofCtx(r.Context(), "request %s", r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }

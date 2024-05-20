@@ -89,11 +89,29 @@ func timeMiddleware(next http.Handler) http.Handler {
 }
 ```
 
+使用中间件
 ```go
-// 使用中间件
 httpServer.Use(
     timeMiddleware,
 )
+```
+
+在子路由中使用中间件
+```go
+// 为子路由添加中间件
+router.Sub("/log", func(sub *luchen.HTTPServeMux) {
+    sub.Use(logMiddleware)
+    sub.Handle("/say-hello", h.sayHello()) // curl http://localhost:8080/log/say-hello?name=fjx
+})
+
+
+// 打印日志
+func logMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        log.InfofCtx(r.Context(), "request %s", r.RequestURI)
+        next.ServeHTTP(w, r)
+    })
+}
 ```
 
 
