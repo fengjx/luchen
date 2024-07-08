@@ -125,19 +125,21 @@ func (c *HTTPClient) call(ctx context.Context, req *HTTPRequest) (*HTTPResponse,
 	}
 	rawurl := fmt.Sprintf("%s://%s%s", ProtocolHTTP, node.Addr, req.Path)
 	var httpReq *http.Request
+	var contentType string
 	if req.Body != nil {
+		contentType = "application/json"
 		bodyBuf := bytes.NewBuffer(req.Body)
 		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, bodyBuf)
-		httpReq.Header.Set("Content-Type", "application/json")
 	} else if len(req.Form) > 0 {
+		contentType = "application/x-www-form-urlencoded"
 		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, strings.NewReader(req.Form.Encode()))
-		httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	} else {
 		httpReq, err = http.NewRequestWithContext(ctx, req.Method, rawurl, nil)
 	}
 	if err != nil {
 		return nil, err
 	}
+	httpReq.Header.Set("Content-Type", contentType)
 	if len(req.Params) > 0 {
 		httpReq.URL.RawQuery = req.Params.Encode()
 	}
