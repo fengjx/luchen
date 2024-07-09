@@ -16,6 +16,8 @@ import (
 	"github.com/fengjx/luchen/env"
 )
 
+const envLogDirKey = "LUCHEN_LOG_DIR"
+
 type (
 	loggerKey struct{}
 )
@@ -33,8 +35,8 @@ func init() {
 	if env.IsProd() {
 		level = logger.InfoLevel
 	}
-	logDir := os.Getenv("LUCHEN_LOG_DIR")
-	if len(logDir) > 0 {
+	logDir := os.Getenv(envLogDirKey)
+	if logDir != "" {
 		_log = createFileLog(level, logDir)
 		_log.SetLevel(level)
 		return
@@ -50,13 +52,17 @@ func init() {
 
 func createFileLog(level logger.Level, logDir string) logger.Logger {
 	app := env.GetAppName()
-	targetDir := filepath.Join(logDir, app)
-	err := os.MkdirAll(targetDir, os.ModePerm)
+	err := os.MkdirAll(logDir, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
-	logfile := filepath.Join(targetDir, app+".log")
-	appLog := logger.New(level, logfile, 1024, 7, zap.AddCallerSkip(2))
+	logfile := filepath.Join(logDir, app+".log")
+	appLog := logger.New(&logger.Options{
+		Level:     level,
+		LogFile:   logfile,
+		MaxSizeMB: 2 * 1024,
+		MaxDays:   15,
+	}, zap.AddCallerSkip(2))
 	log.Println("log file", logfile)
 	appLog.Infof("log file: %s", logfile)
 	return appLog
@@ -64,8 +70,8 @@ func createFileLog(level logger.Level, logDir string) logger.Logger {
 
 // GetLogDir 返回日志路径
 func GetLogDir() string {
-	logDir := os.Getenv("LUCHEN_LOG_DIR")
-	if len(logDir) > 0 {
+	logDir := os.Getenv(envLogDirKey)
+	if logDir != "" {
 		return logDir
 	}
 	return _logDir

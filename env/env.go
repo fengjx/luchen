@@ -21,33 +21,30 @@ func init() {
 	_appPath = appPath
 }
 
-// ENV 环境
-type ENV string
-
 const (
 	// Local 本地环境
-	Local ENV = "local"
+	Local = "local"
 	// Dev 开发环境
-	Dev ENV = "dev"
+	Dev = "dev"
 	// Test 测试环境
-	Test ENV = "test"
+	Test = "test"
 	// Prod 生产环境
-	Prod ENV = "prod"
+	Prod = "prod"
 )
 
 // GetEnv 返回当前环境
-func GetEnv() ENV {
+func GetEnv() string {
 	env := os.Getenv("APP_ENV")
-	switch ENV(env) {
-	case Test:
-		return Test
-	case Prod:
-		return Prod
-	case Dev:
-		return Dev
-	default:
+	if env == "" {
 		return Local
 	}
+	return env
+}
+
+// Is 返回是否是指定环境
+// 框架定义了四种环境：local、dev、test、prod，这个方法可以判断这四种环境意外的情况
+func Is(env string) bool {
+	return GetEnv() == env
 }
 
 // IsProd 返回是否是生产环境
