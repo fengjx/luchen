@@ -4,6 +4,11 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"github.com/go-kit/kit/endpoint"
+	"go.uber.org/zap"
+
+	"github.com/fengjx/luchen/log"
 )
 
 // GetValueFromContext 从 context 中获取值
@@ -65,6 +70,25 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 			fields["rts"] = time.Since(startTime).String()
 			accesslog.Print(fields)
 			return
+		}
+	}
+}
+
+// LogMiddleware 错误日志堆栈打印，放在第一个执行
+func LogMiddleware() Middleware {
+	return func(next endpoint.Endpoint) endpoint.Endpoint {
+		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+			resp, err := next(ctx, request)
+			if err == nil {
+				return resp, nil
+			}
+			var errn *Errno
+			ok := errors.As(err, &errn)
+			e := RequestEndpoint(ctx)
+			if !ok {
+				log.ErrorCtx(ctx, "internal server Error", zap.Any("req", request), zap.String("endpoint", e), zap.Error(err))
+			}
+			return resp, err
 		}
 	}
 }
