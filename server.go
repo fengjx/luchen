@@ -141,11 +141,12 @@ func Stop() {
 		// 停止服务
 		if err := server.Stop(); err != nil {
 			log.Error("server stop err", zap.Error(err))
+		} else {
+			log.Info(
+				"server stop gracefully",
+				zap.String("name", server.GetServiceInfo().Name),
+			)
 		}
-		log.Info(
-			"server stop gracefully",
-			zap.String("name", server.GetServiceInfo().Name),
-		)
 	}
 }
 
