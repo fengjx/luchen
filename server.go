@@ -1,12 +1,12 @@
 package luchen
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"sync"
 	"time"
 
+	"github.com/fengjx/go-halo/halo"
 	"github.com/fengjx/go-halo/hook"
 	"go.uber.org/zap"
 
@@ -112,15 +112,10 @@ func (s *baseServer) GetServiceInfo() *ServiceInfo {
 
 // Start 启动服务
 func Start(svrs ...Server) {
-	start(nil, svrs...)
+	start(svrs...)
 }
 
-// StartWithContext 启动服务
-func StartWithContext(ctx context.Context, svrs ...Server) {
-	start(ctx, svrs...)
-}
-
-func start(ctx context.Context, svrs ...Server) {
+func start(svrs ...Server) {
 	servers = svrs
 	for _, server := range servers {
 		svr := server
@@ -134,13 +129,9 @@ func start(ctx context.Context, svrs ...Server) {
 			}
 		}()
 	}
-	if ctx == nil {
-		return
-	}
-	select {
-	case <-ctx.Done():
+	halo.AddShutdownCallback(func() {
 		Stop()
-	}
+	})
 }
 
 // Stop 停止服务
@@ -150,11 +141,12 @@ func Stop() {
 		// 停止服务
 		if err := server.Stop(); err != nil {
 			log.Error("server stop err", zap.Error(err))
+		} else {
+			log.Info(
+				"server stop gracefully",
+				zap.String("name", server.GetServiceInfo().Name),
+			)
 		}
-		log.Info(
-			"server stop gracefully",
-			zap.String("name", server.GetServiceInfo().Name),
-		)
 	}
 }
 
