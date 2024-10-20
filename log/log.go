@@ -41,8 +41,8 @@ func init() {
 		_log.SetLevel(level)
 		return
 	}
-	if env.IsLocal() {
-		_log = logger.NewConsole(zap.AddCallerSkip(2), zap.AddStacktrace(zap.ErrorLevel))
+	if env.IsDev() {
+		_log = logger.NewConsole(zap.AddCallerSkip(2))
 		_log.SetLevel(level)
 		return
 	}

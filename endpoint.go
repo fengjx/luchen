@@ -3,6 +3,7 @@ package luchen
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-kit/kit/endpoint"
@@ -86,7 +87,7 @@ func LogMiddleware() Middleware {
 			ok := errors.As(err, &errn)
 			e := RequestEndpoint(ctx)
 			if !ok {
-				log.ErrorCtx(ctx, "internal server Error", zap.Any("req", request), zap.String("endpoint", e), zap.Error(err))
+				log.ErrorCtx(ctx, fmt.Sprintf("internal server Error: %+v", err), zap.Any("req", request), zap.String("endpoint", e))
 			}
 			return resp, err
 		}
