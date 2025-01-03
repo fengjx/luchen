@@ -19,7 +19,7 @@ func (p *ProtoMarshaller) Marshal(v any) ([]byte, error) {
 	if !ok {
 		return nil, ErrInvalidProtoMessage
 	}
-	return p.Marshal(msg)
+	return proto.Marshal(msg)
 }
 
 // Unmarshal 将字节切片反序列化为给定的 protobuf 消息
@@ -28,7 +28,7 @@ func (p *ProtoMarshaller) Unmarshal(data []byte, v any) error {
 	if !ok {
 		return ErrInvalidProtoMessage
 	}
-	return p.Unmarshal(data, msg)
+	return proto.Unmarshal(data, msg)
 }
 
 // NewDecoder 创建一个从 io.Reader 读取并解码 protobuf 数据的解码器

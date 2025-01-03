@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/emicklei/proto"
 	"github.com/fengjx/go-halo/addr"
 	"github.com/fengjx/xin"
 	"github.com/go-kit/kit/endpoint"
@@ -125,12 +126,11 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 // ClientIPHTTPMiddleware 获取客户端IP
 func ClientIPHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
 		rip := xin.GetRealIP(r)
 		if rip == "" {
 			rip = r.RemoteAddr
 		}
-		ctx = withRequestClientIP(r.Context(), rip)
+		ctx := withRequestClientIP(r.Context(), rip)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -164,17 +164,18 @@ func contextServerBefore(ctx context.Context, req *http.Request) context.Context
 	return ctx
 }
 
-func decodeHTTPRequest(ctx context.Context, req *http.Request) (request any, err error) {
+func decodeHTTPRequest(ctx context.Context, req *http.Request) (any, error) {
 	marshaller := Marshaller(ctx)
-	body, err := io.ReadAll(req.Body)
+	payload, err := io.ReadAll(req.Body)
 	if err != nil {
 		return nil, err
 	}
-	err = marshaller.Unmarshal(body, &request)
+	var protoMsg proto.Message
+	err = marshaller.Unmarshal(payload, &protoMsg)
 	if err != nil {
 		return nil, err
 	}
-	return
+	return protoMsg, nil
 }
 
 func encodeHTTPResponse(ctx context.Context, w http.ResponseWriter, data any) error {
