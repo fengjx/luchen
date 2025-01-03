@@ -12,6 +12,26 @@ import (
 	"github.com/fengjx/luchen/log"
 )
 
+// MakeEndpoint 包装 endpoint，添加类型安全和中间件支持
+func MakeEndpoint[I any, O any](fn func(ctx context.Context, request I) (O, error), middlewares ...Middleware) Endpoint {
+	e := func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		in, ok := request.(I)
+		if !ok {
+			return nil, fmt.Errorf("%w: expected %T, got %T", ErrInvalidRequest, *new(I), request)
+		}
+		return fn(ctx, in)
+	}
+	return EndpointChain(e, middlewares...)
+}
+
+// EndpointChain Endpoint 中间件包装
+func EndpointChain(e Endpoint, middlewares ...Middleware) Endpoint {
+	if len(middlewares) == 0 {
+		return e
+	}
+	return endpoint.Chain(middlewares[0], middlewares[1:]...)(e)
+}
+
 // GetValueFromContext 从 context 中获取值
 type GetValueFromContext func(ctx context.Context) any
 

@@ -6,7 +6,8 @@ import (
 
 var (
 	// ErrSystem 系统错误
-	ErrSystem = &Errno{Code: 500, HTTPCode: 500, Msg: "系统错误"}
+	ErrSystem         = &Errno{Code: 500, HTTPCode: 500, Msg: "系统错误"}
+	ErrInvalidRequest = &Errno{Code: 400, HTTPCode: 400, Msg: "参数错误或类型不匹配"}
 )
 
 // Errno 错误编码定义

@@ -3,6 +3,8 @@ package luchen
 import (
 	"context"
 	"time"
+
+	"github.com/fengjx/luchen/marshal"
 )
 
 type (
@@ -14,6 +16,8 @@ type (
 	requestStartTimeCtxKey struct{}
 
 	requestClientIP struct{}
+
+	httpRequestMarshallerCtxKey struct{}
 )
 
 // RequestEndpoint 请求端点
@@ -71,4 +75,13 @@ func withRequestClientIP(ctx context.Context, ip string) context.Context {
 // ClientIP 返回客户端IP
 func ClientIP(ctx context.Context) string {
 	return ctx.Value(requestClientIP{}).(string)
+}
+
+func withMarshaller(ctx context.Context, marshaller marshal.Marshaller) context.Context {
+	return context.WithValue(ctx, httpRequestMarshallerCtxKey{}, marshaller)
+}
+
+// Marshaller 返回当前请求的 marshaller
+func Marshaller(ctx context.Context) marshal.Marshaller {
+	return ctx.Value(httpRequestMarshallerCtxKey{}).(marshal.Marshaller)
 }

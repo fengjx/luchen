@@ -3,14 +3,13 @@ package luchen
 import (
 	"context"
 	"fmt"
-	"io/fs"
+	"io"
 	"net"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
-	"github.com/fengjx/go-halo/json"
+	"github.com/fengjx/xin"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -18,8 +17,8 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 
 	"github.com/fengjx/luchen/env"
-	"github.com/fengjx/luchen/http/httpkit"
 	"github.com/fengjx/luchen/log"
+	"github.com/fengjx/luchen/marshal"
 )
 
 type (
@@ -43,8 +42,8 @@ var (
 // HTTPServer http server 实现
 type HTTPServer struct {
 	*baseServer
-	httpServer *http.Server
-	router     *HTTPServeMux
+	*xin.Xin
+	started bool
 }
 
 // NewHTTPServer 创建 http server
@@ -63,10 +62,7 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 	if options.metadata == nil {
 		options.metadata = make(map[string]any)
 	}
-	mux := NewHTTPServeMux()
-	httpServer := &http.Server{
-		Handler: mux,
-	}
+	x := xin.New()
 	svr := &HTTPServer{
 		baseServer: &baseServer{
 			id:          uuid.NewString(),
@@ -75,8 +71,7 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 			address:     options.addr,
 			metadata:    make(map[string]any),
 		},
-		httpServer: httpServer,
-		router:     mux,
+		Xin: x,
 	}
 	svr.Use(
 		ClientIPHTTPMiddleware,
@@ -104,7 +99,7 @@ func (s *HTTPServer) Start() error {
 	s.started = true
 	log.Infof("http server[%s, %s, %s] start", s.serviceName, s.address, s.id)
 	s.Unlock()
-	return s.httpServer.Serve(ln)
+	return s.Serve(ln, true)
 }
 
 // Stop 停止服务
@@ -115,45 +110,7 @@ func (s *HTTPServer) Stop() error {
 		return nil
 	}
 	s.RUnlock()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	return s.httpServer.Shutdown(ctx)
-}
-
-// Use 中间件
-func (s *HTTPServer) Use(middlewares ...HTTPMiddleware) *HTTPServer {
-	for _, m := range middlewares {
-		s.router.Use(m)
-	}
-	return s
-}
-
-// Handler 请求处理
-func (s *HTTPServer) Handler(handlers ...HTTPHandler) *HTTPServer {
-	for _, handler := range handlers {
-		handler.Bind(s.router)
-	}
-	return s
-}
-
-// Static 注册静态文件服务
-// 默认不显示文件目录
-func (s *HTTPServer) Static(pattern string, root string) *HTTPServer {
-	return s.StaticFS(pattern, Dir(root, false))
-}
-
-// StaticFS 注册静态文件服务，自定义文件系统
-// fs 可以使用 luchen.Dir() 创建
-func (s *HTTPServer) StaticFS(pattern string, fs fs.FS) *HTTPServer {
-	prefix := pattern
-	// 1.22 支持 [GET /path] 写法
-	arr := strings.Fields(pattern)
-	if len(arr) > 1 {
-		prefix = arr[1]
-	}
-	s.router.Handle(pattern, FileHandler(prefix, fs))
-	return s
+	return s.Shutdown(30 * time.Second)
 }
 
 // TraceHTTPMiddleware 链路跟踪
@@ -169,7 +126,7 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 func ClientIPHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		rip := httpkit.GetRealIP(r)
+		rip := xin.GetRealIP(r)
 		if rip == "" {
 			rip = r.RemoteAddr
 		}
@@ -178,95 +135,56 @@ func ClientIPHTTPMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// HTTPHandler http 请求处理器接口
-type HTTPHandler interface {
-	// Bind 绑定路由
-	Bind(router *HTTPServeMux)
-}
-
 // NewHTTPTransportServer http handler 绑定 endpoint
 func NewHTTPTransportServer(
 	e endpoint.Endpoint,
-	dec httptransport.DecodeRequestFunc,
-	enc httptransport.EncodeResponseFunc,
 	options ...httptransport.ServerOption,
 ) *HTTPTransportServer {
 	options = append(options, httptransport.ServerBefore(contextServerBefore))
 	return httptransport.NewServer(
 		e,
-		dec,
-		enc,
+		decodeHTTPRequest,
+		encodeHTTPResponse,
 		options...,
 	)
 }
 
 func contextServerBefore(ctx context.Context, req *http.Request) context.Context {
 	startTime := time.Now()
+	contentType := req.Header.Get("Content-Type")
+	marshaller := marshal.GetMarshallerByContentType(contentType)
+
 	ctx = context.WithValue(ctx, HTTPRequestHeaderCtxKey, req.Header)
 	ctx = context.WithValue(ctx, HTTPRequestURLCtxKey, req.URL)
 	ctx = withRequestStartTime(ctx, startTime)
 	ctx = withRequestEndpoint(ctx, req.RequestURI)
 	ctx = withRequestProtocol(ctx, req.Proto)
 	ctx = withMethod(ctx, req.Method)
+	ctx = withMarshaller(ctx, marshaller)
 	return ctx
 }
 
-// DecodeHTTPParamRequest 解析 http request query 和 form 参数
-func DecodeHTTPParamRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
-	req := new(T)
-	err := ShouldBind(r, req)
+func decodeHTTPRequest(ctx context.Context, req *http.Request) (request any, err error) {
+	marshaller := Marshaller(ctx)
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
-		log.ErrorCtx(ctx, "decode request err", zap.Error(err))
-		errn := &Errno{
-			Code:     4,
-			HTTPCode: http.StatusBadRequest,
-			Msg:      err.Error(),
-		}
-		return nil, errn
+		return nil, err
 	}
-	return req, nil
+	err = marshaller.Unmarshal(body, &request)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
-// DecodeHTTPJSONRequest 解析 http request body json 参数
-func DecodeHTTPJSONRequest[T any](ctx context.Context, r *http.Request) (interface{}, error) {
-	req := new(T)
-	err := ShouldBindJSON(r, req)
+func encodeHTTPResponse(ctx context.Context, w http.ResponseWriter, data any) error {
+	marshaller := Marshaller(ctx)
+	bytes, err := marshaller.Marshal(data)
 	if err != nil {
-		log.ErrorCtx(ctx, "decode request err", zap.Error(err))
-		errn := &Errno{
-			Code:     4,
-			HTTPCode: http.StatusBadRequest,
-			Msg:      err.Error(),
-		}
-		return nil, errn
+		return err
 	}
-	return req, nil
-}
-
-// EncodeHTTPJSONResponse http 返回json数据
-// wrapper 对数据重新包装
-func EncodeHTTPJSONResponse(wrapper DataWrapper) httptransport.EncodeResponseFunc {
-	return func(ctx context.Context, w http.ResponseWriter, response interface{}) error {
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		if headerer, ok := response.(httptransport.Headerer); ok {
-			for k, values := range headerer.Headers() {
-				for _, v := range values {
-					w.Header().Add(k, v)
-				}
-			}
-		}
-		code := http.StatusOK
-		if sc, ok := response.(httptransport.StatusCoder); ok {
-			code = sc.StatusCode()
-		}
-		w.WriteHeader(code)
-		if code == http.StatusNoContent {
-			return nil
-		}
-		traceID := TraceID(ctx)
-		if traceID != "" {
-			w.Header().Set(TraceIDHeader, traceID)
-		}
-		return json.NewEncoder(w).Encode(wrapper(response))
-	}
+	w.Header().Set("Content-Type", marshaller.ContentType())
+	w.WriteHeader(http.StatusOK)
+	w.Write(bytes)
+	return nil
 }

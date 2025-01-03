@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/connectivity"
 )
 
-// this is from github.com/go-micro/plugins/v4/client/grpc
+// from github.com/go-micro/plugins/v4/client/grpc
 
 type pool struct {
 	size int
@@ -204,7 +204,6 @@ func removeConn(conn *poolConn) {
 	conn.next = nil
 	conn.in = false
 	conn.sp.count--
-	return
 }
 
 func addConnAfter(conn *poolConn, after *poolConn) {
@@ -216,5 +215,4 @@ func addConnAfter(conn *poolConn, after *poolConn) {
 	after.next = conn
 	conn.in = true
 	conn.sp.count++
-	return
 }

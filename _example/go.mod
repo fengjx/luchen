@@ -1,6 +1,6 @@
 module github.com/fengjx/luchen/example
 
-go 1.22
+go 1.23
 
 require (
 	github.com/fengjx/go-halo v0.0.4-rc02
