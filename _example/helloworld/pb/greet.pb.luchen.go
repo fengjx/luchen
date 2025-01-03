@@ -43,7 +43,7 @@ func (s *GreeterServiceImpl) SayHelHlo(ctx context.Context, req *HelloReq) (*Hel
 func RegisterGreeterHandler(gs *grpc.Server, e GreeterEndpoint, middlewares []luchen.Middleware, options ...grpctransport.ServerOption) {
 	impl := GreeterServiceImpl{
 		sayHello: luchen.NewGRPCTransportServer(
-			luchen.EndpointChain(e.MakeSayHelloEndpoint, middlewares...),
+			luchen.EndpointChain(e.MakeSayHelloEndpoint(), middlewares...),
 			options...,
 		),
 	}
