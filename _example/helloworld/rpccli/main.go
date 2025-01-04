@@ -12,12 +12,12 @@ import (
 func init() {
 	if env.IsDev() {
 		// 可以设置环境变量 LUCHEN_ETCD_ADDRESS 指定 etcd 地址
-		env.SetDefaultEtcdAddress([]string{"192.168.6.129:2379"})
+		env.SetDefaultEtcdAddress([]string{"192.168.6.121:2379"})
 	}
 }
 
 func main() {
-	greeterClient := pb.NewGreeterService("greet")
+	greeterClient := pb.NewGreeterService("grpc.helloworld")
 	helloResp, err := greeterClient.SayHello(context.Background(), &pb.HelloReq{
 		Name: "fengjx",
 	})
