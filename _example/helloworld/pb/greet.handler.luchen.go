@@ -32,7 +32,7 @@ type GreeterServiceImpl struct {
 	sayHello grpctransport.Handler
 }
 
-func (s *GreeterServiceImpl) SayHelHlo(ctx context.Context, req *HelloReq) (*HelloResp, error) {
+func (s *GreeterServiceImpl) SayHello(ctx context.Context, req *HelloReq) (*HelloResp, error) {
 	_, resp, err := s.sayHello.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (s *GreeterServiceImpl) SayHelHlo(ctx context.Context, req *HelloReq) (*Hel
 }
 
 func RegisterGreeterGRPCHandler(gs *luchen.GRPCServer, e GreeterEndpoint) {
-	impl := GreeterServiceImpl{
+	impl := &GreeterServiceImpl{
 		sayHello: luchen.NewGRPCTransportServer(
 			e.SayHelloEdnpointDefine(),
 		),
@@ -50,9 +50,6 @@ func RegisterGreeterGRPCHandler(gs *luchen.GRPCServer, e GreeterEndpoint) {
 }
 
 func RegisterGreeterHTTPHandler(hs *luchen.HTTPServer, e GreeterEndpoint) {
-	def := e.SayHelloEdnpointDefine()
-	e := luchen.MakeEndpoint(e.SayHelloEdnpointDefine())
-	dec := luchen.DecodeHTTPPbRequest[](ctx context.Context, req *http.Request)
-	h := luchen.NewHTTPTransportServer(e, dec http.DecodeRequestFunc, enc http.EncodeResponseFunc)
-	hs.Handle(def.Path, h)
+	sayHelloDef := e.SayHelloEdnpointDefine()
+	hs.Mux().Handle(sayHelloDef.Path, luchen.NewHTTPTransportServer(sayHelloDef))
 }

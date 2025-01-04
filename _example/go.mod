@@ -2,7 +2,10 @@ module github.com/fengjx/luchen/example
 
 go 1.23
 
+replace github.com/fengjx/luchen v1.0.6-rc01.0.20250104162808-6b001d5e56e0 => /Users/fengjianxin/workspaces/my-opensource-project/luchen
+
 require (
+	github.com/fengjx/go-halo v0.1.1-rc09
 	github.com/fengjx/luchen v1.0.6-rc01.0.20250104162808-6b001d5e56e0
 	github.com/go-kit/kit v0.13.0
 	google.golang.org/grpc v1.60.1
@@ -12,8 +15,7 @@ require (
 require (
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
-	github.com/fengjx/go-halo v0.1.1-rc09 // indirect
-	github.com/fengjx/xin v0.0.1-rc01.0.20250104025841-53ef07927813 // indirect
+	github.com/fengjx/xin v0.0.1-rc01.0.20250104182828-8022ba0391a4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-kit/log v0.2.0 // indirect

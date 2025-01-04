@@ -42,8 +42,7 @@ var (
 // HTTPServer http server 实现
 type HTTPServer struct {
 	*baseServer
-	*xin.Xin
-	started bool
+	xin *xin.Xin
 }
 
 // NewHTTPServer 创建 http server
@@ -63,6 +62,10 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 		options.metadata = make(map[string]any)
 	}
 	x := xin.New()
+	x.Use(
+		ClientIPHTTPMiddleware,
+		TraceHTTPMiddleware,
+	)
 	svr := &HTTPServer{
 		baseServer: &baseServer{
 			id:          uuid.NewString(),
@@ -71,12 +74,8 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 			address:     options.addr,
 			metadata:    make(map[string]any),
 		},
-		Xin: x,
+		xin: x,
 	}
-	svr.Use(
-		ClientIPHTTPMiddleware,
-		TraceHTTPMiddleware,
-	)
 	return svr
 }
 
@@ -99,7 +98,7 @@ func (s *HTTPServer) Start() error {
 	s.started = true
 	log.Infof("http server[%s, %s, %s] start", s.serviceName, s.address, s.id)
 	s.Unlock()
-	return s.Serve(ln, true)
+	return s.xin.Serve(ln, true)
 }
 
 // Stop 停止服务
@@ -110,7 +109,12 @@ func (s *HTTPServer) Stop() error {
 		return nil
 	}
 	s.RUnlock()
-	return s.Shutdown(30 * time.Second)
+	return s.xin.Shutdown(30 * time.Second)
+}
+
+// Mux 获取路由复用器
+func (s *HTTPServer) Mux() *xin.Mux {
+	return s.xin.Mux()
 }
 
 // TraceHTTPMiddleware 链路跟踪
@@ -139,7 +143,7 @@ func NewHTTPTransportServer(
 	def *EdnpointDefine,
 	options ...httptransport.ServerOption,
 ) *HTTPTransportServer {
-	e := MakeEndpoint(def)
+	e := EndpointChain(def.Endpoint, def.Middlewares...)
 	dec := getHTTPRequestDecoder(def.ReqType)
 	options = append(options, httptransport.ServerBefore(contextServerBefore))
 	return httptransport.NewServer(
@@ -173,12 +177,13 @@ func getHTTPRequestDecoder(typ reflect.Type) httptransport.DecodeRequestFunc {
 		if err != nil {
 			return nil, err
 		}
-		data := reflect.New(typ)
+		data := reflect.New(typ).Interface()
 		err = marshaller.Unmarshal(payload, data)
 		if err != nil {
+			log.ErrorCtx(ctx, "unmarshal request error", zap.Error(err))
 			return nil, err
 		}
-		return data, nil
+		return reflect.ValueOf(data).Elem().Interface(), nil
 	}
 }
 

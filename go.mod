@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/fengjx/go-halo v0.1.1-rc09
-	github.com/fengjx/xin v0.0.1-rc01.0.20250104025841-53ef07927813
+	github.com/fengjx/xin v0.0.1-rc01.0.20250104182828-8022ba0391a4
 	github.com/go-kit/kit v0.13.0
 	github.com/go-kit/log v0.2.0
 	github.com/google/uuid v1.4.0

@@ -39,3 +39,5 @@ temp
 examples-temp
 node_modules
 pnpm-global
+
+__debug_bin*

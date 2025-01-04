@@ -96,9 +96,8 @@ func (s *GRPCServer) Stop() error {
 type RegisterHandler func(grpcServer *grpc.Server)
 
 // RegisterService 注册 grpc 接口实现
-func (s *GRPCServer) RegisterService(desc *grpc.ServiceDesc, impl any) *GRPCServer {
+func (s *GRPCServer) RegisterService(desc *grpc.ServiceDesc, impl any) {
 	s.server.RegisterService(desc, impl)
-	return s
 }
 
 // NewGRPCTransportServer grpc handler 绑定 endpoint
@@ -106,7 +105,7 @@ func NewGRPCTransportServer(
 	def *EdnpointDefine,
 	options ...grpctransport.ServerOption,
 ) *GRPCTransportServer {
-	e := MakeEndpoint(def)
+	e := EndpointChain(def.Endpoint, def.Middlewares...)
 	opts := []grpctransport.ServerOption{
 		grpctransport.ServerBefore(func(ctx context.Context, md metadata.MD) context.Context {
 			ctx, traceID := TraceGRPC(ctx, md)

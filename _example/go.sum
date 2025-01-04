@@ -8,14 +8,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fengjx/go-halo v0.1.1-rc09 h1:1580oxjFbdhmy2JsGJYLKnqE4qiEkli32dFzt3qngzg=
 github.com/fengjx/go-halo v0.1.1-rc09/go.mod h1:mK0NJ/Lv9ap2yijzVU3N82F6YG9fBrqDdEO5LSt3sLY=
-github.com/fengjx/luchen v1.0.6-rc01.0.20250103154450-0cc113c6a489 h1:razR8C1qZGODtcjwJOc3D6+VpsO0ZCnD0oLkdsRbe1Y=
-github.com/fengjx/luchen v1.0.6-rc01.0.20250103154450-0cc113c6a489/go.mod h1:1DMLD5z1LCJyNuQ1QF+t/8LzYYrMIP1oM0ZNZYFySmQ=
-github.com/fengjx/luchen v1.0.6-rc01.0.20250104162808-6b001d5e56e0 h1:4u6QPdpy9JKv2MmXVveykBjfud7sBivg7k28xDegndw=
-github.com/fengjx/luchen v1.0.6-rc01.0.20250104162808-6b001d5e56e0/go.mod h1:YM0Pnf545ReztWOGsW0+gGIq3wQ1JNaGG7ftURJJE3Q=
-github.com/fengjx/xin v0.0.1-rc01.0.20250102141032-9cb4bbceeea2 h1:q3WsHm8anN7drmhoX1Q2Cs1moKNPaBcz5ltYCCO4S18=
-github.com/fengjx/xin v0.0.1-rc01.0.20250102141032-9cb4bbceeea2/go.mod h1:5EpaqOQuRP09BzwlQtWULYch9ueJ7bZvMb2axj0B24k=
-github.com/fengjx/xin v0.0.1-rc01.0.20250104025841-53ef07927813 h1:EgKFqLPYfjDUmie5+GLO32uATmeQorwQh2RsUAQiBkg=
-github.com/fengjx/xin v0.0.1-rc01.0.20250104025841-53ef07927813/go.mod h1:5EpaqOQuRP09BzwlQtWULYch9ueJ7bZvMb2axj0B24k=
+github.com/fengjx/xin v0.0.1-rc01.0.20250104182828-8022ba0391a4 h1:2W7UAKH97r308xDYYOsbc/hp9BjGkIH/kndQfWZMCs0=
+github.com/fengjx/xin v0.0.1-rc01.0.20250104182828-8022ba0391a4/go.mod h1:5EpaqOQuRP09BzwlQtWULYch9ueJ7bZvMb2axj0B24k=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=
