@@ -6,13 +6,13 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
 	"github.com/fengjx/xin"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 
 	httptransport "github.com/go-kit/kit/transport/http"
 
@@ -136,16 +136,16 @@ func ClientIPHTTPMiddleware(next http.Handler) http.Handler {
 
 // NewHTTPTransportServer http handler 绑定 endpoint
 func NewHTTPTransportServer(
-	e Endpoint,
-	dec httptransport.DecodeRequestFunc,
-	enc httptransport.EncodeResponseFunc,
+	def *EdnpointDefine,
 	options ...httptransport.ServerOption,
 ) *HTTPTransportServer {
+	e := MakeEndpoint(def)
+	dec := getHTTPRequestDecoder(def.ReqType)
 	options = append(options, httptransport.ServerBefore(contextServerBefore))
 	return httptransport.NewServer(
 		e,
 		dec,
-		enc,
+		encodeHTTPPbResponse,
 		options...,
 	)
 }
@@ -165,22 +165,25 @@ func contextServerBefore(ctx context.Context, req *http.Request) context.Context
 	return ctx
 }
 
-// DecodeHTTPPbRequest 解码 http pb 请求
-func DecodeHTTPPbRequest[p proto.Message](ctx context.Context, req *http.Request) (request any, err error) {
-	marshaller := Marshaller(ctx)
-	payload, err := io.ReadAll(req.Body)
-	if err != nil {
-		return nil, err
+// getHTTPRequestDecoder 解码 http pb 请求
+func getHTTPRequestDecoder(typ reflect.Type) httptransport.DecodeRequestFunc {
+	return func(ctx context.Context, req *http.Request) (any, error) {
+		marshaller := Marshaller(ctx)
+		payload, err := io.ReadAll(req.Body)
+		if err != nil {
+			return nil, err
+		}
+		data := reflect.New(typ)
+		err = marshaller.Unmarshal(payload, data)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
 	}
-	err = marshaller.Unmarshal(payload, &request)
-	if err != nil {
-		return nil, err
-	}
-	return request, nil
 }
 
-// EncodeHTTPPbResponse 编码 http pb 响应
-func EncodeHTTPPbResponse[p proto.Message](ctx context.Context, w http.ResponseWriter, data any) error {
+// encodeHTTPPbResponse 编码 http pb 响应
+func encodeHTTPPbResponse(ctx context.Context, w http.ResponseWriter, data any) error {
 	marshaller := Marshaller(ctx)
 	bytes, err := marshaller.Marshal(data)
 	if err != nil {

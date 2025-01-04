@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
-	"github.com/go-kit/kit/endpoint"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -104,9 +103,10 @@ func (s *GRPCServer) RegisterService(desc *grpc.ServiceDesc, impl any) *GRPCServ
 
 // NewGRPCTransportServer grpc handler 绑定 endpoint
 func NewGRPCTransportServer(
-	e endpoint.Endpoint,
+	def *EdnpointDefine,
 	options ...grpctransport.ServerOption,
 ) *GRPCTransportServer {
+	e := MakeEndpoint(def)
 	opts := []grpctransport.ServerOption{
 		grpctransport.ServerBefore(func(ctx context.Context, md metadata.MD) context.Context {
 			ctx, traceID := TraceGRPC(ctx, md)
