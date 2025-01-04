@@ -5,7 +5,6 @@ import (
 
 	"github.com/fengjx/luchen"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
-	httptransport "github.com/go-kit/kit/transport/http"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -25,7 +24,7 @@ type GreeterHandler interface {
 
 type GreeterEndpoint interface {
 	GreeterHandler
-	SayHelloEdnpointDefine() luchen.EdnpointDefine
+	SayHelloEdnpointDefine() *luchen.EdnpointDefine
 }
 
 type GreeterServiceImpl struct {
@@ -41,16 +40,19 @@ func (s *GreeterServiceImpl) SayHelHlo(ctx context.Context, req *HelloReq) (*Hel
 	return resp.(*HelloResp), nil
 }
 
-func RegisterGreeterGRPCHandler(gs *grpc.Server, e GreeterEndpoint, options ...grpctransport.ServerOption) {
+func RegisterGreeterGRPCHandler(gs *luchen.GRPCServer, e GreeterEndpoint) {
 	impl := GreeterServiceImpl{
 		sayHello: luchen.NewGRPCTransportServer(
-			luchen.EndpointChain(e.MakeSayHelloEndpoint()),
-			options...,
+			e.SayHelloEdnpointDefine(),
 		),
 	}
 	RegisterGreeterServer(gs, impl)
 }
 
-func RegisterGreeterHTTPHandler(hs *luchen.HTTPServer, e GreeterEndpoint, options ...httptransport.ServerOption) {
-
+func RegisterGreeterHTTPHandler(hs *luchen.HTTPServer, e GreeterEndpoint) {
+	def := e.SayHelloEdnpointDefine()
+	e := luchen.MakeEndpoint(e.SayHelloEdnpointDefine())
+	dec := luchen.DecodeHTTPPbRequest[](ctx context.Context, req *http.Request)
+	h := luchen.NewHTTPTransportServer(e, dec http.DecodeRequestFunc, enc http.EncodeResponseFunc)
+	hs.Handle(def.Path, h)
 }
