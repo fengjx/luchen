@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	"github.com/fengjx/go-halo/halo"
@@ -21,9 +20,7 @@ func main() {
 	)
 
 	e := &GreeterEndpoint{}
-	httpSvr.HandleFunc("/say-hello", func(w http.ResponseWriter, r *http.Request) {
-		luchen.NewHTTPTransportServer(e.MakeSayHelloEndpoint()).ServeHTTP(w, r)
-	})
+	httpSvr.Handle("/say-hello", luchen.NewHTTPTransportServer(e.MakeSayHelloEndpoint()))
 
 	grpcSvr := luchen.NewGRPCServer(
 		luchen.WithServiceName("helloworld"),
@@ -46,7 +43,7 @@ type GreeterEndpoint struct {
 }
 
 func (e *GreeterEndpoint) MakeSayHelloEndpoint() luchen.Endpoint {
-	return luchen.MakeEndpoint[*pb.HelloReq, *pb.HelloResp](e.SayHello)
+	return luchen.MakeEndpoint(e.SayHello)
 }
 
 func (e *GreeterEndpoint) SayHello(ctx context.Context, req *pb.HelloReq) (*pb.HelloResp, error) {

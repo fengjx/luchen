@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/fengjx/go-halo/halo"
 	"github.com/fengjx/go-halo/hook"
@@ -91,22 +90,16 @@ type baseServer struct {
 
 func (s *baseServer) GetServiceInfo() *ServiceInfo {
 	s.RLock()
-	if s.started {
-		s.RUnlock()
-		return &ServiceInfo{
-			Protocol: s.protocol,
-			ID:       s.id,
-			Name:     s.serviceName,
-			Addr:     s.address,
-			Metadata: s.metadata,
-		}
+	defer s.RUnlock()
+	if !s.started {
+		return nil
 	}
-	s.RUnlock()
-	for {
-		select {
-		case <-time.After(time.Millisecond):
-			return s.GetServiceInfo()
-		}
+	return &ServiceInfo{
+		Protocol: s.protocol,
+		ID:       s.id,
+		Name:     s.serviceName,
+		Addr:     s.address,
+		Metadata: s.metadata,
 	}
 }
 

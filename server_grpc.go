@@ -8,7 +8,6 @@ import (
 
 	"github.com/fengjx/go-halo/addr"
 	"github.com/go-kit/kit/endpoint"
-	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -47,7 +46,7 @@ func NewGRPCServer(opts ...ServerOption) *GRPCServer {
 	if options.metadata == nil {
 		options.metadata = make(map[string]any)
 	}
-	server := grpc.NewServer(grpc.UnaryInterceptor(kitgrpc.Interceptor))
+	server := grpc.NewServer(grpc.UnaryInterceptor(grpctransport.Interceptor))
 	return &GRPCServer{
 		baseServer: &baseServer{
 			id:          uuid.NewString(),
@@ -98,8 +97,8 @@ func (s *GRPCServer) Stop() error {
 type RegisterHandler func(grpcServer *grpc.Server)
 
 // RegisterService 注册 grpc 接口实现
-func (s *GRPCServer) RegisterService(reg RegisterHandler) *GRPCServer {
-	reg(s.server)
+func (s *GRPCServer) RegisterService(desc *grpc.ServiceDesc, impl any) *GRPCServer {
+	s.server.RegisterService(desc, impl)
 	return s
 }
 

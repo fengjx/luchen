@@ -2,26 +2,42 @@ package luchen
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"time"
+	"reflect"
 
 	"github.com/go-kit/kit/endpoint"
-	"go.uber.org/zap"
-
-	"github.com/fengjx/luchen/log"
+	"google.golang.org/protobuf/proto"
 )
 
+type (
+	// Endpoint alias for endpoint.Endpoint
+	Endpoint = endpoint.Endpoint
+
+	// Handler 服务接口处理器
+	Handler func(ctx context.Context, req proto.Message) (resp proto.Message, err error)
+)
+
+// EdnpointDefine 端点定义信息
+type EdnpointDefine struct {
+	Name        string       // 端点名称
+	Path        string       // http 请求路径
+	ReqType     reflect.Type // 请求类型
+	RspType     reflect.Type // 响应类型
+	Handler     Handler      // 服务接口处理器
+	Middlewares []Middleware // 中间件
+}
+
 // MakeEndpoint 包装 endpoint，添加类型安全和中间件支持
-func MakeEndpoint[I any, O any](fn func(ctx context.Context, request I) (O, error), middlewares ...Middleware) Endpoint {
+func MakeEndpoint(desc *EdnpointDefine) Endpoint {
 	e := func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		in, ok := request.(I)
-		if !ok {
-			return nil, fmt.Errorf("%w: expected %T, got %T", ErrInvalidRequest, *new(I), request)
+		// 使用 reflect 将 request 转换为 desc.ReqType 指定的类型
+		reqVal := reflect.ValueOf(request)
+		if reqVal.Type() != desc.ReqType {
+			return nil, fmt.Errorf("%w: expected %v, got %T", ErrInvalidRequest, desc.ReqType, request)
 		}
-		return fn(ctx, in)
+		return desc.Handler(ctx, request.(proto.Message))
 	}
-	return EndpointChain(e, middlewares...)
+	return EndpointChain(e, desc.Middlewares...)
 }
 
 // EndpointChain Endpoint 中间件包装
@@ -30,86 +46,4 @@ func EndpointChain(e Endpoint, middlewares ...Middleware) Endpoint {
 		return e
 	}
 	return endpoint.Chain(middlewares[0], middlewares[1:]...)(e)
-}
-
-// GetValueFromContext 从 context 中获取值
-type GetValueFromContext func(ctx context.Context) any
-
-type AccessLogOpt struct {
-	ContextFields map[string]GetValueFromContext
-	PrintResp     bool
-	AccessLog     AccessLog
-	MaxDay        int
-}
-
-// AccessMiddleware 请求日志
-func AccessMiddleware(opt *AccessLogOpt) Middleware {
-	var accesslog AccessLog
-	var contextFields map[string]GetValueFromContext
-	var printResp bool
-	maxDay := 7
-	if opt != nil {
-		accesslog = opt.AccessLog
-		contextFields = opt.ContextFields
-		printResp = opt.PrintResp
-		if opt.MaxDay > 0 {
-			maxDay = opt.MaxDay
-		}
-	}
-	if accesslog == nil {
-		accesslog = NewAccessLog(10*1024, maxDay, maxDay)
-	}
-	return func(next Endpoint) Endpoint {
-		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-			fields := map[string]any{}
-			for field, fn := range contextFields {
-				value := fn(ctx)
-				fields[field] = value
-			}
-			fields["endpoint"] = RequestEndpoint(ctx)
-			fields["protocol"] = RequestProtocol(ctx)
-			fields["method"] = RequestMethod(ctx)
-			fields["ip"] = ClientIP(ctx)
-			fields["request"] = request
-
-			response, err = next(ctx, request)
-			if printResp {
-				fields["response"] = response
-			}
-			code := 0
-			if err != nil {
-				var errn *Errno
-				ok := errors.As(err, &errn)
-				if ok {
-					code = errn.Code
-				}
-				fields["err"] = err.Error()
-			}
-			fields["code"] = code
-			startTime := RequestStartTime(ctx)
-			fields["rt"] = time.Since(startTime).Nanoseconds()
-			fields["rts"] = time.Since(startTime).String()
-			accesslog.Print(fields)
-			return
-		}
-	}
-}
-
-// LogMiddleware 错误日志堆栈打印，放在第一个执行
-func LogMiddleware() Middleware {
-	return func(next endpoint.Endpoint) endpoint.Endpoint {
-		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-			resp, err := next(ctx, request)
-			if err == nil {
-				return resp, nil
-			}
-			var errn *Errno
-			ok := errors.As(err, &errn)
-			e := RequestEndpoint(ctx)
-			if !ok {
-				log.ErrorCtx(ctx, fmt.Sprintf("internal server Error: %+v", err), zap.Any("req", request), zap.String("endpoint", e))
-			}
-			return resp, err
-		}
-	}
 }

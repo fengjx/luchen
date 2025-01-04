@@ -8,12 +8,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/emicklei/proto"
 	"github.com/fengjx/go-halo/addr"
 	"github.com/fengjx/xin"
-	"github.com/go-kit/kit/endpoint"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 
 	httptransport "github.com/go-kit/kit/transport/http"
 
@@ -137,14 +136,16 @@ func ClientIPHTTPMiddleware(next http.Handler) http.Handler {
 
 // NewHTTPTransportServer http handler 绑定 endpoint
 func NewHTTPTransportServer(
-	e endpoint.Endpoint,
+	e Endpoint,
+	dec httptransport.DecodeRequestFunc,
+	enc httptransport.EncodeResponseFunc,
 	options ...httptransport.ServerOption,
 ) *HTTPTransportServer {
 	options = append(options, httptransport.ServerBefore(contextServerBefore))
 	return httptransport.NewServer(
 		e,
-		decodeHTTPRequest,
-		encodeHTTPResponse,
+		dec,
+		enc,
 		options...,
 	)
 }
@@ -164,21 +165,22 @@ func contextServerBefore(ctx context.Context, req *http.Request) context.Context
 	return ctx
 }
 
-func decodeHTTPRequest(ctx context.Context, req *http.Request) (any, error) {
+// DecodeHTTPPbRequest 解码 http pb 请求
+func DecodeHTTPPbRequest[p proto.Message](ctx context.Context, req *http.Request) (request any, err error) {
 	marshaller := Marshaller(ctx)
 	payload, err := io.ReadAll(req.Body)
 	if err != nil {
 		return nil, err
 	}
-	var protoMsg proto.Message
-	err = marshaller.Unmarshal(payload, &protoMsg)
+	err = marshaller.Unmarshal(payload, &request)
 	if err != nil {
 		return nil, err
 	}
-	return protoMsg, nil
+	return request, nil
 }
 
-func encodeHTTPResponse(ctx context.Context, w http.ResponseWriter, data any) error {
+// EncodeHTTPPbResponse 编码 http pb 响应
+func EncodeHTTPPbResponse[p proto.Message](ctx context.Context, w http.ResponseWriter, data any) error {
 	marshaller := Marshaller(ctx)
 	bytes, err := marshaller.Marshal(data)
 	if err != nil {

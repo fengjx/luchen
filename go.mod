@@ -4,14 +4,11 @@ go 1.23
 
 require (
 	github.com/fengjx/go-halo v0.1.1-rc09
-	github.com/fengjx/xin v0.0.1-rc01.0.20250102141032-9cb4bbceeea2
+	github.com/fengjx/xin v0.0.1-rc01.0.20250104025841-53ef07927813
 	github.com/go-kit/kit v0.13.0
 	github.com/go-kit/log v0.2.0
-	github.com/go-playground/validator/v10 v10.23.0
 	github.com/google/uuid v1.4.0
-	github.com/gorilla/schema v1.4.1
 	github.com/json-iterator/go v1.1.12
-	github.com/magiconair/properties v1.8.7
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/viper v1.18.2
 	go.uber.org/zap v1.26.0
@@ -27,10 +24,13 @@ require (
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-playground/validator/v10 v10.23.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/gorilla/schema v1.4.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
