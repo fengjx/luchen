@@ -10,6 +10,7 @@ import (
 	"github.com/fengjx/luchen"
 
 	"github.com/fengjx/luchen/env"
+	"github.com/fengjx/luchen/example/helloworld/endpoint/greet"
 	"github.com/fengjx/luchen/example/helloworld/pb"
 )
 
@@ -34,9 +35,8 @@ func main() {
 		luchen.WithServerAddr(":8088"),
 	)
 
-	e := &GreeterEndpoint{}
-	pb.RegisterGreeterGRPCHandler(gs, e)
-	pb.RegisterGreeterHTTPHandler(hs, e)
+	greet.RegisterGreeterGRPCHandler(gs)
+	greet.RegisterGreeterHTTPHandler(hs)
 
 	registrar := luchen.NewEtcdV3Registrar(
 		hs,
