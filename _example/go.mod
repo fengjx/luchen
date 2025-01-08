@@ -2,7 +2,7 @@ module github.com/fengjx/luchen/example
 
 go 1.23
 
-replace github.com/fengjx/luchen v1.0.6-rc01.0.20250104162808-6b001d5e56e0 => /Users/fengjianxin/workspaces/my-opensource-project/luchen
+replace github.com/fengjx/luchen => ../
 
 require (
 	github.com/fengjx/go-halo v0.1.1-rc09

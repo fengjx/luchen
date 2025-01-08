@@ -48,10 +48,10 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 				value := fn(ctx)
 				fields[field] = value
 			}
-			fields["endpoint"] = RequestEndpoint(ctx)
-			fields["protocol"] = RequestProtocol(ctx)
-			fields["method"] = RequestMethod(ctx)
-			fields["ip"] = ClientIP(ctx)
+			h := GetHeader(ctx)
+			fields["endpoint"] = h.Endpoint
+			fields["protocol"] = h.Protocol
+			fields["ip"] = h.CLientIP
 			fields["request"] = request
 
 			response, err = next(ctx, request)
@@ -68,7 +68,7 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 				fields["err"] = err.Error()
 			}
 			fields["code"] = code
-			startTime := RequestStartTime(ctx)
+			startTime := h.StartTime
 			fields["rt"] = time.Since(startTime).Nanoseconds()
 			fields["rts"] = time.Since(startTime).String()
 			accesslog.Print(fields)
@@ -87,9 +87,9 @@ func LogMiddleware() Middleware {
 			}
 			var errn *Errno
 			ok := errors.As(err, &errn)
-			e := RequestEndpoint(ctx)
+			h := GetHeader(ctx)
 			if !ok {
-				log.ErrorCtx(ctx, fmt.Sprintf("internal server Error: %+v", err), zap.Any("req", request), zap.String("endpoint", e))
+				log.ErrorCtx(ctx, fmt.Sprintf("internal server Error: %+v", err), zap.Any("req", request), zap.String("endpoint", h.Endpoint), zap.Stack("stack"))
 			}
 			return resp, err
 		}

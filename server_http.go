@@ -2,6 +2,7 @@ package luchen
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -22,21 +23,10 @@ import (
 )
 
 type (
-	httpRequestHeaderKey struct{}
-	httpRequestURLKey    struct{}
+	httpRequestKey struct{}
 
 	// HTTPTransportServer go-kit http transport server
 	HTTPTransportServer = httptransport.Server
-)
-
-var (
-	// HTTPRequestHeaderCtxKey context http header
-	HTTPRequestHeaderCtxKey = httpRequestHeaderKey{}
-	// HTTPRequestURLCtxKey context http url
-	HTTPRequestURLCtxKey = httpRequestURLKey{}
-
-	// NopHTTPRequestDecoder 不需要解析请求参数
-	NopHTTPRequestDecoder = httptransport.NopRequestDecoder
 )
 
 // HTTPServer http server 实现
@@ -63,7 +53,6 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 	}
 	x := xin.New()
 	x.Use(
-		ClientIPHTTPMiddleware,
 		TraceHTTPMiddleware,
 	)
 	svr := &HTTPServer{
@@ -126,18 +115,6 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// ClientIPHTTPMiddleware 获取客户端IP
-func ClientIPHTTPMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rip := xin.GetRealIP(r)
-		if rip == "" {
-			rip = r.RemoteAddr
-		}
-		ctx := withRequestClientIP(r.Context(), rip)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
 // NewHTTPTransportServer http handler 绑定 endpoint
 func NewHTTPTransportServer(
 	def *EdnpointDefine,
@@ -145,7 +122,10 @@ func NewHTTPTransportServer(
 ) *HTTPTransportServer {
 	e := EndpointChain(def.Endpoint, def.Middlewares...)
 	dec := getHTTPRequestDecoder(def.ReqType)
-	options = append(options, httptransport.ServerBefore(contextServerBefore))
+	options = append(options,
+		httptransport.ServerBefore(contextServerBefore),
+		httptransport.ServerErrorEncoder(errorEncoder),
+	)
 	return httptransport.NewServer(
 		e,
 		dec,
@@ -154,17 +134,38 @@ func NewHTTPTransportServer(
 	)
 }
 
+func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
+	var errn *Errno
+	ok := errors.As(err, &errn)
+	if !ok {
+		errn = ErrSystem
+	}
+	w.WriteHeader(errn.Code)
+	w.Header().Set("X-Server-Msg", errn.Msg)
+	w.Write([]byte(""))
+}
+
 func contextServerBefore(ctx context.Context, req *http.Request) context.Context {
 	startTime := time.Now()
 	contentType := req.Header.Get("Content-Type")
 	marshaller := marshal.GetMarshallerByContentType(contentType)
 
-	ctx = context.WithValue(ctx, HTTPRequestHeaderCtxKey, req.Header)
-	ctx = context.WithValue(ctx, HTTPRequestURLCtxKey, req.URL)
-	ctx = withRequestStartTime(ctx, startTime)
-	ctx = withRequestEndpoint(ctx, req.RequestURI)
-	ctx = withRequestProtocol(ctx, req.Proto)
-	ctx = withMethod(ctx, req.Method)
+	rip := xin.GetRealIP(req)
+	if rip == "" {
+		rip = req.RemoteAddr
+	}
+	h := &Header{
+		Method:      req.Method,
+		Endpoint:    req.RequestURI,
+		Protocol:    string(ProtocolHTTP),
+		Host:        req.Host,
+		CLientIP:    rip,
+		TraceID:     TraceID(ctx),
+		StartTime:   startTime,
+		ContentType: contentType,
+	}
+	ctx = withHeader(ctx, h)
+	ctx = context.WithValue(ctx, httpRequestKey{}, req)
 	ctx = withMarshaller(ctx, marshaller)
 	return ctx
 }
@@ -198,4 +199,13 @@ func encodeHTTPPbResponse(ctx context.Context, w http.ResponseWriter, data any) 
 	w.WriteHeader(http.StatusOK)
 	w.Write(bytes)
 	return nil
+}
+
+// GetHttpHeader 获取 http header
+func getHTTPRequest(ctx context.Context) *http.Request {
+	r, ok := ctx.Value(httpRequestKey{}).(*http.Request)
+	if !ok {
+		return nil
+	}
+	return r
 }
