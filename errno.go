@@ -10,6 +10,8 @@ var (
 	ErrSystem = NewErrno(http.StatusInternalServerError, "")
 	// ErrBadRequest 参数错误
 	ErrBadRequest = NewErrno(http.StatusBadRequest, "")
+	// ErrUnauthorized 未授权
+	ErrUnauthorized = NewErrno(http.StatusUnauthorized, "")
 	// ErrForbidden 没有权限访问
 	ErrForbidden = NewErrno(http.StatusForbidden, "")
 )
