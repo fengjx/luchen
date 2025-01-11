@@ -142,6 +142,10 @@ func NewHTTPTransportServer(
 }
 
 func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
+	WriteError(ctx, w, err)
+}
+
+func WriteError(ctx context.Context, w http.ResponseWriter, err error) {
 	var errn *Errno
 	ok := errors.As(err, &errn)
 	if !ok {
@@ -149,7 +153,7 @@ func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
 	}
 	w.WriteHeader(errn.Code)
 	w.Header().Set("X-Server-Msg", errn.Msg)
-	w.Write([]byte(""))
+	_, _ = w.Write([]byte(""))
 }
 
 func contextServerBefore(ctx context.Context, req *http.Request) context.Context {
