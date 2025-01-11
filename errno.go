@@ -32,3 +32,8 @@ type Errno struct {
 func (e *Errno) Error() string {
 	return fmt.Sprintf("code:%d, msg:%s", e.Code, e.Msg)
 }
+
+// IsServerError 是否是服务端系统错误
+func (e *Errno) IsServerError() bool {
+	return e.Code >= 500 && e.Code < 600
+}

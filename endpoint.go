@@ -11,8 +11,8 @@ type (
 	Endpoint = endpoint.Endpoint
 )
 
-// EdnpointDefine 端点定义信息
-type EdnpointDefine struct {
+// EndpointDefine 端点定义信息
+type EndpointDefine struct {
 	Name        string       // 端点名称
 	Path        string       // http 请求路径
 	ReqType     reflect.Type // 请求类型

@@ -117,10 +117,17 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 
 // NewHTTPTransportServer http handler 绑定 endpoint
 func NewHTTPTransportServer(
-	def *EdnpointDefine,
+	def *EndpointDefine,
 	options ...httptransport.ServerOption,
 ) *HTTPTransportServer {
-	e := EndpointChain(def.Endpoint, def.Middlewares...)
+	e := def.Endpoint
+	var middlewares = GlobalHTTPMiddlewares
+	if len(def.Middlewares) > 0 {
+		middlewares = append(middlewares, def.Middlewares...)
+	}
+	if len(middlewares) > 0 {
+		e = EndpointChain(e, middlewares...)
+	}
 	dec := getHTTPRequestDecoder(def.ReqType)
 	options = append(options,
 		httptransport.ServerBefore(contextServerBefore),
@@ -201,11 +208,11 @@ func encodeHTTPPbResponse(ctx context.Context, w http.ResponseWriter, data any) 
 	return nil
 }
 
-// GetHttpHeader 获取 http header
-func getHTTPRequest(ctx context.Context) *http.Request {
-	r, ok := ctx.Value(httpRequestKey{}).(*http.Request)
-	if !ok {
-		return nil
-	}
-	return r
+// GlobalHTTPMiddlewares 全局 HTTP 中间件
+var GlobalHTTPMiddlewares []Middleware
+
+// UseGlobalHTTPMiddleware 注册全局 HTTP 中间件
+// 中间件的执行顺序与注册顺序相同，先注册的中间件先执行
+func UseGlobalHTTPMiddleware(m ...Middleware) {
+	GlobalHTTPMiddlewares = append(GlobalHTTPMiddlewares, m...)
 }

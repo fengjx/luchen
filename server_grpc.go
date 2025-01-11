@@ -102,10 +102,17 @@ func (s *GRPCServer) RegisterService(desc *grpc.ServiceDesc, impl any) {
 
 // NewGRPCTransportServer grpc handler 绑定 endpoint
 func NewGRPCTransportServer(
-	def *EdnpointDefine,
+	def *EndpointDefine,
 	options ...grpctransport.ServerOption,
 ) *GRPCTransportServer {
-	e := EndpointChain(def.Endpoint, def.Middlewares...)
+	e := def.Endpoint
+	var middlewares = GlobalGRPCMiddlewares
+	if len(def.Middlewares) > 0 {
+		middlewares = append(middlewares, def.Middlewares...)
+	}
+	if len(middlewares) > 0 {
+		e = EndpointChain(e, middlewares...)
+	}
 	opts := []grpctransport.ServerOption{
 		grpctransport.ServerBefore(func(ctx context.Context, md metadata.MD) context.Context {
 			ctx, traceID := TraceGRPC(ctx, md)
@@ -144,4 +151,13 @@ func decodePB(_ context.Context, req interface{}) (interface{}, error) {
 
 func encodePB(_ context.Context, resp interface{}) (interface{}, error) {
 	return resp, nil
+}
+
+// GlobalGRPCMiddlewares 全局 GRPC 中间件
+var GlobalGRPCMiddlewares []Middleware
+
+// UseGlobalGRPCMiddleware 注册全局 GRPC 中间件
+// 中间件的执行顺序与注册顺序相同，先注册的中间件先执行
+func UseGlobalGRPCMiddleware(m ...Middleware) {
+	GlobalGRPCMiddlewares = append(GlobalGRPCMiddlewares, m...)
 }
