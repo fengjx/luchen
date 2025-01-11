@@ -7,9 +7,11 @@ import (
 
 var (
 	// ErrSystem 系统错误
-	ErrSystem = NewErrno(500, "")
+	ErrSystem = NewErrno(http.StatusInternalServerError, "")
 	// ErrBadRequest 参数错误
-	ErrBadRequest = NewErrno(400, "")
+	ErrBadRequest = NewErrno(http.StatusBadRequest, "")
+	// ErrForbidden 没有权限访问
+	ErrForbidden = NewErrno(http.StatusForbidden, "")
 )
 
 // NewErrno 创建错误编码

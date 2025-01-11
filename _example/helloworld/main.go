@@ -50,8 +50,8 @@ func main() {
 type GreeterEndpoint struct {
 }
 
-func (e *GreeterEndpoint) SayHelloEdnpointDefine() *luchen.EdnpointDefine {
-	def := &luchen.EdnpointDefine{
+func (e *GreeterEndpoint) SayHelloEndpointDefine() *luchen.EndpointDefine {
+	def := &luchen.EndpointDefine{
 		Name:    "Greet.SayHello",
 		Path:    "/say-hello",
 		ReqType: reflect.TypeOf(&pb.HelloReq{}),
