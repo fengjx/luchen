@@ -29,8 +29,8 @@ func withHeader(ctx context.Context, header *Header) context.Context {
 }
 
 // GetHeader 返回当前请求的 header
-func GetHeader(ctx context.Context) Header {
-	return ctx.Value(requestHeaderKey{}).(Header)
+func GetHeader(ctx context.Context) *Header {
+	return ctx.Value(requestHeaderKey{}).(*Header)
 }
 
 func withMarshaller(ctx context.Context, marshaller marshal.Marshaller) context.Context {
