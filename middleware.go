@@ -78,24 +78,22 @@ func AccessMiddleware(opt *AccessLogOpt) Middleware {
 }
 
 // LogMiddleware 错误日志堆栈打印，放在第一个执行
-func LogMiddleware() Middleware {
-	return func(next endpoint.Endpoint) endpoint.Endpoint {
-		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-			resp, err := next(ctx, request)
-			if err == nil {
-				return resp, nil
-			}
-			var errn *Errno
-			ok := errors.As(err, &errn)
-			h := GetHeader(ctx)
-			if !ok && !errn.IsServerError() {
-				log.ErrorCtx(ctx,
-					fmt.Sprintf("internal server Error: %+v", err),
-					zap.Any("req", request), zap.String("endpoint", h.Endpoint),
-					zap.Stack("stack"),
-				)
-			}
-			return resp, err
+func LogMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		resp, err := next(ctx, request)
+		if err == nil {
+			return resp, nil
 		}
+		var errn *Errno
+		ok := errors.As(err, &errn)
+		h := GetHeader(ctx)
+		if !ok && !errn.IsServerError() {
+			log.ErrorCtx(ctx,
+				fmt.Sprintf("internal server Error: %+v", err),
+				zap.Any("req", request), zap.String("endpoint", h.Endpoint),
+				zap.Stack("stack"),
+			)
+		}
+		return resp, err
 	}
 }
