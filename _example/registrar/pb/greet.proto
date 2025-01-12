@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package pb;
 
-option go_package="github.com/fengjx/luchen/example/helloworld/pbgreet";
+option go_package="github.com/fengjx/luchen/example/registrar/pbgreet";
 
 // gomodpath=github.com/fengjx/luchen/example
-// epath=helloworld/endpoint
+// epath=registrar/endpoint
 
 // The greeting service definition.
 service Greeter {

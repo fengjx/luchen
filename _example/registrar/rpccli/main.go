@@ -5,8 +5,7 @@ import (
 	"log"
 
 	"github.com/fengjx/luchen/env"
-
-	"github.com/fengjx/luchen/example/helloworld/pb"
+	"github.com/fengjx/luchen/example/helloworld/pbgreet"
 )
 
 func init() {
@@ -17,8 +16,8 @@ func init() {
 }
 
 func main() {
-	greeterClient := pb.NewGreeterService("grpc.helloworld")
-	helloResp, err := greeterClient.SayHello(context.Background(), &pb.HelloReq{
+	greeterClient := pbgreet.NewGreeterService("grpc.helloworld")
+	helloResp, err := greeterClient.SayHello(context.Background(), &pbgreet.HelloReq{
 		Name: "fengjx",
 	})
 	if err != nil {

@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.19.1
-// source: greet.proto
+// source: registrar/pb/greet.proto
 
-package pb
+package pbgreet
 
 import (
 	context "context"
@@ -22,7 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GreeterClient interface {
-	// Sends a greeting
+	// SayHello Sends a greeting
+	// http.path=/say-hello
 	SayHello(ctx context.Context, in *HelloReq, opts ...grpc.CallOption) (*HelloResp, error)
 }
 
@@ -47,7 +48,8 @@ func (c *greeterClient) SayHello(ctx context.Context, in *HelloReq, opts ...grpc
 // All implementations must embed UnimplementedGreeterServer
 // for forward compatibility
 type GreeterServer interface {
-	// Sends a greeting
+	// SayHello Sends a greeting
+	// http.path=/say-hello
 	SayHello(context.Context, *HelloReq) (*HelloResp, error)
 	mustEmbedUnimplementedGreeterServer()
 }
@@ -103,5 +105,5 @@ var Greeter_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "greet.proto",
+	Metadata: "registrar/pb/greet.proto",
 }
