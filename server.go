@@ -102,12 +102,8 @@ func (s *baseServer) GetServiceInfo() *ServiceInfo {
 		}
 	}
 	s.RUnlock()
-	for {
-		select {
-		case <-time.After(time.Millisecond):
-			return s.GetServiceInfo()
-		}
-	}
+	time.Sleep(time.Millisecond)
+	return s.GetServiceInfo()
 }
 
 // Start 启动服务
@@ -159,6 +155,3 @@ func AddBeforeStopHook(handler func()) {
 func DoStopHook() {
 	hook.DoHooks(beforeStopHookEvent)
 }
-
-// DataWrapper 对数据重新组装
-type DataWrapper func(data any) any

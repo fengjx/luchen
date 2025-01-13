@@ -4,12 +4,9 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"reflect"
 	"time"
 
 	"github.com/fengjx/go-halo/addr"
-	"github.com/go-kit/kit/endpoint"
-	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -48,7 +45,7 @@ func NewGRPCServer(opts ...ServerOption) *GRPCServer {
 	if options.metadata == nil {
 		options.metadata = make(map[string]any)
 	}
-	server := grpc.NewServer(grpc.UnaryInterceptor(kitgrpc.Interceptor))
+	server := grpc.NewServer(grpc.UnaryInterceptor(grpctransport.Interceptor))
 	return &GRPCServer{
 		baseServer: &baseServer{
 			id:          uuid.NewString(),
@@ -99,18 +96,23 @@ func (s *GRPCServer) Stop() error {
 type RegisterHandler func(grpcServer *grpc.Server)
 
 // RegisterService 注册 grpc 接口实现
-func (s *GRPCServer) RegisterService(reg RegisterHandler) *GRPCServer {
-	reg(s.server)
-	return s
+func (s *GRPCServer) RegisterService(desc *grpc.ServiceDesc, impl any) {
+	s.server.RegisterService(desc, impl)
 }
 
 // NewGRPCTransportServer grpc handler 绑定 endpoint
 func NewGRPCTransportServer(
-	e endpoint.Endpoint,
-	dec grpctransport.DecodeRequestFunc,
-	enc grpctransport.EncodeResponseFunc,
+	def *EndpointDefine,
 	options ...grpctransport.ServerOption,
 ) *GRPCTransportServer {
+	e := def.Endpoint
+	var middlewares = GlobalGRPCMiddlewares
+	if len(def.Middlewares) > 0 {
+		middlewares = append(middlewares, def.Middlewares...)
+	}
+	if len(middlewares) > 0 {
+		e = EndpointChain(e, middlewares...)
+	}
 	opts := []grpctransport.ServerOption{
 		grpctransport.ServerBefore(func(ctx context.Context, md metadata.MD) context.Context {
 			ctx, traceID := TraceGRPC(ctx, md)
@@ -123,8 +125,8 @@ func NewGRPCTransportServer(
 	opts = append(opts, options...)
 	return grpctransport.NewServer(
 		e,
-		dec,
-		enc,
+		decodePB,
+		encodePB,
 		opts...,
 	)
 }
@@ -140,21 +142,22 @@ func NewLogGRPCErrorHandler() *LogGRPCErrorHandler {
 
 // Handle 统一错误处理
 func (h *LogGRPCErrorHandler) Handle(ctx context.Context, err error) {
-	log.ErrorCtx(ctx, "handle grpc err", zap.Error(err))
+	log.ErrorCtx(ctx, "handle grpc err", zap.Error(err), zap.Stack("stack"))
 }
 
-// DecodePB protobuf 解码
-func DecodePB[T any](_ context.Context, req interface{}) (interface{}, error) {
-	if pbReq, ok := req.(T); ok {
-		return pbReq, nil
-	}
-	return nil, fmt.Errorf("proto decode request err, want type[%s] but[%s]", reflect.TypeOf(new(T)), reflect.TypeOf(req))
+func decodePB(_ context.Context, req interface{}) (interface{}, error) {
+	return req, nil
 }
 
-// EncodePB protobuf 编码
-func EncodePB[T any](_ context.Context, resp interface{}) (interface{}, error) {
-	if pbResp, ok := resp.(T); ok {
-		return pbResp, nil
-	}
-	return nil, fmt.Errorf("proto encode response err, want type[%s] but[%s]", reflect.TypeOf(new(T)), reflect.TypeOf(resp))
+func encodePB(_ context.Context, resp interface{}) (interface{}, error) {
+	return resp, nil
+}
+
+// GlobalGRPCMiddlewares 全局 GRPC 中间件
+var GlobalGRPCMiddlewares []Middleware
+
+// UseGlobalGRPCMiddleware 注册全局 GRPC 中间件
+// 中间件的执行顺序与注册顺序相同，先注册的中间件先执行
+func UseGlobalGRPCMiddleware(m ...Middleware) {
+	GlobalGRPCMiddlewares = append(GlobalGRPCMiddlewares, m...)
 }
