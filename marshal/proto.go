@@ -10,7 +10,7 @@ import (
 // ErrInvalidProtoMessage 当传入的值不是有效的 protobuf 消息时返回此错误
 var ErrInvalidProtoMessage = errors.New("value is not a proto.Message")
 
-// ProtoMarshaller 实现了 Marshaler 接口，提供 Protocol Buffers 格式的序列化和反序列化功能
+// ProtoMarshaller 实现了 Marshaller 接口，提供 Protocol Buffers 格式的序列化和反序列化功能
 type ProtoMarshaller struct{}
 
 // Marshal 将给定的 protobuf 消息序列化为字节切片
@@ -70,7 +70,7 @@ func (p *ProtoMarshaller) ContentType() string {
 	return ContentTypeProtobuf
 }
 
-// NewProtoMarshaller 创建一个新的 Protocol Buffers Marshaler
+// NewProtoMarshaller 创建一个新的 Protocol Buffers Marshaller
 func NewProtoMarshaller() Marshaller {
 	return &ProtoMarshaller{}
 }

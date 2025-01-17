@@ -50,7 +50,7 @@ type EncoderFunc func(v any) error
 // Encode 实现 Encoder 接口
 func (f EncoderFunc) Encode(v any) error { return f(v) }
 
-// DefaultMarshaller 提供了一个简单的 Marshaler 实现，它总是返回不支持的错误
+// DefaultMarshaller 提供了一个简单的 Marshaller 实现，它总是返回不支持的错误
 type DefaultMarshaller struct{}
 
 // Marshal 返回不支持的编解码类型错误
