@@ -2,7 +2,6 @@ package luchen
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -17,9 +16,16 @@ import (
 
 	httptransport "github.com/go-kit/kit/transport/http"
 
+	"github.com/fengjx/go-halo/errs"
+	"github.com/fengjx/go-halo/json"
 	"github.com/fengjx/luchen/env"
 	"github.com/fengjx/luchen/log"
 	"github.com/fengjx/luchen/marshal"
+	"github.com/fengjx/luchen/types"
+)
+
+const (
+	HeaderRspMeta = "X-Rsp-Meta"
 )
 
 type (
@@ -53,6 +59,7 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 	}
 	x := xin.New()
 	x.Use(
+		RecoverHTTPMiddleware,
 		TraceHTTPMiddleware,
 	)
 	svr := &HTTPServer{
@@ -106,6 +113,12 @@ func (s *HTTPServer) Mux() *xin.Mux {
 	return s.xin.Mux()
 }
 
+// Handle 注册 http 路由
+func (s *HTTPServer) Handle(def *EndpointDefine) {
+	hts := NewHTTPTransportServer(def)
+	s.Mux().Handle(def.Path, hts)
+}
+
 // TraceHTTPMiddleware 链路跟踪
 func TraceHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -115,13 +128,31 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// RecoverHTTPMiddleware 恢复 panic
+func RecoverHTTPMiddleware(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		errs.RecoverFunc(func(err any, stack *errs.Stack) {
+			if err == http.ErrAbortHandler {
+				// we don't recover http.ErrAbortHandler so the response
+				// to the client is aborted, this should not be logged
+				panic(err)
+			}
+			if r.Header.Get("Connection") != "Upgrade" {
+				WriteError(r.Context(), w, ErrSystem.WithDetail(fmt.Sprintf("%v", stack)))
+			}
+		})
+		next.ServeHTTP(w, r)
+	}
+	return http.HandlerFunc(fn)
+}
+
 // NewHTTPTransportServer http handler 绑定 endpoint
 func NewHTTPTransportServer(
 	def *EndpointDefine,
 	options ...httptransport.ServerOption,
 ) *HTTPTransportServer {
 	e := def.Endpoint
-	var middlewares = GlobalHTTPMiddlewares
+	middlewares := GlobalHTTPMiddlewares
 	if len(def.Middlewares) > 0 {
 		middlewares = append(middlewares, def.Middlewares...)
 	}
@@ -136,7 +167,7 @@ func NewHTTPTransportServer(
 	return httptransport.NewServer(
 		e,
 		dec,
-		encodeHTTPPbResponse,
+		encodeHTTPResponse,
 		options...,
 	)
 }
@@ -145,14 +176,24 @@ func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
 	WriteError(ctx, w, err)
 }
 
+// WriteError write error
 func WriteError(ctx context.Context, w http.ResponseWriter, err error) {
-	var errn *Errno
-	ok := errors.As(err, &errn)
+	errn, ok := FromError(err)
 	if !ok {
 		errn = ErrSystem
 	}
-	w.WriteHeader(errn.Code)
-	w.Header().Set("X-Server-Msg", errn.Msg)
+	w.WriteHeader(errn.HttpCode)
+	rspMeta := &types.RspMeta{
+		Code:       int32(errn.Code),
+		Msg:        errn.Msg,
+		TraceId:    TraceID(ctx),
+		ServerTime: time.Now().UnixMilli(),
+	}
+	if !env.IsProd() {
+		rspMeta.Detail = errn.GetDetail()
+	}
+	rspMetaJson, _ := json.ToJson(rspMeta)
+	w.Header().Set(HeaderRspMeta, rspMetaJson)
 	_, _ = w.Write([]byte(""))
 }
 
@@ -189,6 +230,9 @@ func getHTTPRequestDecoder(typ reflect.Type) httptransport.DecodeRequestFunc {
 		if err != nil {
 			return nil, err
 		}
+		if len(payload) == 0 {
+			return nil, nil
+		}
 		data := reflect.New(typ).Interface()
 		err = marshaller.Unmarshal(payload, data)
 		if err != nil {
@@ -199,14 +243,21 @@ func getHTTPRequestDecoder(typ reflect.Type) httptransport.DecodeRequestFunc {
 	}
 }
 
-// encodeHTTPPbResponse 编码 http pb 响应
-func encodeHTTPPbResponse(ctx context.Context, w http.ResponseWriter, data any) error {
+// encodeHTTPResponse 编码 http 响应
+func encodeHTTPResponse(ctx context.Context, w http.ResponseWriter, data any) error {
 	marshaller := Marshaller(ctx)
 	bytes, err := marshaller.Marshal(data)
 	if err != nil {
 		return err
 	}
 	w.Header().Set("Content-Type", marshaller.ContentType())
+	rspMeta := &types.RspMeta{
+		Code:       0,
+		TraceId:    TraceID(ctx),
+		ServerTime: time.Now().UnixMilli(),
+	}
+	rspMetaJson, _ := json.ToJson(rspMeta)
+	w.Header().Set(HeaderRspMeta, rspMetaJson)
 	w.WriteHeader(http.StatusOK)
 	w.Write(bytes)
 	return nil

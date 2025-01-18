@@ -3,7 +3,7 @@ package endpoint
 
 import (
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/example/helloworld/pbgreet"
+	"github.com/fengjx/luchen/example/pbdemo/pbgreet"
 )
 
 // RegisterGreeterGRPCHandler 注册 GRPC 服务处理器
@@ -22,8 +22,7 @@ var GreeterEndpointImpl = &GreeterEndpoint{
 }
 
 // GreeterHandlerImpl 服务处理器实现
-type GreeterHandlerImpl struct {
-}
+type GreeterHandlerImpl struct{}
 
 // GreeterEndpoint 服务 Endpoint 定义
 type GreeterEndpoint struct {

@@ -6,7 +6,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-// JSONMarshaller 实现了 Marshaler 接口，提供 JSON 格式的序列化和反序列化功能
+// JSONMarshaller 实现了 Marshaller 接口，提供 JSON 格式的序列化和反序列化功能
 type JSONMarshaller struct{}
 
 // Marshal 将给定的值序列化为 JSON 字节切片
@@ -34,7 +34,7 @@ func (p *JSONMarshaller) ContentType() string {
 	return ContentTypeJSON
 }
 
-// NewJSONMarshaller 创建一个新的 JSON Marshaler
+// NewJSONMarshaller 创建一个新的 JSON Marshaller
 func NewJSONMarshaller() Marshaller {
 	return &JSONMarshaller{}
 }

@@ -2,24 +2,20 @@ syntax = "proto3";
 
 package pb;
 
-option go_package="github.com/fengjx/luchen/example/helloworld/pbgreet";
+option go_package = "github.com/fengjx/luchen/example/pbdemo/pbgreet";
 
 // gomodpath=github.com/fengjx/luchen/example
-// epath=helloworld/endpoint
+// epath=pbdemo/endpoint
 
 // The greeting service definition.
 service Greeter {
   // SayHello Sends a greeting
   // http.path=/say-hello
-  rpc SayHello (HelloReq) returns (HelloResp) {}
+  rpc SayHello(HelloReq) returns (HelloResp) {}
 }
 
 // The request message containing the user's name.
-message HelloReq {
-  string name = 1;
-}
+message HelloReq { string name = 1; }
 
 // The response message containing the greetings
-message HelloResp {
-  string message = 1;
-}
+message HelloResp { string message = 1; }

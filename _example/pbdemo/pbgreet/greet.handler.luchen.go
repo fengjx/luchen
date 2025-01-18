@@ -3,13 +3,12 @@ package pbgreet
 
 import (
 	"context"
+	"reflect"
+	"sync"
 
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"reflect"
-	"sync"
 
 	"github.com/fengjx/luchen"
 )
@@ -93,6 +92,6 @@ func RegisterGreeterGRPCHandler(gs *luchen.GRPCServer, e GreeterEndpoint, middle
 func RegisterGreeterHTTPHandler(hs *luchen.HTTPServer, e GreeterEndpoint, middlewares ...luchen.Middleware) {
 	impl := GetGreeterServiceImpl(e, middlewares...)
 	if impl.sayhelloDefine.Path != "" {
-		hs.Mux().Handle(impl.sayhelloDefine.Path, luchen.NewHTTPTransportServer(impl.sayhelloDefine))
+		hs.Handle(impl.sayhelloDefine)
 	}
 }

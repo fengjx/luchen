@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// JSONProtoMarshaller 实现了 Marshaler 接口，提供 JSON 和 Protobuf 之间的转换
+// JSONProtoMarshaller 实现了 Marshaller 接口，提供 JSON 和 Protobuf 之间的转换
 // 将 JSON 输入转换为 Protobuf 消息，并将 Protobuf 消息转换为 JSON 输出
 type JSONProtoMarshaller struct {
 	MarshalOptions   *protojson.MarshalOptions
@@ -20,7 +20,7 @@ func (jp *JSONProtoMarshaller) Marshal(v any) ([]byte, error) {
 	if pb, ok := v.(proto.Message); ok {
 		return jp.MarshalOptions.Marshal(pb)
 	}
-
+	// 如果转换的结构体不是 proto.Message，则直接使用 jsoniter 序列化
 	return jsoniter.Marshal(v)
 }
 
@@ -29,7 +29,7 @@ func (jp *JSONProtoMarshaller) Unmarshal(data []byte, v any) error {
 	if pb, ok := v.(proto.Message); ok {
 		return jp.UnmarshalOptions.Unmarshal(data, pb)
 	}
-
+	// 如果转换的结构体不是 proto.Message，则直接使用 jsoniter 反序列化
 	return jsoniter.Unmarshal(data, v)
 }
 
@@ -61,11 +61,11 @@ func (jp *JSONProtoMarshaller) NewEncoder(w io.Writer) Encoder {
 }
 
 // ContentType 返回 json 的 MIME 类型
-func (p *JSONProtoMarshaller) ContentType() string {
+func (jp *JSONProtoMarshaller) ContentType() string {
 	return ContentTypeJSON
 }
 
-// NewJSONProtoMarshaller 创建一个新的 JSON-Protobuf 转换 Marshaler
+// NewJSONProtoMarshaller 创建一个新的 JSON-Protobuf 转换 Marshaller
 func NewJSONProtoMarshaller() Marshaller {
 	return &JSONProtoMarshaller{
 		MarshalOptions: &protojson.MarshalOptions{

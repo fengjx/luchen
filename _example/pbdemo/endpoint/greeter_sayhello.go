@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/fengjx/luchen"
-	"github.com/fengjx/luchen/example/helloworld/pbgreet"
+	"github.com/fengjx/luchen/example/pbdemo/pbgreet"
 )
 
 func (e *GreeterEndpoint) SayHelloEndpoint() luchen.Endpoint {
@@ -14,7 +14,7 @@ func (e *GreeterEndpoint) SayHelloEndpoint() luchen.Endpoint {
 		req, ok := request.(*pbgreet.HelloReq)
 		if !ok {
 			msg := fmt.Sprintf("invalid request type: %T", request)
-			return nil, luchen.NewErrno(http.StatusBadRequest, msg)
+			return nil, luchen.NewErrnoWithHttpCode(http.StatusBadRequest, msg)
 		}
 		return e.handler.SayHello(ctx, req)
 	}

@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/fengjx/luchen"
+	"context"
+	"reflect"
 
-	"github.com/fengjx/luchen/example/helloworld/endpoint"
+	"github.com/fengjx/luchen"
 )
 
 func main() {
@@ -11,9 +12,29 @@ func main() {
 	hs := luchen.NewHTTPServer(
 		luchen.WithServerAddr(":8080"),
 	)
-
-	// 注册 http 端点
-	endpoint.RegisterGreeterHTTPHandler(hs)
+	def := &luchen.EndpointDefine{
+		Endpoint: sayHello,
+		Path:     "/say-hello",
+		ReqType:  reflect.TypeOf(&sayHelloReq{}),
+		RspType:  reflect.TypeOf(&sayHelloRsp{}),
+	}
+	hs.Handle(def)
 	// 启动服务并监听 kill 信号
 	hs.Start()
+}
+
+func sayHello(ctx context.Context, request any) (response any, err error) {
+	req := request.(*sayHelloReq)
+	response = &sayHelloRsp{
+		Msg: "hello " + req.Name,
+	}
+	return
+}
+
+type sayHelloReq struct {
+	Name string
+}
+
+type sayHelloRsp struct {
+	Msg string
 }
