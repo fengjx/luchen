@@ -3,13 +3,12 @@ package pbgreet
 
 import (
 	"context"
+	"reflect"
+	"sync"
 
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"reflect"
-	"sync"
 
 	"github.com/fengjx/luchen"
 )

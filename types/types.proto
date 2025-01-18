@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package types;
+
+option go_package = "github.com/fengjx/luchen/types";
+
+// gomodpath=github.com/fengjx/luchen/types
+
+message RspMeta {
+  int32 code = 1;        // 错误码，在 http code 大于等于 400 时返回
+  string msg = 2;        // 错误信息
+  string detail = 3;     // 错误详情，测试环境才会返回
+  string trace_id = 4;   // 请求唯一标识
+  int64 server_time = 5; // 服务器时间
+}
