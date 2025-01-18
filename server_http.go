@@ -113,6 +113,12 @@ func (s *HTTPServer) Mux() *xin.Mux {
 	return s.xin.Mux()
 }
 
+// Handle 注册 http 路由
+func (s *HTTPServer) Handle(def *EndpointDefine) {
+	hts := NewHTTPTransportServer(def)
+	s.Mux().Handle(def.Path, hts)
+}
+
 // TraceHTTPMiddleware 链路跟踪
 func TraceHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

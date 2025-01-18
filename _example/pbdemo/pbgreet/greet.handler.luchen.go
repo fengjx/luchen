@@ -92,6 +92,6 @@ func RegisterGreeterGRPCHandler(gs *luchen.GRPCServer, e GreeterEndpoint, middle
 func RegisterGreeterHTTPHandler(hs *luchen.HTTPServer, e GreeterEndpoint, middlewares ...luchen.Middleware) {
 	impl := GetGreeterServiceImpl(e, middlewares...)
 	if impl.sayhelloDefine.Path != "" {
-		hs.Mux().Handle(impl.sayhelloDefine.Path, luchen.NewHTTPTransportServer(impl.sayhelloDefine))
+		hs.Handle(impl.sayhelloDefine)
 	}
 }

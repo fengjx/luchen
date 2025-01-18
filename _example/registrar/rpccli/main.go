@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/fengjx/luchen/env"
-	"github.com/fengjx/luchen/example/helloworld/pbgreet"
+	"github.com/fengjx/luchen/example/registrar/pbgreet"
 )
 
 func init() {
