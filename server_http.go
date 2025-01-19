@@ -180,9 +180,8 @@ func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
 func WriteError(ctx context.Context, w http.ResponseWriter, err error) {
 	errn, ok := FromError(err)
 	if !ok {
-		errn = ErrSystem
+		errn = ErrSystem.WithCause(err)
 	}
-	w.WriteHeader(errn.HttpCode)
 	rspMeta := &types.RspMeta{
 		Code:       int32(errn.Code),
 		Msg:        errn.Msg,
@@ -194,6 +193,7 @@ func WriteError(ctx context.Context, w http.ResponseWriter, err error) {
 	}
 	rspMetaJson, _ := json.ToJson(rspMeta)
 	w.Header().Set(HeaderRspMeta, rspMetaJson)
+	w.WriteHeader(errn.HttpCode)
 	_, _ = w.Write([]byte(""))
 }
 
