@@ -12,12 +12,14 @@ func main() {
 	hs := luchen.NewHTTPServer(
 		luchen.WithServerAddr(":8080"),
 	)
+	// 端点定义
 	def := &luchen.EndpointDefine{
 		Endpoint: sayHello,
 		Path:     "/say-hello",
 		ReqType:  reflect.TypeOf(&sayHelloReq{}),
 		RspType:  reflect.TypeOf(&sayHelloRsp{}),
 	}
+	// 注册端点
 	hs.Handle(def)
 	// 启动服务并监听 kill 信号
 	hs.Start()
@@ -32,9 +34,9 @@ func sayHello(ctx context.Context, request any) (response any, err error) {
 }
 
 type sayHelloReq struct {
-	Name string
+	Name string `json:"name"`
 }
 
 type sayHelloRsp struct {
-	Msg string
+	Msg string `json:"msg"`
 }
