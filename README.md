@@ -12,6 +12,7 @@ luchen 是一个基于 [go-kit](https://github.com/go-kit/kit) 封装的微服�
 - 多协议支持： 支持 HTTP、gRPC 传输协议，适用于不同的场景和需求，轻松扩展更多协议支持，无需改动业务层代码。
 - 分层设计： 保留 go-kit 的分层设计思想，包括端点（Endpoints）、传输（Transport）、服务（Service）等层次，保证了代码的可维护性和可扩展性。
 - 微服务支持： 使用 go-kit 实现微服务化架构，支持服务注册、发现、负载均衡、限流、熔断等功能。
+- 完善的工具链支持，一键生成 crud 和接口实现代码。
 
 ## 快速体验
 
@@ -23,18 +24,19 @@ $ go run main.go
 
 请求服务接口
 ```bash
-$ curl http://localhost:8080/say-hello?name=fjx
-hello: fjx
+$ curl 'http://localhost:8080/say-hello' \
+--header 'Content-Type: application/json' \
+--data '{
+    "name": "fengjx"
+}'
+{"Msg":"hello fengjx"}
 ```
 
 ### 示例
 
 - [helloworld](_example/helloworld) 简单示例
-- [feathttp](_example/feathttp) http 功能特性示例
-- [featgrpc](_example/featgrpc) grpc 功能特性示例
-- [quickstart](_example/quickstart) 多协议支持示例
-- [httponly](_example/httponly) 仅支持http协议项目模板
-- [gateway](_example/gateway) 网关服务示例
+- [pbdemo](_example/pbdemo) 基于 proto 协议开发接口示例
+- [registrar](_example/registrar) 服务注册与发现示例
 
 ## 文档
 

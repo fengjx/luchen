@@ -22,8 +22,6 @@ func init() {
 }
 
 const (
-	// Local 本地环境
-	Local = "local"
 	// Dev 开发环境
 	Dev = "dev"
 	// Test 测试环境
@@ -36,7 +34,7 @@ const (
 func GetEnv() string {
 	env := os.Getenv("APP_ENV")
 	if env == "" {
-		return Local
+		return Dev
 	}
 	return env
 }
@@ -60,11 +58,6 @@ func IsTest() bool {
 // IsDev 返回是否是开发环境
 func IsDev() bool {
 	return GetEnv() == Dev
-}
-
-// IsLocal 返回是否是本地环境
-func IsLocal() bool {
-	return GetEnv() == Local
 }
 
 // GetAppName 可执行文件名
