@@ -38,6 +38,16 @@ func ErrorCtx(ctx context.Context, msg string, fields ...zap.Field) {
 	GetLogger(ctx).Error(msg, fields...)
 }
 
+func ErrorStack(msg string, fields ...zap.Field) {
+	fields = append(fields, zap.Stack("stack"))
+	_log.Error(msg, fields...)
+}
+
+func ErrorStackCtx(ctx context.Context, msg string, fields ...zap.Field) {
+	fields = append(fields, zap.Stack("stack"))
+	GetLogger(ctx).Error(msg, fields...)
+}
+
 func Panic(msg string, fields ...zap.Field) {
 	_log.Panic(msg, fields...)
 }

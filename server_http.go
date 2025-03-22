@@ -18,6 +18,7 @@ import (
 
 	"github.com/fengjx/go-halo/errs"
 	"github.com/fengjx/go-halo/json"
+
 	"github.com/fengjx/luchen/env"
 	"github.com/fengjx/luchen/log"
 	"github.com/fengjx/luchen/marshal"
@@ -180,6 +181,7 @@ func errorEncoder(ctx context.Context, err error, w http.ResponseWriter) {
 func WriteError(ctx context.Context, w http.ResponseWriter, err error) {
 	errn, ok := FromError(err)
 	if !ok {
+		log.ErrorStackCtx(ctx, "internal server Error", zap.Error(err))
 		errn = ErrSystem.WithCause(err)
 	}
 	rspMeta := &types.RspMeta{
