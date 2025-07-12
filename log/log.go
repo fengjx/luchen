@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/fengjx/go-halo/conv"
 	"github.com/fengjx/go-halo/halo"
 	"github.com/fengjx/go-halo/json"
 	"github.com/fengjx/go-halo/logger"
-	"github.com/fengjx/go-halo/utils"
 	kitlog "github.com/go-kit/log"
 	"go.uber.org/zap"
 
@@ -89,7 +89,7 @@ func (l kitLogger) Log(kv ...interface{}) error {
 		if n <= len(kv) {
 			v = kv[n]
 		}
-		fields[utils.ToString(k)] = v
+		fields[conv.ToString(k)] = v
 	}
 	jsonStr, _ := json.ToJson(fields)
 	l("", jsonStr)
