@@ -18,6 +18,7 @@ import (
 
 	"github.com/fengjx/go-halo/errs"
 	"github.com/fengjx/go-halo/json"
+
 	"github.com/fengjx/luchen/env"
 	"github.com/fengjx/luchen/log"
 	"github.com/fengjx/luchen/marshal"
@@ -131,15 +132,12 @@ func TraceHTTPMiddleware(next http.Handler) http.Handler {
 // RecoverHTTPMiddleware 恢复 panic
 func RecoverHTTPMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		errs.RecoverFunc(func(err any, stack *errs.Stack) {
+		defer errs.RecoverFunc(func(err any, stack *errs.Stack) {
 			if err == http.ErrAbortHandler {
-				// we don't recover http.ErrAbortHandler so the response
-				// to the client is aborted, this should not be logged
 				panic(err)
 			}
-			if r.Header.Get("Connection") != "Upgrade" {
-				WriteError(r.Context(), w, ErrSystem.WithDetail(fmt.Sprintf("%v", stack)))
-			}
+			log.PanicfCtx(r.Context(), "server panic: %v", err)
+			WriteError(r.Context(), w, ErrSystem.WithDetail(fmt.Sprintf("%v", stack)))
 		})
 		next.ServeHTTP(w, r)
 	}
