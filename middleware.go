@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fengjx/luchen/log"
 	"github.com/go-kit/kit/endpoint"
 	"go.uber.org/zap"
+
+	"github.com/fengjx/luchen/log"
 )
 
 // Middleware alias for endpoint.Endpoint
@@ -87,10 +88,11 @@ func LogMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
 		var errn *Errno
 		ok := errors.As(err, &errn)
 		h := GetHeader(ctx)
-		if !ok && !errn.IsServerError() {
+		if !ok || errn.IsServerError() {
 			log.ErrorCtx(ctx,
 				fmt.Sprintf("internal server Error: %+v", err),
-				zap.Any("req", request), zap.String("endpoint", h.Endpoint),
+				zap.Any("req", request),
+				zap.String("endpoint", h.Endpoint),
 				zap.Stack("stack"),
 			)
 		}
