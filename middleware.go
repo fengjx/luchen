@@ -4,11 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
+	"github.com/fengjx/go-halo/errs"
 	"github.com/go-kit/kit/endpoint"
 	"go.uber.org/zap"
 
+	"github.com/fengjx/luchen/env"
 	"github.com/fengjx/luchen/log"
 )
 
@@ -96,6 +99,26 @@ func LogMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
 				zap.Stack("stack"),
 			)
 		}
+		return resp, err
+	}
+}
+
+// RecoverMiddleware panic 处理
+func RecoverMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (resp interface{}, err error) {
+		defer errs.RecoverFunc(func(err any, stack *errs.Stack) {
+			if err == http.ErrAbortHandler {
+				panic(err)
+			}
+			log.PanicfCtx(ctx, "server panic: %v", zap.Any("req", request), err)
+			resp = nil
+			if env.IsProd() {
+				err = ErrSystem
+			} else {
+				err = ErrSystem.WithDetail(fmt.Sprintf("%v", stack))
+			}
+		})
+		resp, err = next(ctx, request)
 		return resp, err
 	}
 }

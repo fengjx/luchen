@@ -16,7 +16,6 @@ import (
 
 	httptransport "github.com/go-kit/kit/transport/http"
 
-	"github.com/fengjx/go-halo/errs"
 	"github.com/fengjx/go-halo/json"
 
 	"github.com/fengjx/luchen/env"
@@ -60,7 +59,6 @@ func NewHTTPServer(opts ...ServerOption) *HTTPServer {
 	}
 	x := xin.New()
 	x.Use(
-		RecoverHTTPMiddleware,
 		TraceHTTPMiddleware,
 	)
 	svr := &HTTPServer{
@@ -124,24 +122,9 @@ func (s *HTTPServer) Handle(def *EndpointDefine) {
 func TraceHTTPMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r, traceID := TraceHTTPRequest(r)
-		ctx := log.WithLogger(r.Context(), zap.String("traceId", traceID))
+		ctx := log.WithLogger(r.Context(), zap.String("traceid", traceID))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
-}
-
-// RecoverHTTPMiddleware 恢复 panic
-func RecoverHTTPMiddleware(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		defer errs.RecoverFunc(func(err any, stack *errs.Stack) {
-			if err == http.ErrAbortHandler {
-				panic(err)
-			}
-			log.PanicfCtx(r.Context(), "server panic: %v", err)
-			WriteError(r.Context(), w, ErrSystem.WithDetail(fmt.Sprintf("%v", stack)))
-		})
-		next.ServeHTTP(w, r)
-	}
-	return http.HandlerFunc(fn)
 }
 
 // NewHTTPTransportServer http handler 绑定 endpoint
@@ -192,6 +175,9 @@ func WriteError(ctx context.Context, w http.ResponseWriter, err error) {
 	rspMetaJson, _ := json.ToJson(rspMeta)
 	w.Header().Set(HeaderRspMeta, rspMetaJson)
 	w.WriteHeader(errn.HttpCode)
+	if !env.IsProd() {
+		_, _ = w.Write([]byte(errn.GetDetail()))
+	}
 }
 
 func contextServerBefore(ctx context.Context, req *http.Request) context.Context {
