@@ -106,9 +106,9 @@ func LogMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
 // RecoverMiddleware panic 处理
 func RecoverMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (resp interface{}, err error) {
-		defer errs.RecoverFunc(func(err any, stack *errs.Stack) {
-			log.ErrorCtx(ctx, "server panic", zap.Any("req", request), zap.Any("error", err), zap.Any("stack", stack))
-			os.Stderr.Write([]byte(fmt.Sprintf("server panic: %v - stack: %+v", err, stack)))
+		defer errs.RecoverFunc(func(perr any, stack *errs.Stack) {
+			log.ErrorCtx(ctx, "server panic", zap.Any("req", request), zap.Any("error", perr), zap.String("stack", fmt.Sprintf("%+v", stack)))
+			os.Stderr.Write([]byte(fmt.Sprintf("server panic: %v - stack: %+v", perr, stack)))
 			resp = nil
 			if env.IsProd() {
 				err = ErrSystem
