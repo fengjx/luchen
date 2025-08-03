@@ -10,6 +10,8 @@ github.com/fengjx/go-halo v0.1.1-rc14 h1:Eoykz6CG6P1uxC9c0F1MfmbsQJiOvdEW2H5fPbJ
 github.com/fengjx/go-halo v0.1.1-rc14/go.mod h1:Y7WGNeJ19maX7UqWEECb0Yp8mDUSHGK1KZLDMqj8mZ8=
 github.com/fengjx/xin v0.0.1-rc01.0.20250104182828-8022ba0391a4 h1:2W7UAKH97r308xDYYOsbc/hp9BjGkIH/kndQfWZMCs0=
 github.com/fengjx/xin v0.0.1-rc01.0.20250104182828-8022ba0391a4/go.mod h1:5EpaqOQuRP09BzwlQtWULYch9ueJ7bZvMb2axj0B24k=
+github.com/fengjx/xin v0.0.2-rc03 h1:HwVYqHPH6D253cGCp4TsJXig6ICn4yPnFfhsSYoRAZc=
+github.com/fengjx/xin v0.0.2-rc03/go.mod h1:5EpaqOQuRP09BzwlQtWULYch9ueJ7bZvMb2axj0B24k=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=

@@ -192,7 +192,6 @@ func WriteError(ctx context.Context, w http.ResponseWriter, err error) {
 	rspMetaJson, _ := json.ToJson(rspMeta)
 	w.Header().Set(HeaderRspMeta, rspMetaJson)
 	w.WriteHeader(errn.HttpCode)
-	_, _ = w.Write([]byte(""))
 }
 
 func contextServerBefore(ctx context.Context, req *http.Request) context.Context {
