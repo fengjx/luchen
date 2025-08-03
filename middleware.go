@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
+	"os"
 	"time"
 
 	"github.com/fengjx/go-halo/errs"
@@ -107,10 +107,8 @@ func LogMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
 func RecoverMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (resp interface{}, err error) {
 		defer errs.RecoverFunc(func(err any, stack *errs.Stack) {
-			if err == http.ErrAbortHandler {
-				panic(err)
-			}
-			log.PanicfCtx(ctx, "server panic: %v", zap.Any("req", request), err)
+			log.ErrorCtx(ctx, "server panic", zap.Any("req", request), zap.Any("error", err), zap.Any("stack", stack))
+			os.Stderr.Write([]byte(fmt.Sprintf("server panic: %v - stack: %+v", err, stack)))
 			resp = nil
 			if env.IsProd() {
 				err = ErrSystem
