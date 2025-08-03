@@ -113,7 +113,7 @@ func RecoverMiddleware(next endpoint.Endpoint) endpoint.Endpoint {
 			if env.IsProd() {
 				err = ErrSystem
 			} else {
-				err = ErrSystem.WithDetail(fmt.Sprintf("%v", err))
+				err = ErrSystem.WithDetail(fmt.Sprintf("%v", perr))
 			}
 		})
 		resp, err = next(ctx, request)
