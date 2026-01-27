@@ -236,9 +236,9 @@ func encodeHTTPResponse(ctx context.Context, w http.ResponseWriter, data any) er
 	}
 	w.Header().Set("Content-Type", marshaller.ContentType())
 	rspMeta := &types.RspMeta{
-		Code:       0,
-		TraceId:    TraceID(ctx),
-		ServerTime: time.Now().UnixMilli(),
+		Code:    0,
+		TraceId: TraceID(ctx),
+		STime:   time.Now().UnixMilli(),
 	}
 	rspMetaJson, _ := json.ToJson(rspMeta)
 	w.Header().Set(HeaderRspMeta, rspMetaJson)
