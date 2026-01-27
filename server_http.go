@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"reflect"
 	"time"
 
@@ -164,10 +165,10 @@ func WriteError(ctx context.Context, w http.ResponseWriter, err error) {
 		errn = ErrSystem.WithCause(err)
 	}
 	rspMeta := &types.RspMeta{
-		Code:       int32(errn.Code),
-		Msg:        errn.Msg,
-		TraceId:    TraceID(ctx),
-		ServerTime: time.Now().UnixMilli(),
+		Code:    int32(errn.Code),
+		Msg:     url.QueryEscape(errn.Msg),
+		TraceId: TraceID(ctx),
+		STime:   time.Now().UnixMilli(),
 	}
 	if !env.IsProd() {
 		rspMeta.Detail = errn.GetDetail()
